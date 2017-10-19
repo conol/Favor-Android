@@ -1,3 +1,11 @@
 <resources>
-    <string name="app_name">Favor-android</string>
+    <string name="app_name">Favor</string>
+    <string name="app_name_sub">〜あなたのお店を集める〜</string>
+
+    <!-- ユーザー登録画面 -->
+    <string name="user_name">ユーザー名</string>
+    <string name="user_age">年代</string>
+    <string name="user_gender">性別</string>
+    <string name="registration_user">はじめる</string>
+
 </resources>
