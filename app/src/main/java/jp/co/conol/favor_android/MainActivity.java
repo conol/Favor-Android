@@ -14,18 +14,5 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        Register register = new Register("ito", "male", 20, null, null, null, null);
-        new RegistrationUserAsyncTask(new RegistrationUserAsyncTask.AsyncCallback() {
-            @Override
-            public void onSuccess(User user) {
-                Log.d("test", user.getApp_token());
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-
-            }
-        }).execute(register);
     }
 }
