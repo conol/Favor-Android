@@ -8,4 +8,29 @@
     <string name="user_gender">性別</string>
     <string name="registration_user">はじめる</string>
 
+    <!-- メイン画面 -->
+    <string name="touch_nfc">タッチして入店する</string>
+    <string name="shop_history_title">入店履歴</string>
+    <string name="user_setting_title"> の情報</string>
+
+    <!-- nfc -->
+    <string name="nfc_scan_title">スキャンの準備ができました</string>
+    <string name="nfc_scan_message">CORONAへタッチしてください</string>
+
+    <!-- ダイアログ -->
+    <string name="nfc_dialog">NFCがオフになっています\nNFCをオンに設定してください</string>
+    <string name="grant_permission">本アプリを使用するには、位置情報へのアクセスを許可する必要があります。</string>
+
+    <!-- エラー -->
+    <string name="error_network_disable">利用可能なデバイス情報一覧の取得に失敗しました。\nインターネットに接続してください。</string>
+    <string name="error_fail_get_device_ids">一覧データの取得に失敗しました。\nアプリを再起動して再取得してください。</string>
+    <string name="load_devices_failed">デバイス一覧の取得に失敗しました</string>
+    <string name="error_read_service_failed">このNFCではWi-Fiサービスがご利用できません。</string>
+    <string name="error_not_exist_in_devise_ids">利用されたNFCは本アプリに対応していません。</string>
+
+    <!-- 全体 -->
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="cancel_kana">キャンセル</string>
+
 </resources>

@@ -30,10 +30,10 @@ public class RegistrationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_registration);
 
         // ユーザー情報が保存されていれば、登録画面は表示しない
-        if(MyUtil.SharedPref.get(RegistrationActivity.this, "UserSetting") != null) {
+        if(MyUtil.SharedPref.get(RegistrationActivity.this, "userSetting") != null) {
             Intent intent = new Intent(RegistrationActivity.this, MainActivity.class);
-            intent.setFlags(FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
+            finish();
         }
 
         mUserNameEditText = (EditText) findViewById(R.id.userNameEditText);
@@ -99,12 +99,12 @@ public class RegistrationActivity extends AppCompatActivity {
 
                 // ユーザー情報を端末に保存
                 Gson gson = new Gson();
-                MyUtil.SharedPref.save(RegistrationActivity.this, "UserSetting", gson.toJson(user));
+                MyUtil.SharedPref.save(RegistrationActivity.this, "userSetting", gson.toJson(user));
 
                 // ページ移動
                 Intent intent = new Intent(RegistrationActivity.this, MainActivity.class);
-                intent.setFlags(FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
+                finish();
             }
 
             @Override
