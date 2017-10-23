@@ -12,7 +12,7 @@ import jp.co.conol.favor_android.R;
  * Created by Masafumi_Ito on 2017/09/04.
  */
 
-public class EnteringHistoryRecyclerAdapter extends RecyclerView.Adapter<EnteringHistoryRecyclerAdapter.ViewHolder> {
+public class ShopHistoryRecyclerAdapter extends RecyclerView.Adapter<ShopHistoryRecyclerAdapter.ViewHolder> {
 
     private Context mContext;
 
@@ -29,14 +29,14 @@ public class EnteringHistoryRecyclerAdapter extends RecyclerView.Adapter<Enterin
     }
 
     // コンストラクタ
-    public EnteringHistoryRecyclerAdapter(Context context) {
+    public ShopHistoryRecyclerAdapter(Context context) {
         mContext = context;
     }
 
     // ViewHolder作成
     @Override
-    public EnteringHistoryRecyclerAdapter.ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
-        final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_entering_history, parent, false);
+    public ShopHistoryRecyclerAdapter.ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
+        final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_shop_history, parent, false);
 
         // ViewHolder作成
         final ViewHolder holder = new ViewHolder(view);

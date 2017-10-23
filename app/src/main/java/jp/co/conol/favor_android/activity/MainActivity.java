@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    Intent intent = new Intent(MainActivity.this, EnteringHistoryActivity.class);
+                    Intent intent = new Intent(MainActivity.this, ShopHistoryActivity.class);
                     startActivity(intent);
                 }
                 return false;
