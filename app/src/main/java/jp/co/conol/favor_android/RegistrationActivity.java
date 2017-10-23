@@ -12,11 +12,9 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 
-import jp.co.conol.favorlib.favor.RegistrationUserAsyncTask;
+import jp.co.conol.favorlib.favor.RegistrationUser;
 import jp.co.conol.favorlib.favor.model.Register;
 import jp.co.conol.favorlib.favor.model.User;
-
-import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
 
 public class RegistrationActivity extends AppCompatActivity {
 
@@ -93,7 +91,7 @@ public class RegistrationActivity extends AppCompatActivity {
         );
 
         // ユーザー情報を登録
-        new RegistrationUserAsyncTask(new RegistrationUserAsyncTask.AsyncCallback() {
+        new RegistrationUser(new RegistrationUser.AsyncCallback() {
             @Override
             public void onSuccess(User user) {
 

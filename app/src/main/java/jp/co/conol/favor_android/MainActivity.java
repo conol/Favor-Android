@@ -16,14 +16,13 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 
 import jp.co.conol.favorlib.corona.Corona;
-import jp.co.conol.favorlib.corona.NFCNotAvailableException;
+import jp.co.conol.favorlib.corona.NfcNotAvailableException;
 import jp.co.conol.favorlib.favor.model.User;
 
 public class MainActivity extends AppCompatActivity {
@@ -47,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             mCorona = new Corona(this);
-        } catch (NFCNotAvailableException e) {
+        } catch (NfcNotAvailableException e) {
             Log.d("Corona", e.toString());
             finish();
         }

@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.wifi.WifiManager;
 import android.nfc.FormatException;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
@@ -17,29 +18,35 @@ import android.nfc.tech.IsoDep;
 import android.nfc.tech.MifareUltralight;
 import android.nfc.tech.Ndef;
 import android.nfc.tech.NfcA;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.PatternMatcher;
 import android.util.Log;
 
 import com.google.gson.Gson;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
 import jp.co.conol.favorlib.Util;
-import jp.co.conol.favorlib.corona.corona_reader.CNFCReaderException;
 import jp.co.conol.favorlib.corona.corona_reader.CoronaReaderTag;
 import jp.co.conol.favorlib.corona.corona_writer.CNFCT2WriterTag;
 import jp.co.conol.favorlib.corona.corona_writer.CoronaWriterTag;
-import jp.co.conol.favorlib.device_manager.GetLocation;
-import jp.co.conol.favorlib.device_manager.SendLogAsyncTask;
-import jp.co.conol.favorlib.wifi_connector.WifiConnector;
 
+import static android.content.Context.WIFI_SERVICE;
 
 /**
  * Created by Masafumi_Ito on 2017/10/11.
@@ -52,12 +59,17 @@ public class Corona {
     private final PendingIntent pendingIntent;
     private final IntentFilter[] intentFilters;
     private final String[][] techList;
+    private String mReadLogMessage = "read!";
+    private String mWriteLogMessage = "write!";
+    public static final int TAG_TYPE_UNKNOWN = 0;
+    public static final int TAG_TYPE_CORONA = 1;
+    public static final int TAG_TYPE_SEAL = 2;
 
-    public Corona(Context context) throws NFCNotAvailableException {
+    public Corona(Context context) throws NfcNotAvailableException {
         this.context = context;
         nfcAdapter = NfcAdapter.getDefaultAdapter(context);
         if (nfcAdapter == null) {
-            throw new NFCNotAvailableException();
+            throw new NfcNotAvailableException();
         }
 
         pendingIntent = PendingIntent.getActivity(context, 0,
@@ -83,8 +95,8 @@ public class Corona {
         String savedLog[][] = gson.fromJson(pref.getString("savedLog", null), String[][].class);
 
         // ネットに繋がっていればログの送信
-        if(savedLog != null && (Util.Network.isConnected(context) || WifiConnector.isEnable(context))) {
-            new SendLogAsyncTask(new SendLogAsyncTask.AsyncCallback() {
+        if(savedLog != null && (Util.Network.isConnected(context) || isWifiEnable(context))) {
+            new SendLog(new SendLog.AsyncCallback() {
                 @Override
                 public void onSuccess(JSONObject responseJson) {
                     // 保存されているログは削除
@@ -113,7 +125,71 @@ public class Corona {
         nfcAdapter.disableForegroundDispatch(activity);
     }
 
-    public CoronaWriterTag getWriteTagFromIntent(Intent intent) throws CNFCReaderException {
+    public int readType(Intent intent) throws CoronaException {
+        CoronaReaderTag tag;
+        try {
+            tag = getReadTagFromIntent(intent, false);
+        } catch (CoronaException e) {
+            e.printStackTrace();
+            throw new CoronaException(e);
+        }
+        if(tag != null) {
+            return tag.getType();
+        } else {
+            return Corona.TAG_TYPE_UNKNOWN;
+        }
+    }
+
+    public String readDeviceId(Intent intent) throws CoronaException {
+        CoronaReaderTag tag;
+        try {
+            tag = getReadTagFromIntent(intent, false);
+        } catch (CoronaException e) {
+            e.printStackTrace();
+            throw new CoronaException(e);
+        }
+        if(tag != null) {
+            return tag.getDeviceIdString();
+        } else {
+            return null;
+        }
+    }
+
+    public String readJson(Intent intent) throws CoronaException {
+        CoronaReaderTag tag;
+        try {
+            tag = getReadTagFromIntent(intent, true);
+        } catch (CoronaException e) {
+            e.printStackTrace();
+            throw new CoronaException(e);
+        }
+        if(tag != null) {
+            return tag.getJsonString();
+        } else {
+            return null;
+        }
+    }
+
+    public void writeJson(Intent intent, String json) throws CoronaException {
+        CoronaWriterTag tag;
+        try {
+            tag = getWriteTagFromIntent(intent);
+            if(tag != null) tag.writeJson(json);
+        } catch (CoronaException | IOException e) {
+            e.printStackTrace();
+            throw new CoronaException(e);
+        }
+    }
+
+    public void setReadLogMessage(String message) {
+        mReadLogMessage = message;
+    }
+
+    public void setWriteLogMessage(String message) {
+        mWriteLogMessage = message;
+    }
+
+    private CoronaWriterTag getWriteTagFromIntent(Intent intent) throws CoronaException {
         // GPSの許可を確認（ログ送信用）
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (context.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -138,7 +214,7 @@ public class Corona {
 
                     Ndef ndef = Ndef.get(tag);
                     if (ndef == null) {
-                        throw new CNFCReaderException("Not NDEF tag");
+                        throw new CoronaException("Not NDEF tag");
                     }
 
                     NdefMessage msg;
@@ -146,7 +222,7 @@ public class Corona {
                         ndef.connect();
                         msg = ndef.getNdefMessage();
                     } catch (IOException | FormatException e) {
-                        throw new CNFCReaderException(e);
+                        throw new CoronaException(e);
                     } finally {
                         try {
                             ndef.close();
@@ -154,18 +230,12 @@ public class Corona {
                             e.printStackTrace();
                         }
                     }
-                    if(msg == null) throw new CNFCReaderException("Can not available WifiHelper!!");
+                    if(msg == null) throw new CoronaException("Can not available WifiHelper!!");
 
                     NdefRecord[] records = msg.getRecords();
                     for (NdefRecord rec : records) {
                         CoronaReaderTag t = CoronaReaderTag.get(rec);
                         if (t != null) {
-
-                            // 現在時間の作成
-                            Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
-                            sdf.setTimeZone(cal.getTimeZone());
-                            String currentDateTime = sdf.format(cal.getTime());
 
                             // 位置情報の取得
                             GetLocation location = new GetLocation(context);
@@ -188,7 +258,7 @@ public class Corona {
                             Gson gson = new Gson();
 
                             // 現在のログを作成
-                            String currentLog[] = {sb.toString().toLowerCase(), currentDateTime, locationInfo, "Write"};
+                            String currentLog[] = {sb.toString().toLowerCase(), locationInfo, mWriteLogMessage};
 
                             // 本体に登録されているログを取得（2次元配列）
                             final SharedPreferences pref = context.getSharedPreferences("logs", Context.MODE_PRIVATE);
@@ -206,8 +276,8 @@ public class Corona {
                             }
 
                             // ネットに繋がっていればログの送信
-                            if(Util.Network.isConnected(context) || WifiConnector.isEnable(context)) {
-                                new SendLogAsyncTask(new SendLogAsyncTask.AsyncCallback() {
+                            if(Util.Network.isConnected(context) || isWifiEnable(context)) {
+                                new SendLog(new SendLog.AsyncCallback() {
                                     @Override
                                     public void onSuccess(JSONObject responseJson) {
                                         // 保存されているログは削除
@@ -238,7 +308,7 @@ public class Corona {
         return null;
     }
 
-    public CoronaReaderTag getReadTagFromIntent(Intent intent) throws CNFCReaderException {
+    private CoronaReaderTag getReadTagFromIntent(Intent intent, boolean sendLog) throws CoronaException {
         // GPSの許可がなければwifiに接続できないため、事前に確認（ログ送信にも使用）
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (context.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -260,7 +330,7 @@ public class Corona {
 
         Ndef ndef = Ndef.get(tag);
         if (ndef == null) {
-            throw new CNFCReaderException("Not NDEF tag");
+            throw new CoronaException("Not NDEF tag");
         }
 
         NdefMessage msg;
@@ -268,8 +338,8 @@ public class Corona {
             ndef.connect();
             msg = ndef.getNdefMessage();
         } catch (IOException | FormatException e) {
-            Log.d("CNFCReaderException", e.toString());
-            throw new CNFCReaderException(e);
+            Log.d("CoronaException", e.toString());
+            throw new CoronaException(e);
         } finally {
             try {
                 ndef.close();
@@ -277,84 +347,175 @@ public class Corona {
                 e.printStackTrace();
             }
         }
-        if(msg == null) throw new CNFCReaderException("Can not available WifiHelper!!");
+        if(msg == null) throw new CoronaException("Can not available WifiHelper!!");
 
         NdefRecord[] records = msg.getRecords();
         for (NdefRecord rec : records) {
             CoronaReaderTag t = CoronaReaderTag.get(rec);
             if (t != null) {
 
-                // 現在時間の作成
-                Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
-                sdf.setTimeZone(cal.getTimeZone());
-                String currentDateTime = sdf.format(cal.getTime());
+                if (sendLog) {
 
-                // 位置情報の取得
-                GetLocation location = new GetLocation(context);
-                String locationInfo = "";
-                if(location.getCurrentLocation() != null) {
-                    locationInfo = String.valueOf(location.getCurrentLocation().getLatitude()) + "," + String.valueOf(location.getCurrentLocation().getLongitude());
-                }
+                    // 位置情報の取得
+                    GetLocation location = new GetLocation(context);
+                    String locationInfo = "";
+                    if (location.getCurrentLocation() != null) {
+                        locationInfo = String.valueOf(location.getCurrentLocation().getLatitude()) + "," + String.valueOf(location.getCurrentLocation().getLongitude());
+                    }
 
-                // デバイスIDに空白を入れる
-                // TODO 16進数でなくなるとこの部分削除
-                String str = t.getDeviceIdString();
-                StringBuilder sb = new StringBuilder(str);
-                sb.insert(12," ");
-                sb.insert(10," ");
-                sb.insert(8," ");
-                sb.insert(6," ");
-                sb.insert(4," ");
-                sb.insert(2," ");
+                    // デバイスIDに空白を入れる
+                    // TODO 16進数でなくなるとこの部分削除
+                    String str = t.getDeviceIdString();
+                    StringBuilder sb = new StringBuilder(str);
+                    sb.insert(12, " ");
+                    sb.insert(10, " ");
+                    sb.insert(8, " ");
+                    sb.insert(6, " ");
+                    sb.insert(4, " ");
+                    sb.insert(2, " ");
 
-                // 現在のログを作成
-                String currentLog[] = {sb.toString().toLowerCase(), currentDateTime, locationInfo, "Read"};
+                    // 現在のログを作成
+                    String currentLog[] = {sb.toString().toLowerCase(), locationInfo, mReadLogMessage};
 
-                // 本体に登録されているログを取得（2次元配列）
-                Gson gson = new Gson();
-                final SharedPreferences pref = context.getSharedPreferences("logs", Context.MODE_PRIVATE);
-                String savedLog[][] = gson.fromJson(pref.getString("savedLog", null), String[][].class);
+                    // 本体に登録されているログを取得（2次元配列）
+                    Gson gson = new Gson();
+                    final SharedPreferences pref = context.getSharedPreferences("logs", Context.MODE_PRIVATE);
+                    String savedLog[][] = gson.fromJson(pref.getString("savedLog", null), String[][].class);
 
-                // サーバーに送信するためのログを作成
-                int toSendLogLength = 1;
-                if(savedLog != null) {
-                    toSendLogLength += savedLog.length;
-                }
-                String toSendLog[][] = new String[toSendLogLength][currentLog.length];
-                toSendLog[0] = currentLog;
-                if(savedLog != null) {
-                    System.arraycopy(savedLog, 0, toSendLog, 1, toSendLogLength - 1);
-                }
+                    // サーバーに送信するためのログを作成
+                    int toSendLogLength = 1;
+                    if (savedLog != null) {
+                        toSendLogLength += savedLog.length;
+                    }
+                    String toSendLog[][] = new String[toSendLogLength][currentLog.length];
+                    toSendLog[0] = currentLog;
+                    if (savedLog != null) {
+                        System.arraycopy(savedLog, 0, toSendLog, 1, toSendLogLength - 1);
+                    }
 
-                // ネットに繋がっていればログの送信
-                if(Util.Network.isConnected(context) || WifiConnector.isEnable(context)) {
-                    new SendLogAsyncTask(new SendLogAsyncTask.AsyncCallback() {
-                        @Override
-                        public void onSuccess(JSONObject responseJson) {
-                            // 保存されているログは削除
-                            SharedPreferences.Editor editor = pref.edit();
-                            editor.putString("savedLog", null);
-                            editor.apply();
-                        }
+                    // ネットに繋がっていればログの送信
+                    if (Util.Network.isConnected(context) || isWifiEnable(context)) {
+                        new SendLog(new SendLog.AsyncCallback() {
+                            @Override
+                            public void onSuccess(JSONObject responseJson) {
+                                // 保存されているログは削除
+                                SharedPreferences.Editor editor = pref.edit();
+                                editor.putString("savedLog", null);
+                                editor.apply();
+                            }
 
-                        @Override
-                        public void onFailure(Exception e) {
-                            Log.d("SendLogFailure", e.toString());
-                        }
-                    }).execute(toSendLog);
-                }
-                // ネットに繋がっていなければログを保存
-                else {
-                    SharedPreferences.Editor editor = pref.edit();
-                    editor.putString("savedLog", gson.toJson(toSendLog));
-                    editor.apply();
+                            @Override
+                            public void onFailure(Exception e) {
+                                Log.d("SendLogFailure", e.toString());
+                            }
+                        }).execute(toSendLog);
+                    }
+                    // ネットに繋がっていなければログを保存
+                    else {
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putString("savedLog", gson.toJson(toSendLog));
+                        editor.apply();
+                    }
                 }
 
                 return t;
             }
         }
 
-        throw new CNFCReaderException("Not Corona tag");
+        throw new CoronaException("Not Corona tag");
+    }
+
+    public static class SendLog extends AsyncTask<String[][], Void, JSONObject> {
+
+        private AsyncCallback mAsyncCallback = null;
+
+        public interface AsyncCallback{
+            void onSuccess(JSONObject responseJson);
+            void onFailure(Exception e);
+        }
+
+        public SendLog(AsyncCallback asyncCallback){
+            this.mAsyncCallback = asyncCallback;
+        }
+
+        @Override
+        protected JSONObject doInBackground(String[][]... params) {
+
+            // 現在時間の作成
+            Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
+            sdf.setTimeZone(cal.getTimeZone());
+            String currentDateTime = sdf.format(cal.getTime());
+
+            // ログ送信用のjsonを作成
+            JSONObject deviceLogsJson = new JSONObject();
+            JSONArray deviceLogJsonArray = new JSONArray();
+            try {
+                for(int i = 0; i < params[0].length; i++) {
+                    JSONObject jsonOneData;
+                    jsonOneData = new JSONObject();
+                    jsonOneData.put("device_id", params[0][i][0]);
+                    jsonOneData.put("used_at", currentDateTime);
+                    jsonOneData.put("lat_lng", params[0][i][1]);
+                    jsonOneData.put("notes", params[0][i][2]);
+                    jsonOneData.put("shop", null);  // TODO 後に削除
+                    deviceLogJsonArray.put(jsonOneData);
+                }
+
+                deviceLogsJson.put("device_logs", deviceLogJsonArray);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            // サーバーにログを送信
+            JSONObject responseJson = null;
+            try {
+                String buffer = "";
+                HttpURLConnection con = null;
+                URL url = new URL("http://13.112.232.171/api/device_logs/H7Pa7pQaVxxG.json");
+                con = (HttpURLConnection) url.openConnection();
+                con.setRequestMethod("POST");
+                con.setInstanceFollowRedirects(false);
+                con.setRequestProperty("Accept-Language", "jp");
+                con.setDoOutput(true);
+                con.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+                OutputStream os = con.getOutputStream();
+                PrintStream ps = new PrintStream(os);
+                ps.print(deviceLogsJson.toString());
+                ps.close();
+
+                // レスポンスを取得
+                BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+                String responseJsonString = reader.readLine();
+                responseJson = new JSONObject(responseJsonString);
+
+                con.disconnect();
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.e("ServerLog", e.toString());
+                onFailure(e);
+            }
+
+            return responseJson;
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject responseJson) {
+            super.onPostExecute(responseJson);
+            onSuccess(responseJson);
+        }
+
+        private void onSuccess(JSONObject responseJson) {
+            this.mAsyncCallback.onSuccess(responseJson);
+        }
+
+        private void onFailure(Exception e) {
+            this.mAsyncCallback.onFailure(e);
+        }
+    }
+
+    private static boolean isWifiEnable(Context context) {
+        WifiManager wifiManager = (WifiManager)context.getApplicationContext().getSystemService(WIFI_SERVICE);
+        return wifiManager.isWifiEnabled();
     }
 }

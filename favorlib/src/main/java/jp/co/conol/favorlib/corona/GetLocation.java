@@ -1,4 +1,4 @@
-package jp.co.conol.favorlib.device_manager;
+package jp.co.conol.favorlib.corona;
 
 /**
  * Created by Masafumi_Ito on 2017/10/14.

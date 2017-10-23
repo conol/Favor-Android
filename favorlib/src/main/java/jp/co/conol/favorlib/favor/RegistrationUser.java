@@ -20,7 +20,7 @@ import jp.co.conol.favorlib.favor.model.User;
  * Created by Masafumi_Ito on 2017/10/13.
  */
 
-public class RegistrationUserAsyncTask extends AsyncTask<Register, Void, User> {
+public class RegistrationUser extends AsyncTask<Register, Void, User> {
 
     private AsyncCallback mAsyncCallback = null;
 
@@ -29,7 +29,7 @@ public class RegistrationUserAsyncTask extends AsyncTask<Register, Void, User> {
         void onFailure(Exception e);
     }
 
-    public RegistrationUserAsyncTask(AsyncCallback asyncCallback){
+    public RegistrationUser(AsyncCallback asyncCallback){
         this.mAsyncCallback = asyncCallback;
     }
 
