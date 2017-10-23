@@ -1,4 +1,4 @@
-package jp.co.conol.favor_android;
+package jp.co.conol.favor_android.activity;
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,6 +12,8 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 
+import jp.co.conol.favor_android.MyUtil;
+import jp.co.conol.favor_android.R;
 import jp.co.conol.favorlib.favor.RegistrationUser;
 import jp.co.conol.favorlib.favor.model.Register;
 import jp.co.conol.favorlib.favor.model.User;

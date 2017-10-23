@@ -1,4 +1,4 @@
-package jp.co.conol.favor_android;
+package jp.co.conol.favor_android.activity;
 
 import android.Manifest;
 import android.content.DialogInterface;
@@ -21,6 +21,8 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import jp.co.conol.favor_android.MyUtil;
+import jp.co.conol.favor_android.R;
 import jp.co.conol.favorlib.corona.Corona;
 import jp.co.conol.favorlib.corona.NfcNotAvailableException;
 import jp.co.conol.favorlib.favor.model.User;
