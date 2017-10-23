@@ -13,6 +13,10 @@
     <string name="shop_history_title">入店履歴</string>
     <string name="user_setting_title"> の情報</string>
 
+    <!-- ユーザー画面 -->
+    <string name="user_favorite">お気に入り</string>
+    <string name="user_order_history">注文履歴</string>
+
     <!-- nfc -->
     <string name="nfc_scan_title">スキャンの準備ができました</string>
     <string name="nfc_scan_message">CORONAへタッチしてください</string>
@@ -32,5 +36,8 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="cancel_kana">キャンセル</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

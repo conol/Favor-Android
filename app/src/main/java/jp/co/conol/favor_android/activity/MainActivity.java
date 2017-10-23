@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private Handler mScanDialogAutoCloseHandler = new Handler();
     private Corona mCorona;
     private ConstraintLayout mShopHistoryConstraintLayout;
+    private ConstraintLayout mUserSettingConstraintLayout;
     private TextView mUserSettingTextView;
     private ConstraintLayout mScanBackgroundConstraintLayout;
     private ConstraintLayout mScanDialogConstraintLayout;
@@ -45,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mShopHistoryConstraintLayout = (ConstraintLayout) findViewById(R.id.shopHistoryConstraintLayout);
+        mUserSettingConstraintLayout = (ConstraintLayout) findViewById(R.id.userSettingConstraintLayout);
         mUserSettingTextView = (TextView) findViewById(R.id.userSettingTextView);
         mScanBackgroundConstraintLayout = (ConstraintLayout) findViewById(R.id.ScanBackgroundConstraintLayout);
         mScanDialogConstraintLayout = (ConstraintLayout) findViewById(R.id.scanDialogConstraintLayout);
@@ -103,6 +105,18 @@ public class MainActivity extends AppCompatActivity {
         // ユーザー名を表示
         String userSettingTitle = user.getNickname() + getResources().getString(R.string.user_setting_title);
         mUserSettingTextView.setText(userSettingTitle);
+
+        // ユーザー情報をタップした時の動作
+        mUserSettingConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                    Intent intent = new Intent(MainActivity.this, UserActivity.class);
+                    startActivity(intent);
+                }
+                return false;
+            }
+        });
     }
 
     public void onStartScanButtonClicked(View view) {

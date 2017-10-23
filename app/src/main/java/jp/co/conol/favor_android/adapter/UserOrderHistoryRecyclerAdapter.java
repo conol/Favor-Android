@@ -9,14 +9,13 @@ import android.view.ViewGroup;
 import jp.co.conol.favor_android.R;
 
 /**
- * Created by Masafumi_Ito on 2017/09/04.
+ * Created by Masafumi_Ito on 2017/10/24.
  */
 
-public class ShopHistoryRecyclerAdapter extends RecyclerView.Adapter<ShopHistoryRecyclerAdapter.ViewHolder> {
+public class UserOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<UserOrderHistoryRecyclerAdapter.ViewHolder> {
 
     private Context mContext;
 
-    // ViewHolder
     class ViewHolder extends RecyclerView.ViewHolder {
 
         // ViewHolderのコンストラクタ
@@ -29,14 +28,13 @@ public class ShopHistoryRecyclerAdapter extends RecyclerView.Adapter<ShopHistory
     }
 
     // コンストラクタ
-    public ShopHistoryRecyclerAdapter(Context context) {
+    public UserOrderHistoryRecyclerAdapter(Context context) {
         mContext = context;
     }
 
-    // ViewHolder作成
     @Override
-    public ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
-        final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_shop_history, parent, false);
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user_order_history, parent, false);
 
         // ViewHolder作成
         final ViewHolder holder = new ViewHolder(view);
@@ -44,9 +42,9 @@ public class ShopHistoryRecyclerAdapter extends RecyclerView.Adapter<ShopHistory
         return holder;
     }
 
-    // 画面に表示する内容をセット
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+
     }
 
     @Override
@@ -54,5 +52,3 @@ public class ShopHistoryRecyclerAdapter extends RecyclerView.Adapter<ShopHistory
         return 20;
     }
 }
-
-
