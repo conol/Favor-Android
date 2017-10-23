@@ -14,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean isScanning = false;
     private Handler mScanDialogAutoCloseHandler = new Handler();
     private Corona mCorona;
+    private ConstraintLayout mShopHistoryConstraintLayout;
     private TextView mUserSettingTextView;
     private ConstraintLayout mScanBackgroundConstraintLayout;
     private ConstraintLayout mScanDialogConstraintLayout;
@@ -42,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mShopHistoryConstraintLayout = (ConstraintLayout) findViewById(R.id.shopHistoryConstraintLayout);
         mUserSettingTextView = (TextView) findViewById(R.id.userSettingTextView);
         mScanBackgroundConstraintLayout = (ConstraintLayout) findViewById(R.id.ScanBackgroundConstraintLayout);
         mScanDialogConstraintLayout = (ConstraintLayout) findViewById(R.id.scanDialogConstraintLayout);
@@ -80,6 +83,18 @@ public class MainActivity extends AppCompatActivity {
                     .setNegativeButton(getString(R.string.cancel), null)
                     .show();
         }
+
+        // 入店履歴をタップした時の動作
+        mShopHistoryConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                    Intent intent = new Intent(MainActivity.this, EnteringHistoryActivity.class);
+                    startActivity(intent);
+                }
+                return false;
+            }
+        });
 
         // ユーザー情報を取得
         Gson gson = new Gson();
