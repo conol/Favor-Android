@@ -22,6 +22,9 @@
     <string name="shop_detail_order_menu">注文履歴</string>
     <string name="shop_menu_show">注文メニューを表示する</string>
 
+    <!-- ショップメニュー画面 -->
+    <string name="shop_menu_title">MENU</string>
+
     <!-- nfc -->
     <string name="nfc_scan_title">スキャンの準備ができました</string>
     <string name="nfc_scan_message">CORONAへタッチしてください</string>

@@ -23,7 +23,7 @@ public class ShopHistoryActivity extends AppCompatActivity {
         mShopHistoryRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         // アダプターのセット
-        ShopHistoryRecyclerAdapter adapter = new ShopHistoryRecyclerAdapter(this);
-        mShopHistoryRecyclerView.setAdapter(adapter);
+        ShopHistoryRecyclerAdapter shopHistoryRecyclerAdapter = new ShopHistoryRecyclerAdapter(this);
+        mShopHistoryRecyclerView.setAdapter(shopHistoryRecyclerAdapter);
     }
 }
