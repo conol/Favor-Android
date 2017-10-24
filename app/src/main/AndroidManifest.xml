@@ -18,7 +18,8 @@
         </activity>
         <activity android:name=".activity.MainActivity" />
         <activity android:name=".activity.ShopHistoryActivity" />
-        <activity android:name=".activity.UserActivity"></activity>
+        <activity android:name=".activity.UserActivity" />
+        <activity android:name=".activity.ShopDetailActivity"></activity>
     </application>
 
 </manifest>
