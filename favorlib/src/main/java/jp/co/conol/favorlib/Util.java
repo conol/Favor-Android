@@ -1,8 +1,10 @@
 package jp.co.conol.favorlib;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.preference.PreferenceManager;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -13,6 +15,19 @@ import java.util.Date;
 
 @SuppressWarnings("ALL")
 public class Util {
+
+    public static class SharedPref {
+
+        public static void save(Context context, String key, String objString) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            pref.edit().putString(key ,objString).apply();
+        }
+
+        public static String get(Context context, String key) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            return pref.getString(key, null);
+        }
+    }
 
     public static class Network {
 
@@ -30,6 +45,16 @@ public class Util {
     }
 
     public static class Transform {
+
+        // デバイスIDをサーバーに送信可能な形式に変換
+        public static String deviceIdForServer(String deviceId) {
+            String deviceIdTmp = deviceId.replace(" ", "").toLowerCase();
+            StringBuilder deviceIdToSend = new StringBuilder(deviceIdTmp);
+            for (int i = 0; i < 6; i++) {
+                deviceIdToSend.insert(12 - (2 * i), " ");
+            }
+            return deviceIdToSend.toString();
+        }
 
         /**
          * Date型 -> Calendar型

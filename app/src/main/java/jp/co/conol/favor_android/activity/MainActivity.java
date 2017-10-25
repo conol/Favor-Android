@@ -26,6 +26,8 @@ import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favorlib.corona.Corona;
 import jp.co.conol.favorlib.corona.NfcNotAvailableException;
+import jp.co.conol.favorlib.favor.EnteringShop;
+import jp.co.conol.favorlib.favor.model.EnteredShop;
 import jp.co.conol.favorlib.favor.model.User;
 
 public class MainActivity extends AppCompatActivity {
@@ -50,6 +52,31 @@ public class MainActivity extends AppCompatActivity {
         mUserSettingTextView = (TextView) findViewById(R.id.userSettingTextView);
         mScanBackgroundConstraintLayout = (ConstraintLayout) findViewById(R.id.ScanBackgroundConstraintLayout);
         mScanDialogConstraintLayout = (ConstraintLayout) findViewById(R.id.scanDialogConstraintLayout);
+
+
+
+
+
+        Gson gsonTmp = new Gson();
+        User userTmp = gsonTmp.fromJson(MyUtil.SharedPref.get(this, "userSetting"), User.class);
+
+
+        // 入店API
+        new EnteringShop(new EnteringShop.AsyncCallback() {
+            @Override
+            public void onSuccess(EnteredShop enteredShop) {
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.d("failUserRegistration", e.toString());
+            }
+        }).setAppToken(userTmp.getAppToken()).setDeviceId("04 b5 38 01 72 d5 38").execute();
+
+
+
+
+
 
         try {
             mCorona = new Corona(this);

@@ -244,21 +244,13 @@ public class Corona {
                                 locationInfo = String.valueOf(location.getCurrentLocation().getLatitude()) + "," + String.valueOf(location.getCurrentLocation().getLongitude());
                             }
 
-                            // デバイスIDに空白を入れる
-                            // TODO 16進数でなくなるとこの部分削除
-                            String str = t.getDeviceIdString();
-                            StringBuilder sb = new StringBuilder(str);
-                            sb.insert(12," ");
-                            sb.insert(10," ");
-                            sb.insert(8," ");
-                            sb.insert(6," ");
-                            sb.insert(4," ");
-                            sb.insert(2," ");
+                            // デバイスIDをサーバーで送信可能な形式に変換
+                            String deviceId = Util.Transform.deviceIdForServer(t.getDeviceIdString());
 
                             Gson gson = new Gson();
 
                             // 現在のログを作成
-                            String currentLog[] = {sb.toString().toLowerCase(), locationInfo, mWriteLogMessage};
+                            String currentLog[] = {deviceId, locationInfo, mWriteLogMessage};
 
                             // 本体に登録されているログを取得（2次元配列）
                             final SharedPreferences pref = context.getSharedPreferences("logs", Context.MODE_PRIVATE);
@@ -363,19 +355,11 @@ public class Corona {
                         locationInfo = String.valueOf(location.getCurrentLocation().getLatitude()) + "," + String.valueOf(location.getCurrentLocation().getLongitude());
                     }
 
-                    // デバイスIDに空白を入れる
-                    // TODO 16進数でなくなるとこの部分削除
-                    String str = t.getDeviceIdString();
-                    StringBuilder sb = new StringBuilder(str);
-                    sb.insert(12, " ");
-                    sb.insert(10, " ");
-                    sb.insert(8, " ");
-                    sb.insert(6, " ");
-                    sb.insert(4, " ");
-                    sb.insert(2, " ");
+                    // デバイスIDをサーバーで送信可能な形式に変換
+                    String deviceId = Util.Transform.deviceIdForServer(t.getDeviceIdString());
 
                     // 現在のログを作成
-                    String currentLog[] = {sb.toString().toLowerCase(), locationInfo, mReadLogMessage};
+                    String currentLog[] = {deviceId, locationInfo, mReadLogMessage};
 
                     // 本体に登録されているログを取得（2次元配列）
                     Gson gson = new Gson();
@@ -458,7 +442,6 @@ public class Corona {
                     jsonOneData.put("used_at", currentDateTime);
                     jsonOneData.put("lat_lng", params[0][i][1]);
                     jsonOneData.put("notes", params[0][i][2]);
-                    jsonOneData.put("shop", null);  // TODO 後に削除
                     deviceLogJsonArray.put(jsonOneData);
                 }
 

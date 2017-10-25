@@ -62,23 +62,23 @@ public class User {
         return age;
     }
 
-    public String getCustom_area1() {
+    public String getCustomArea1() {
         return custom_area1;
     }
 
-    public String getCustom_area2() {
+    public String getCustomArea2() {
         return custom_area2;
     }
 
-    public String getCustom_area3() {
+    public String getCustomArea3() {
         return custom_area3;
     }
 
-    public String getApp_token() {
+    public String getAppToken() {
         return app_token;
     }
 
-    public String getPush_token() {
+    public String getPushToken() {
         return push_token;
     }
 
@@ -86,11 +86,11 @@ public class User {
         return notifiable;
     }
 
-    public String getCreated_at() {
+    public String getCreatedAt() {
         return created_at;
     }
 
-    public String getUpdated_at() {
+    public String getUpdatedAt() {
         return updated_at;
     }
 }
