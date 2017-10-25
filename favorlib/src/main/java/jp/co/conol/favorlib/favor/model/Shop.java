@@ -7,12 +7,12 @@ import java.util.List;
  * Created by Masafumi_Ito on 2017/10/25.
  */
 
-public class EnteringShop {
+public class Shop {
 
-    private Shop shop;
+    private ShopInfo shop;
     private VisitHistory visit_history;
 
-    private class Shop {
+    private class ShopInfo {
         private int id;
         private String name;
         private String introduction;
@@ -145,7 +145,7 @@ public class EnteringShop {
 
     public List<String> getShopImages() {
         List<String> shopImage = new ArrayList<>();
-        for(Shop.ShopImage shopImageObj : shop.getShopImages()) {
+        for(ShopInfo.ShopImage shopImageObj : shop.getShopImages()) {
             shopImage.add(shopImageObj.getImageUrl());
         }
 

@@ -11,21 +11,13 @@ import jp.co.conol.favorlib.favor.model.Shop;
  * Created by Masafumi_Ito on 2017/10/25.
  */
 
-public class EnteringShopTask extends AsyncTask<Void, Void, Shop> {
+public class GetShopDetailTask extends AsyncTask<Void, Void, Shop> {
 
     private AsyncCallback mAsyncCallback = null;
     private String mAppToken = null;
-    private String mDeviceId = null;
 
-    public EnteringShopTask setAppToken(String appToken) {
+    public GetShopDetailTask setAppToken(String appToken) {
         mAppToken = appToken;
-        return this;
-    }
-
-    public EnteringShopTask setDeviceId(String deviceId) {
-
-        // サーバーで送信可能な形式に変換
-        mDeviceId = Util.Transform.deviceIdForServer(deviceId);
         return this;
     }
 
@@ -34,7 +26,7 @@ public class EnteringShopTask extends AsyncTask<Void, Void, Shop> {
         void onFailure(Exception e);
     }
 
-    public EnteringShopTask(AsyncCallback asyncCallback) {
+    public GetShopDetailTask(AsyncCallback asyncCallback) {
         this.mAsyncCallback = asyncCallback;
     }
 
@@ -43,13 +35,10 @@ public class EnteringShopTask extends AsyncTask<Void, Void, Shop> {
 
         Gson gson = new Gson();
 
-        // 入店用のjson（デバイスID）を作成
-        String deviceIdString = gson.toJson(mDeviceId);
-
         // サーバーにjsonを送信
         String responseJsonString = null;
         try {
-            responseJsonString = Util.Http.post("http://52.196.33.58/api/users/enter.json", mAppToken, deviceIdString);
+            responseJsonString = Util.Http.get("http://52.196.33.58/api/users/shop/1.json", mAppToken);
         } catch (Exception e) {
             onFailure(e);
         }

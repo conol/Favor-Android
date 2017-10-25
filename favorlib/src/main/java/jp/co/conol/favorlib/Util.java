@@ -7,8 +7,6 @@ import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -18,8 +16,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
-
-import jp.co.conol.favorlib.favor.model.EnteringShop;
 
 /**
  * Created by Masafumi_Ito on 2017/09/28.

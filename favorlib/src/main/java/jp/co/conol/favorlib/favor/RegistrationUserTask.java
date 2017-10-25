@@ -1,22 +1,10 @@
 package jp.co.conol.favorlib.favor;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.google.gson.Gson;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
 import jp.co.conol.favorlib.Util;
-import jp.co.conol.favorlib.favor.model.EnteringShop;
 import jp.co.conol.favorlib.favor.model.Register;
 import jp.co.conol.favorlib.favor.model.User;
 
