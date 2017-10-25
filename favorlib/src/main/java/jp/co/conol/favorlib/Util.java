@@ -81,6 +81,7 @@ public class Util {
 
             } catch (Exception e) {
                 e.printStackTrace();
+                Log.e("HttpException", e.toString());
                 return null;
             }
         }
@@ -110,7 +111,7 @@ public class Util {
                 con.disconnect();
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.e("SendJson", e.toString());
+                Log.e("HttpException", e.toString());
             }
 
             return responseJsonString;

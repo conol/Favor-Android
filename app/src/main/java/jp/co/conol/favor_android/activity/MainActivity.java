@@ -30,8 +30,10 @@ import jp.co.conol.favorlib.corona.Corona;
 import jp.co.conol.favorlib.corona.NfcNotAvailableException;
 import jp.co.conol.favorlib.favor.EnteringShopTask;
 import jp.co.conol.favorlib.favor.GetShopDetailTask;
+import jp.co.conol.favorlib.favor.GetShopMenuTask;
 import jp.co.conol.favorlib.favor.GetVisitedShopHistoriesTask;
 import jp.co.conol.favorlib.favor.model.Shop;
+import jp.co.conol.favorlib.favor.model.ShopMenu;
 import jp.co.conol.favorlib.favor.model.User;
 import jp.co.conol.favorlib.favor.model.VisitedShop;
 
@@ -82,6 +84,19 @@ public class MainActivity extends AppCompatActivity {
         new GetShopDetailTask(new GetShopDetailTask.AsyncCallback() {
             @Override
             public void onSuccess(Shop shop) {
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.d("onFailure", e.toString());
+            }
+        }).setAppToken(userTmp.getAppToken()).execute();
+
+
+        // 店舗メニュー取得API
+        new GetShopMenuTask(new GetShopMenuTask.AsyncCallback() {
+            @Override
+            public void onSuccess(List<ShopMenu> shopMenuList) {
             }
 
             @Override

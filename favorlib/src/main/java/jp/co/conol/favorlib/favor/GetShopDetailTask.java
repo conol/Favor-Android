@@ -38,7 +38,7 @@ public class GetShopDetailTask extends AsyncTask<Void, Void, Shop> {
         // サーバーにjsonを送信
         String responseJsonString = null;
         try {
-            responseJsonString = Util.Http.get("http://52.196.33.58/api/users/shop/1.json", mAppToken);
+            responseJsonString = Util.Http.get("http://52.196.33.58/api/users/shops/1.json", mAppToken);
         } catch (Exception e) {
             onFailure(e);
         }
