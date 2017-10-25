@@ -30,6 +30,7 @@ import jp.co.conol.favorlib.corona.Corona;
 import jp.co.conol.favorlib.corona.NfcNotAvailableException;
 import jp.co.conol.favorlib.favor.AddFavoriteTask;
 import jp.co.conol.favorlib.favor.EnterShopTask;
+import jp.co.conol.favorlib.favor.GetFavoritesTask;
 import jp.co.conol.favorlib.favor.GetShopDetailTask;
 import jp.co.conol.favorlib.favor.GetShopMenuTask;
 import jp.co.conol.favorlib.favor.GetVisitedShopHistoriesTask;
@@ -132,6 +133,18 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("onFailure", e.toString());
             }
         }).setAppToken(userTmp.getAppToken()).setName("酢豚").setLevel(5).execute();
+
+        // お気に入り一覧取得
+        new GetFavoritesTask(new GetFavoritesTask.AsyncCallback() {
+            @Override
+            public void onSuccess(List<Favorite> favoriteList) {
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.d("onFailure", e.toString());
+            }
+        }).setAppToken(userTmp.getAppToken()).execute();
 
 
 
