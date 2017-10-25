@@ -29,6 +29,7 @@ import jp.co.conol.favor_android.R;
 import jp.co.conol.favorlib.corona.Corona;
 import jp.co.conol.favorlib.corona.NfcNotAvailableException;
 import jp.co.conol.favorlib.favor.AddFavoriteTask;
+import jp.co.conol.favorlib.favor.DeleteFavoriteTask;
 import jp.co.conol.favorlib.favor.EnterShopTask;
 import jp.co.conol.favorlib.favor.GetFavoritesTask;
 import jp.co.conol.favorlib.favor.GetShopDetailTask;
@@ -145,6 +146,18 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("onFailure", e.toString());
             }
         }).setAppToken(userTmp.getAppToken()).execute();
+
+        // お気に入り削除
+//        new DeleteFavoriteTask(new DeleteFavoriteTask.AsyncCallback() {
+//            @Override
+//            public void onSuccess(List<Favorite> favoriteList) {
+//            }
+//
+//            @Override
+//            public void onFailure(Exception e) {
+//                Log.d("onFailure", e.toString());
+//            }
+//        }).setAppToken(userTmp.getAppToken()).setFavoriteId(7).execute();
 
 
 

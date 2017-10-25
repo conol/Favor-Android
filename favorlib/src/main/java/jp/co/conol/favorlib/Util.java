@@ -116,6 +116,35 @@ public class Util {
 
             return responseJsonString;
         }
+
+        public static String delete(String url, String appToken) {
+            String responseJsonString = null;
+            try {
+                String buffer = "";
+                HttpURLConnection con = null;
+                URL urlTmp = new URL(url);
+                con = (HttpURLConnection) urlTmp.openConnection();
+                con.setRequestMethod("DELETE");
+                con.setInstanceFollowRedirects(false);
+                con.setRequestProperty("Accept-Language", "jp");
+                con.setConnectTimeout(5000);
+                con.setReadTimeout(5000);
+                con.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+                if(appToken != null || appToken != "") con.setRequestProperty("Authorization", "Bearer " + appToken);
+                con.getResponseCode();
+
+                // レスポンスを取得
+                BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+                responseJsonString = reader.readLine();
+
+                con.disconnect();
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.e("HttpException", e.toString());
+            }
+
+            return responseJsonString;
+        }
     }
 
     public static class Transform {

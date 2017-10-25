@@ -14,7 +14,7 @@ import jp.co.conol.favorlib.favor.model.Shop;
 
 public class AddFavoriteTask extends AsyncTask<Void, Void, Favorite> {
 
-    private AddFavoriteTask.AsyncCallback mAsyncCallback = null;
+    private AsyncCallback mAsyncCallback = null;
     private String mAppToken = null;
     private String mName = null;
     private int mLevel = 3;

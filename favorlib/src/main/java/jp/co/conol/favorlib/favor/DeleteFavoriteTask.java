@@ -15,13 +15,19 @@ import jp.co.conol.favorlib.favor.model.Favorite;
  * Created by Masafumi_Ito on 2017/10/26.
  */
 
-public class GetFavoritesTask extends AsyncTask<Void, Void, List<Favorite>> {
+public class DeleteFavoriteTask extends AsyncTask<Void, Void, List<Favorite>> {
 
     private AsyncCallback mAsyncCallback = null;
     private String mAppToken = null;
+    private String mFavoriteId = null;
 
-    public GetFavoritesTask setAppToken(String appToken) {
+    public DeleteFavoriteTask setAppToken(String appToken) {
         mAppToken = appToken;
+        return this;
+    }
+
+    public DeleteFavoriteTask setFavoriteId(int favoriteId) {
+        mFavoriteId = String.valueOf(favoriteId);
         return this;
     }
 
@@ -30,7 +36,7 @@ public class GetFavoritesTask extends AsyncTask<Void, Void, List<Favorite>> {
         void onFailure(Exception e);
     }
 
-    public GetFavoritesTask(AsyncCallback asyncCallback) {
+    public DeleteFavoriteTask(AsyncCallback asyncCallback) {
         this.mAsyncCallback = asyncCallback;
     }
 
@@ -42,7 +48,7 @@ public class GetFavoritesTask extends AsyncTask<Void, Void, List<Favorite>> {
         // サーバーにjsonを送信
         String responseJsonString = null;
         try {
-            responseJsonString = Util.Http.get("http://52.196.33.58/api/users/favorites.json", mAppToken);
+            responseJsonString = Util.Http.delete("http://52.196.33.58/api/users/favorites/" + mFavoriteId + ".json", mAppToken);
         } catch (Exception e) {
             onFailure(e);
         }
