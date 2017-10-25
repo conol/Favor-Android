@@ -7,7 +7,7 @@ import java.util.List;
  * Created by Masafumi_Ito on 2017/10/25.
  */
 
-public class EnteredShop {
+public class EnteringShop {
 
     private Shop shop;
     private VisitHistory visit_history;
@@ -24,9 +24,9 @@ public class EnteredShop {
         private String closing_day;
         private String[] card_brands;
         private String notes;
-        private ShopImage[] shop_images;
         private String created_at;
         private String updated_at;
+        private ShopImage[] shop_images;
 
         private class ShopImage {
             private String image_url;

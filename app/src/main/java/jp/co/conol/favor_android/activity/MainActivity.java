@@ -22,13 +22,17 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import java.util.List;
+
 import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favorlib.corona.Corona;
 import jp.co.conol.favorlib.corona.NfcNotAvailableException;
-import jp.co.conol.favorlib.favor.EnteringShop;
-import jp.co.conol.favorlib.favor.model.EnteredShop;
+import jp.co.conol.favorlib.favor.EnteringShopTask;
+import jp.co.conol.favorlib.favor.GetVisitedShopHistoriesTask;
+import jp.co.conol.favorlib.favor.model.EnteringShop;
 import jp.co.conol.favorlib.favor.model.User;
+import jp.co.conol.favorlib.favor.model.VisitedShop;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -60,16 +64,28 @@ public class MainActivity extends AppCompatActivity {
         Gson gsonTmp = new Gson();
         User userTmp = gsonTmp.fromJson(MyUtil.SharedPref.get(this, "userSetting"), User.class);
 
-
-        // 入店API
-        new EnteringShop(new EnteringShop.AsyncCallback() {
+        // 入店履歴一覧取得API
+        new GetVisitedShopHistoriesTask(new GetVisitedShopHistoriesTask.AsyncCallback() {
             @Override
-            public void onSuccess(EnteredShop enteredShop) {
+            public void onSuccess(List<VisitedShop> visitedShopList) {
             }
 
             @Override
             public void onFailure(Exception e) {
-                Log.d("failUserRegistration", e.toString());
+                Log.d("onFailure", e.toString());
+            }
+        }).setAppToken(userTmp.getAppToken()).execute();
+
+
+        // 入店API
+        new EnteringShopTask(new EnteringShopTask.AsyncCallback() {
+            @Override
+            public void onSuccess(EnteringShop enteringShop) {
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.d("onFailure", e.toString());
             }
         }).setAppToken(userTmp.getAppToken()).setDeviceId("04 b5 38 01 72 d5 38").execute();
 

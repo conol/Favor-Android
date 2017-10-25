@@ -14,7 +14,7 @@ import com.google.gson.Gson;
 
 import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
-import jp.co.conol.favorlib.favor.RegistrationUser;
+import jp.co.conol.favorlib.favor.RegistrationUserTask;
 import jp.co.conol.favorlib.favor.model.Register;
 import jp.co.conol.favorlib.favor.model.User;
 
@@ -89,11 +89,11 @@ public class RegistrationActivity extends AppCompatActivity {
                 mUserNameEditText.getText().toString(),
                 gender,
                 Integer.parseInt(mUserAgeEditText.getText().toString()),
-                null, null, null, null
+                null
         );
 
         // ユーザー情報を登録
-        new RegistrationUser(new RegistrationUser.AsyncCallback() {
+        new RegistrationUserTask(new RegistrationUserTask.AsyncCallback() {
             @Override
             public void onSuccess(User user) {
 

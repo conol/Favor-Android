@@ -9,9 +9,6 @@ public class User {
     private String nickname = null;
     private String gender = "male";
     private int age = 20;
-    private String custom_area1 = null;
-    private String custom_area2 = null;
-    private String custom_area3 = null;
     private String app_token = null;
     private String push_token = null;
     private boolean notifiable = false;
@@ -23,9 +20,6 @@ public class User {
             String nickname,
             String gender,
             int age,
-            String custom_area1,
-            String custom_area2,
-            String custom_area3,
             String app_token,
             String push_token,
             boolean notifiable,
@@ -36,9 +30,6 @@ public class User {
         this.nickname = nickname;
         this.gender = gender;
         this.age = age;
-        this.custom_area1 = custom_area1;
-        this.custom_area2 = custom_area2;
-        this.custom_area3 = custom_area3;
         this.app_token = app_token;
         this.push_token = push_token;
         this.notifiable = notifiable;
@@ -60,18 +51,6 @@ public class User {
 
     public int getAge() {
         return age;
-    }
-
-    public String getCustomArea1() {
-        return custom_area1;
-    }
-
-    public String getCustomArea2() {
-        return custom_area2;
-    }
-
-    public String getCustomArea3() {
-        return custom_area3;
     }
 
     public String getAppToken() {
