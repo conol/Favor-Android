@@ -4,13 +4,13 @@ package jp.co.conol.favorlib.favor.model;
  * Created by Masafumi_Ito on 2017/10/19.
  */
 
-public class Register {
+public class Registration {
     private String nickname = null;
     private String gender = "male";
     private int age = 20;
     private String push_token = null;
 
-    public Register(String nickname, String gender, int age, String push_token) {
+    public Registration(String nickname, String gender, int age, String push_token) {
         this.nickname = nickname;
         this.gender = gender;
         this.age = age;

@@ -43,12 +43,12 @@ public class ShopMenu {
             return notes;
         }
 
-        public List<String> getImages() {
+        public String[] getImages() {
             List<String> itemImage = new ArrayList<>();
             for(Image imageObj : images) {
                 itemImage.add(imageObj.getImage_url());
             }
-            return itemImage;
+            return itemImage.toArray(new String[0]);
         }
     }
 

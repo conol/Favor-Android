@@ -14,8 +14,8 @@ import com.google.gson.Gson;
 
 import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
-import jp.co.conol.favorlib.favor.RegistrationUserTask;
-import jp.co.conol.favorlib.favor.model.Register;
+import jp.co.conol.favorlib.favor.RegisterUserTask;
+import jp.co.conol.favorlib.favor.model.Registration;
 import jp.co.conol.favorlib.favor.model.User;
 
 public class RegistrationActivity extends AppCompatActivity {
@@ -85,7 +85,7 @@ public class RegistrationActivity extends AppCompatActivity {
         // 登録するユーザー情報
         String gender = "male";
         if(mUserGenderEditText.getText().toString().equals("女性")) gender = "female";
-        Register register = new Register(
+        Registration registration = new Registration(
                 mUserNameEditText.getText().toString(),
                 gender,
                 Integer.parseInt(mUserAgeEditText.getText().toString()),
@@ -93,7 +93,7 @@ public class RegistrationActivity extends AppCompatActivity {
         );
 
         // ユーザー情報を登録
-        new RegistrationUserTask(new RegistrationUserTask.AsyncCallback() {
+        new RegisterUserTask(new RegisterUserTask.AsyncCallback() {
             @Override
             public void onSuccess(User user) {
 
@@ -111,6 +111,6 @@ public class RegistrationActivity extends AppCompatActivity {
             public void onFailure(Exception e) {
                 Log.d("failUserRegistration", e.toString());
             }
-        }).execute(register);
+        }).execute(registration);
     }
 }

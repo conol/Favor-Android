@@ -5,14 +5,14 @@ import android.os.AsyncTask;
 import com.google.gson.Gson;
 
 import jp.co.conol.favorlib.Util;
-import jp.co.conol.favorlib.favor.model.Register;
+import jp.co.conol.favorlib.favor.model.Registration;
 import jp.co.conol.favorlib.favor.model.User;
 
 /**
  * Created by Masafumi_Ito on 2017/10/13.
  */
 
-public class RegistrationUserTask extends AsyncTask<Register, Void, User> {
+public class RegisterUserTask extends AsyncTask<Registration, Void, User> {
 
     private AsyncCallback mAsyncCallback = null;
 
@@ -21,12 +21,12 @@ public class RegistrationUserTask extends AsyncTask<Register, Void, User> {
         void onFailure(Exception e);
     }
 
-    public RegistrationUserTask(AsyncCallback asyncCallback){
+    public RegisterUserTask(AsyncCallback asyncCallback){
         this.mAsyncCallback = asyncCallback;
     }
 
     @Override
-    protected User doInBackground(Register... params) {
+    protected User doInBackground(Registration... params) {
 
         Gson gson = new Gson();
 

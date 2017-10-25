@@ -28,10 +28,12 @@ import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favorlib.corona.Corona;
 import jp.co.conol.favorlib.corona.NfcNotAvailableException;
-import jp.co.conol.favorlib.favor.EnteringShopTask;
+import jp.co.conol.favorlib.favor.AddFavoriteTask;
+import jp.co.conol.favorlib.favor.EnterShopTask;
 import jp.co.conol.favorlib.favor.GetShopDetailTask;
 import jp.co.conol.favorlib.favor.GetShopMenuTask;
 import jp.co.conol.favorlib.favor.GetVisitedShopHistoriesTask;
+import jp.co.conol.favorlib.favor.model.Favorite;
 import jp.co.conol.favorlib.favor.model.Shop;
 import jp.co.conol.favorlib.favor.model.ShopMenu;
 import jp.co.conol.favorlib.favor.model.User;
@@ -107,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         // 入店API
-        new EnteringShopTask(new EnteringShopTask.AsyncCallback() {
+        new EnterShopTask(new EnterShopTask.AsyncCallback() {
             @Override
             public void onSuccess(Shop shop) {
             }
@@ -118,6 +120,18 @@ public class MainActivity extends AppCompatActivity {
             }
         }).setAppToken(userTmp.getAppToken()).setDeviceId("04 b5 38 01 72 d5 38").execute();
 
+
+        // お気に入り追加
+        new AddFavoriteTask(new AddFavoriteTask.AsyncCallback() {
+            @Override
+            public void onSuccess(Favorite favorite) {
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.d("onFailure", e.toString());
+            }
+        }).setAppToken(userTmp.getAppToken()).setName("酢豚").setLevel(5).execute();
 
 
 
