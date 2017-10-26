@@ -9,14 +9,14 @@ import java.util.List;
 
 public class Order {
 
-    private int id;
-    private int visit_history_id;
-    private int menu_item_id;
-    private int quantity;
-    private String status;
-    private String created_at;
-    private String updated_at;
-    private MenuItem menu_item;
+    private int id = 0;
+    private int visit_history_id = 0;
+    private int menu_item_id = 0;
+    private int quantity = 0;
+    private String status = null;
+    private String created_at = null;
+    private String updated_at = null;
+    private MenuItem menu_item = null;
 
     private class MenuItem {
         private int id;

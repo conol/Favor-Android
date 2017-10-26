@@ -32,9 +32,10 @@ import jp.co.conol.favorlib.corona.NfcNotAvailableException;
 import jp.co.conol.favorlib.favor.AddFavoriteTask;
 import jp.co.conol.favorlib.favor.EnterShopTask;
 import jp.co.conol.favorlib.favor.GetFavoritesTask;
-import jp.co.conol.favorlib.favor.GetOrderHistoryTask;
+import jp.co.conol.favorlib.favor.GetUsersOrderInShopTask;
 import jp.co.conol.favorlib.favor.GetShopDetailTask;
 import jp.co.conol.favorlib.favor.GetShopMenuTask;
+import jp.co.conol.favorlib.favor.GetUsersAllOrderTask;
 import jp.co.conol.favorlib.favor.GetVisitedShopHistoryTask;
 import jp.co.conol.favorlib.favor.OrderTask;
 import jp.co.conol.favorlib.favor.model.Favorite;
@@ -176,9 +177,9 @@ public class MainActivity extends AppCompatActivity {
             }
         }).setAppToken(userTmp.getAppToken()).setVisitHistoryId(17).setOrder(orderList).execute();
 
-        // 注文一覧取得
+        // 店舗の注文一覧取得
         orderList.add(new Order(1, 2));
-        new GetOrderHistoryTask(new GetOrderHistoryTask.AsyncCallback() {
+        new GetUsersOrderInShopTask(new GetUsersOrderInShopTask.AsyncCallback() {
             @Override
             public void onSuccess(List<Order> orderList) {
             }
@@ -188,6 +189,19 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("onFailure", e.toString());
             }
         }).setAppToken(userTmp.getAppToken()).setVisitHistoryId(17).execute();
+
+        // ユーザーの注文一覧取得
+        orderList.add(new Order(1, 2));
+        new GetUsersAllOrderTask(new GetUsersAllOrderTask.AsyncCallback() {
+            @Override
+            public void onSuccess(List<Order> orderList) {
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.d("onFailure", e.toString());
+            }
+        }).setAppToken(userTmp.getAppToken()).execute();
 
 
 

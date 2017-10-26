@@ -15,19 +15,13 @@ import jp.co.conol.favorlib.favor.model.Order;
  * Created by Masafumi_Ito on 2017/10/26.
  */
 
-public class GetOrderHistoryTask extends AsyncTask<Void, Void, List<Order>> {
+public class GetUsersAllOrderTask extends AsyncTask<Void, Void, List<Order>> {
 
     private AsyncCallback mAsyncCallback = null;
     private String mAppToken = null;
-    private String mVisitHistoryId = null;
 
-    public GetOrderHistoryTask setAppToken(String appToken) {
+    public GetUsersAllOrderTask setAppToken(String appToken) {
         mAppToken = appToken;
-        return this;
-    }
-
-    public GetOrderHistoryTask setVisitHistoryId(int visitHistoryId) {
-        mVisitHistoryId = String.valueOf(visitHistoryId);
         return this;
     }
 
@@ -36,7 +30,7 @@ public class GetOrderHistoryTask extends AsyncTask<Void, Void, List<Order>> {
         void onFailure(Exception e);
     }
 
-    public GetOrderHistoryTask(AsyncCallback asyncCallback) {
+    public GetUsersAllOrderTask(AsyncCallback asyncCallback) {
         this.mAsyncCallback = asyncCallback;
     }
 
@@ -49,10 +43,12 @@ public class GetOrderHistoryTask extends AsyncTask<Void, Void, List<Order>> {
         String responseJsonString = null;
         try {
             responseJsonString
-                    = Util.Http.get("http://52.196.33.58/api/users/visit_histories/" + mVisitHistoryId + "/orders.json", mAppToken);
+                    = Util.Http.get("http://52.196.33.58/api/users/orders.json", mAppToken);
         } catch (Exception e) {
             onFailure(e);
         }
+
+        List<Order> test = gson.fromJson(responseJsonString, new TypeToken<ArrayList<Order>>(){}.getType());
 
         return gson.fromJson(responseJsonString, new TypeToken<ArrayList<Order>>(){}.getType());
     }
