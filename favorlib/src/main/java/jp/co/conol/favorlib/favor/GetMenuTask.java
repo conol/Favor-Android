@@ -9,39 +9,39 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jp.co.conol.favorlib.Util;
-import jp.co.conol.favorlib.favor.model.ShopMenu;
+import jp.co.conol.favorlib.favor.model.Menu;
 
 /**
  * Created by Masafumi_Ito on 2017/10/25.
  */
 
-public class GetShopMenuTask extends AsyncTask<Void, Void, List<ShopMenu>> {
+public class GetMenuTask extends AsyncTask<Void, Void, List<Menu>> {
 
     private AsyncCallback mAsyncCallback = null;
     private String mAppToken = null;
     private String mShopId = null;
 
-    public GetShopMenuTask setAppToken(String appToken) {
+    public GetMenuTask setAppToken(String appToken) {
         mAppToken = appToken;
         return this;
     }
 
-    public GetShopMenuTask setShopId(int shopId) {
+    public GetMenuTask setShopId(int shopId) {
         mShopId = String.valueOf(shopId);
         return this;
     }
 
     public interface AsyncCallback {
-        void onSuccess(List<ShopMenu> shopMenuList);
+        void onSuccess(List<Menu> menuList);
         void onFailure(Exception e);
     }
 
-    public GetShopMenuTask(AsyncCallback asyncCallback) {
+    public GetMenuTask(AsyncCallback asyncCallback) {
         this.mAsyncCallback = asyncCallback;
     }
 
     @Override
-    protected List<ShopMenu> doInBackground(Void... params) {
+    protected List<Menu> doInBackground(Void... params) {
 
         Gson gson = new Gson();
 
@@ -53,17 +53,17 @@ public class GetShopMenuTask extends AsyncTask<Void, Void, List<ShopMenu>> {
             onFailure(e);
         }
 
-        return gson.fromJson(responseJsonString, new TypeToken<ArrayList<ShopMenu>>(){}.getType());
+        return gson.fromJson(responseJsonString, new TypeToken<ArrayList<Menu>>(){}.getType());
     }
 
     @Override
-    protected void onPostExecute(List<ShopMenu> shopMenuList) {
-        super.onPostExecute(shopMenuList);
-        onSuccess(shopMenuList);
+    protected void onPostExecute(List<Menu> menuList) {
+        super.onPostExecute(menuList);
+        onSuccess(menuList);
     }
 
-    private void onSuccess(List<ShopMenu> shopMenuList) {
-        this.mAsyncCallback.onSuccess(shopMenuList);
+    private void onSuccess(List<Menu> menuList) {
+        this.mAsyncCallback.onSuccess(menuList);
     }
 
     private void onFailure(Exception e) {

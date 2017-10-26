@@ -32,18 +32,18 @@ import jp.co.conol.favorlib.corona.NfcNotAvailableException;
 import jp.co.conol.favorlib.favor.AddFavoriteTask;
 import jp.co.conol.favorlib.favor.EnterShopTask;
 import jp.co.conol.favorlib.favor.GetFavoritesTask;
+import jp.co.conol.favorlib.favor.GetUserGroupsOrderInShopTask;
 import jp.co.conol.favorlib.favor.GetUsersOrderInShopTask;
 import jp.co.conol.favorlib.favor.GetShopDetailTask;
-import jp.co.conol.favorlib.favor.GetShopMenuTask;
+import jp.co.conol.favorlib.favor.GetMenuTask;
 import jp.co.conol.favorlib.favor.GetUsersAllOrderTask;
 import jp.co.conol.favorlib.favor.GetVisitedShopHistoryTask;
 import jp.co.conol.favorlib.favor.OrderTask;
 import jp.co.conol.favorlib.favor.model.Favorite;
 import jp.co.conol.favorlib.favor.model.Order;
+import jp.co.conol.favorlib.favor.model.Menu;
 import jp.co.conol.favorlib.favor.model.Shop;
-import jp.co.conol.favorlib.favor.model.ShopMenu;
 import jp.co.conol.favorlib.favor.model.User;
-import jp.co.conol.favorlib.favor.model.VisitedShop;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
         // 入店履歴一覧取得API
         new GetVisitedShopHistoryTask(new GetVisitedShopHistoryTask.AsyncCallback() {
             @Override
-            public void onSuccess(List<VisitedShop> visitedShopList) {
+            public void onSuccess(List<Shop> visitedShopList) {
             }
 
             @Override
@@ -102,9 +102,9 @@ public class MainActivity extends AppCompatActivity {
 
 
         // 店舗メニュー取得API
-        new GetShopMenuTask(new GetShopMenuTask.AsyncCallback() {
+        new GetMenuTask(new GetMenuTask.AsyncCallback() {
             @Override
-            public void onSuccess(List<ShopMenu> shopMenuList) {
+            public void onSuccess(List<Menu> menuList) {
             }
 
             @Override
@@ -175,9 +175,9 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(Exception e) {
                 Log.d("onFailure", e.toString());
             }
-        }).setAppToken(userTmp.getAppToken()).setVisitHistoryId(17).setOrder(orderList).execute();
+        }).setAppToken(userTmp.getAppToken()).setVisitHistoryId(5).setOrder(orderList).execute();
 
-        // 店舗の注文一覧取得
+        // 店舗の注文一覧取得(来店個人単位)
         orderList.add(new Order(1, 2));
         new GetUsersOrderInShopTask(new GetUsersOrderInShopTask.AsyncCallback() {
             @Override
@@ -188,7 +188,20 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(Exception e) {
                 Log.d("onFailure", e.toString());
             }
-        }).setAppToken(userTmp.getAppToken()).setVisitHistoryId(17).execute();
+        }).setAppToken(userTmp.getAppToken()).setVisitHistoryId(5).execute();
+
+        // 店舗の注文一覧取得(来店グループ単位)
+        orderList.add(new Order(1, 2));
+        new GetUserGroupsOrderInShopTask(new GetUserGroupsOrderInShopTask.AsyncCallback() {
+            @Override
+            public void onSuccess(List<Order> orderList) {
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.d("onFailure", e.toString());
+            }
+        }).setAppToken(userTmp.getAppToken()).setVisitGroupId(1).execute();
 
         // ユーザーの注文一覧取得
         orderList.add(new Order(1, 2));

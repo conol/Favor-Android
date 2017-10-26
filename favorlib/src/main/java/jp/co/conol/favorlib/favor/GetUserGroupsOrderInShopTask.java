@@ -15,13 +15,19 @@ import jp.co.conol.favorlib.favor.model.Order;
  * Created by Masafumi_Ito on 2017/10/26.
  */
 
-public class GetUsersAllOrderTask extends AsyncTask<Void, Void, List<Order>> {
+public class GetUserGroupsOrderInShopTask extends AsyncTask<Void, Void, List<Order>> {
 
     private AsyncCallback mAsyncCallback = null;
     private String mAppToken = null;
+    private String mVisitGroupId = null;
 
-    public GetUsersAllOrderTask setAppToken(String appToken) {
+    public GetUserGroupsOrderInShopTask setAppToken(String appToken) {
         mAppToken = appToken;
+        return this;
+    }
+
+    public GetUserGroupsOrderInShopTask setVisitGroupId(int visitGroupId) {
+        mVisitGroupId = String.valueOf(visitGroupId);
         return this;
     }
 
@@ -30,7 +36,7 @@ public class GetUsersAllOrderTask extends AsyncTask<Void, Void, List<Order>> {
         void onFailure(Exception e);
     }
 
-    public GetUsersAllOrderTask(AsyncCallback asyncCallback) {
+    public GetUserGroupsOrderInShopTask(AsyncCallback asyncCallback) {
         this.mAsyncCallback = asyncCallback;
     }
 
@@ -43,7 +49,7 @@ public class GetUsersAllOrderTask extends AsyncTask<Void, Void, List<Order>> {
         String responseJsonString = null;
         try {
             responseJsonString
-                    = Util.Http.get("http://52.196.33.58/api/users/orders.json?page=1&per=20", mAppToken);
+                    = Util.Http.get("http://52.196.33.58/api/users/visit_groups/" + mVisitGroupId + "/orders.json", mAppToken);
         } catch (Exception e) {
             onFailure(e);
         }

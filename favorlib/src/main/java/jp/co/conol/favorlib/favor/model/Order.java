@@ -16,7 +16,21 @@ public class Order {
     private String status = null;
     private String created_at = null;
     private String updated_at = null;
+    private UserInfo user = null;
     private MenuItem menu_item = null;
+
+    private class UserInfo {
+        private int id;
+        private String nickname;
+
+        public int getId() {
+            return id;
+        }
+
+        public String getNickname() {
+            return nickname;
+        }
+    }
 
     private class MenuItem {
         private int id;
@@ -80,11 +94,11 @@ public class Order {
         return status;
     }
 
-    public String getCreated_at() {
+    public String getCreatedAt() {
         return created_at;
     }
 
-    public String getUpdated_at() {
+    public String getUpdatedAt() {
         return updated_at;
     }
 
@@ -98,6 +112,14 @@ public class Order {
 
     public String getMenuItemNotes() {
         return menu_item.getNotes();
+    }
+
+    public int getUserId() {
+        return user.getId();
+    }
+
+    public String getUserNickname() {
+        return user.getNickname();
     }
 
     public String[] getMenuItemImages() {

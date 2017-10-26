@@ -7,7 +7,8 @@ import java.util.List;
  * Created by Masafumi_Ito on 2017/10/25.
  */
 
-public class ShopMenu {
+// TODO api修正
+public class Menu {
 
     private String category;
     private Item[] items;

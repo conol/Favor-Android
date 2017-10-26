@@ -9,13 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jp.co.conol.favorlib.Util;
-import jp.co.conol.favorlib.favor.model.VisitedShop;
+import jp.co.conol.favorlib.favor.model.Shop;
 
 /**
  * Created by Masafumi_Ito on 2017/10/25.
  */
 
-public class GetVisitedShopHistoryTask extends AsyncTask<Void, Void, List<VisitedShop>> {
+public class GetVisitedShopHistoryTask extends AsyncTask<Void, Void, List<Shop>> {
 
     private AsyncCallback mAsyncCallback = null;
     private String mAppToken = null;
@@ -26,7 +26,7 @@ public class GetVisitedShopHistoryTask extends AsyncTask<Void, Void, List<Visite
     }
 
     public interface AsyncCallback {
-        void onSuccess(List<VisitedShop> visitedShopList);
+        void onSuccess(List<Shop> shopList);
         void onFailure(Exception e);
     }
 
@@ -35,7 +35,7 @@ public class GetVisitedShopHistoryTask extends AsyncTask<Void, Void, List<Visite
     }
 
     @Override
-    protected List<VisitedShop> doInBackground(Void... params) {
+    protected List<Shop> doInBackground(Void... params) {
 
         Gson gson = new Gson();
 
@@ -47,17 +47,19 @@ public class GetVisitedShopHistoryTask extends AsyncTask<Void, Void, List<Visite
             onFailure(e);
         }
 
-        return gson.fromJson(responseJsonString, new TypeToken<ArrayList<VisitedShop>>(){}.getType());
+        List<Shop> test = gson.fromJson(responseJsonString, new TypeToken<ArrayList<Shop>>(){}.getType());
+
+        return gson.fromJson(responseJsonString, new TypeToken<ArrayList<Shop>>(){}.getType());
     }
 
     @Override
-    protected void onPostExecute(List<VisitedShop> visitedShopList) {
-        super.onPostExecute(visitedShopList);
-        onSuccess(visitedShopList);
+    protected void onPostExecute(List<Shop> shopList) {
+        super.onPostExecute(shopList);
+        onSuccess(shopList);
     }
 
-    private void onSuccess(List<VisitedShop> visitedShopList) {
-        this.mAsyncCallback.onSuccess(visitedShopList);
+    private void onSuccess(List<Shop> shopList) {
+        this.mAsyncCallback.onSuccess(shopList);
     }
 
     private void onFailure(Exception e) {
