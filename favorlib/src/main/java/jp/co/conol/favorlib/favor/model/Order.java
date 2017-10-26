@@ -47,7 +47,7 @@ public class Order {
             }
         }
 
-        public int geId() {
+        public int getId() {
             return id;
         }
 
@@ -83,7 +83,7 @@ public class Order {
     }
 
     public int getMenuItemId() {
-        return menu_item_id;
+        return menu_item.getId();
     }
 
     public int getQuantity() {

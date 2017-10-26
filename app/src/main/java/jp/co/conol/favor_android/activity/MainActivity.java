@@ -38,6 +38,7 @@ import jp.co.conol.favorlib.favor.GetShopDetailTask;
 import jp.co.conol.favorlib.favor.GetMenuTask;
 import jp.co.conol.favorlib.favor.GetUsersAllOrderTask;
 import jp.co.conol.favorlib.favor.GetVisitedShopHistoryTask;
+import jp.co.conol.favorlib.favor.OrderStopTask;
 import jp.co.conol.favorlib.favor.OrderTask;
 import jp.co.conol.favorlib.favor.model.Favorite;
 import jp.co.conol.favorlib.favor.model.Order;
@@ -215,6 +216,19 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("onFailure", e.toString());
             }
         }).setAppToken(userTmp.getAppToken()).execute();
+
+        // オーダーストップ
+        orderList.add(new Order(1, 2));
+        new OrderStopTask(new OrderStopTask.AsyncCallback() {
+            @Override
+            public void onSuccess(List<Order> orderList) {
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.d("onFailure", e.toString());
+            }
+        }).setAppToken(userTmp.getAppToken()).setVisitHistoryId(1).execute();
 
 
 

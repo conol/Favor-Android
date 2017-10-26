@@ -117,6 +117,39 @@ public class Util {
             return responseJsonString;
         }
 
+        public static String put(String url, String appToken, String body) {
+            String responseJsonString = null;
+            try {
+                String buffer = "";
+                HttpURLConnection con = null;
+                URL urlTmp = new URL(url);
+                con = (HttpURLConnection) urlTmp.openConnection();
+                con.setRequestMethod("PUT");
+                con.setInstanceFollowRedirects(false);
+                con.setRequestProperty("Accept-Language", "jp");
+                con.setDoOutput(true);
+                con.setConnectTimeout(5000);
+                con.setReadTimeout(5000);
+                con.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+                if(appToken != null || appToken != "") con.setRequestProperty("Authorization", "Bearer " + appToken);
+                OutputStream os = con.getOutputStream();
+                PrintStream ps = new PrintStream(os);
+                ps.print(body);
+                ps.close();
+
+                // レスポンスを取得
+                BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+                responseJsonString = reader.readLine();
+
+                con.disconnect();
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.e("HttpException", e.toString());
+            }
+
+            return responseJsonString;
+        }
+
         public static String delete(String url, String appToken) {
             String responseJsonString = null;
             try {
@@ -145,6 +178,8 @@ public class Util {
 
             return responseJsonString;
         }
+
+
     }
 
     public static class Transform {
