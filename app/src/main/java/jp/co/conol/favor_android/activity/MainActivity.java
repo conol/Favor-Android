@@ -30,13 +30,13 @@ import jp.co.conol.favor_android.R;
 import jp.co.conol.favorlib.corona.Corona;
 import jp.co.conol.favorlib.corona.NfcNotAvailableException;
 import jp.co.conol.favorlib.favor.AddFavoriteTask;
-import jp.co.conol.favorlib.favor.DeleteFavoriteTask;
 import jp.co.conol.favorlib.favor.EnterShopTask;
 import jp.co.conol.favorlib.favor.GetFavoritesTask;
+import jp.co.conol.favorlib.favor.GetOrderHistoryTask;
 import jp.co.conol.favorlib.favor.GetShopDetailTask;
 import jp.co.conol.favorlib.favor.GetShopMenuTask;
-import jp.co.conol.favorlib.favor.GetVisitedShopHistoriesTask;
-import jp.co.conol.favorlib.favor.OrderMenuTask;
+import jp.co.conol.favorlib.favor.GetVisitedShopHistoryTask;
+import jp.co.conol.favorlib.favor.OrderTask;
 import jp.co.conol.favorlib.favor.model.Favorite;
 import jp.co.conol.favorlib.favor.model.Order;
 import jp.co.conol.favorlib.favor.model.Shop;
@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
         User userTmp = gsonTmp.fromJson(MyUtil.SharedPref.get(this, "userSetting"), User.class);
 
         // 入店履歴一覧取得API
-        new GetVisitedShopHistoriesTask(new GetVisitedShopHistoriesTask.AsyncCallback() {
+        new GetVisitedShopHistoryTask(new GetVisitedShopHistoryTask.AsyncCallback() {
             @Override
             public void onSuccess(List<VisitedShop> visitedShopList) {
             }
@@ -165,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
         // 注文する
         List<Order> orderList = new ArrayList<>();
         orderList.add(new Order(1, 2));
-        new OrderMenuTask(new OrderMenuTask.AsyncCallback() {
+        new OrderTask(new OrderTask.AsyncCallback() {
             @Override
             public void onSuccess(List<Order> orderList) {
             }
@@ -175,6 +175,19 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("onFailure", e.toString());
             }
         }).setAppToken(userTmp.getAppToken()).setVisitHistoryId(17).setOrder(orderList).execute();
+
+        // 注文一覧取得
+        orderList.add(new Order(1, 2));
+        new GetOrderHistoryTask(new GetOrderHistoryTask.AsyncCallback() {
+            @Override
+            public void onSuccess(List<Order> orderList) {
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.d("onFailure", e.toString());
+            }
+        }).setAppToken(userTmp.getAppToken()).setVisitHistoryId(17).execute();
 
 
 

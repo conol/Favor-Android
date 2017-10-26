@@ -15,25 +15,19 @@ import jp.co.conol.favorlib.favor.model.Order;
  * Created by Masafumi_Ito on 2017/10/26.
  */
 
-public class OrderMenuTask extends AsyncTask<Void, Void, List<Order>> {
+public class GetOrderHistoryTask extends AsyncTask<Void, Void, List<Order>> {
 
     private AsyncCallback mAsyncCallback = null;
     private String mAppToken = null;
     private String mVisitHistoryId = null;
-    private List<Order> mOrderList = new ArrayList<>();
 
-    public OrderMenuTask setAppToken(String appToken) {
+    public GetOrderHistoryTask setAppToken(String appToken) {
         mAppToken = appToken;
         return this;
     }
 
-    public OrderMenuTask setVisitHistoryId(int visitHistoryId) {
+    public GetOrderHistoryTask setVisitHistoryId(int visitHistoryId) {
         mVisitHistoryId = String.valueOf(visitHistoryId);
-        return this;
-    }
-
-    public OrderMenuTask setOrder(List<Order> orderList) {
-        mOrderList = orderList;
         return this;
     }
 
@@ -42,7 +36,7 @@ public class OrderMenuTask extends AsyncTask<Void, Void, List<Order>> {
         void onFailure(Exception e);
     }
 
-    public OrderMenuTask(AsyncCallback asyncCallback) {
+    public GetOrderHistoryTask(AsyncCallback asyncCallback) {
         this.mAsyncCallback = asyncCallback;
     }
 
@@ -51,14 +45,11 @@ public class OrderMenuTask extends AsyncTask<Void, Void, List<Order>> {
 
         Gson gson = new Gson();
 
-        // オーダー用のjsonを作成
-        String orderString = gson.toJson(mOrderList).replace("[", "{\"orders\": [").replace("]", "]}");
-
         // サーバーにjsonを送信
         String responseJsonString = null;
         try {
             responseJsonString
-                    = Util.Http.post("http://52.196.33.58/api/users/visit_histories/" + mVisitHistoryId + "/orders.json", mAppToken, orderString);
+                    = Util.Http.get("http://52.196.33.58/api/users/visit_histories/" + mVisitHistoryId + "/orders.json", mAppToken);
         } catch (Exception e) {
             onFailure(e);
         }

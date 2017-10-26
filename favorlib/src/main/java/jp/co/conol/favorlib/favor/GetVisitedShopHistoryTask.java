@@ -15,12 +15,12 @@ import jp.co.conol.favorlib.favor.model.VisitedShop;
  * Created by Masafumi_Ito on 2017/10/25.
  */
 
-public class GetVisitedShopHistoriesTask extends AsyncTask<Void, Void, List<VisitedShop>> {
+public class GetVisitedShopHistoryTask extends AsyncTask<Void, Void, List<VisitedShop>> {
 
     private AsyncCallback mAsyncCallback = null;
     private String mAppToken = null;
 
-    public GetVisitedShopHistoriesTask setAppToken(String appToken) {
+    public GetVisitedShopHistoryTask setAppToken(String appToken) {
         mAppToken = appToken;
         return this;
     }
@@ -30,7 +30,7 @@ public class GetVisitedShopHistoriesTask extends AsyncTask<Void, Void, List<Visi
         void onFailure(Exception e);
     }
 
-    public GetVisitedShopHistoriesTask(AsyncCallback asyncCallback) {
+    public GetVisitedShopHistoryTask(AsyncCallback asyncCallback) {
         this.mAsyncCallback = asyncCallback;
     }
 
