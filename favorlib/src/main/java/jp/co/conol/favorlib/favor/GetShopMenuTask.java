@@ -19,9 +19,15 @@ public class GetShopMenuTask extends AsyncTask<Void, Void, List<ShopMenu>> {
 
     private AsyncCallback mAsyncCallback = null;
     private String mAppToken = null;
+    private String mShopId = null;
 
     public GetShopMenuTask setAppToken(String appToken) {
         mAppToken = appToken;
+        return this;
+    }
+
+    public GetShopMenuTask setShopId(int shopId) {
+        mShopId = String.valueOf(shopId);
         return this;
     }
 
@@ -42,7 +48,7 @@ public class GetShopMenuTask extends AsyncTask<Void, Void, List<ShopMenu>> {
         // サーバーにjsonを送信
         String responseJsonString = null;
         try {
-            responseJsonString = Util.Http.get("http://52.196.33.58/api/users/shops/1/menu.json", mAppToken);
+            responseJsonString = Util.Http.get("http://52.196.33.58/api/users/shops/" + mShopId + "/menu.json", mAppToken);
         } catch (Exception e) {
             onFailure(e);
         }

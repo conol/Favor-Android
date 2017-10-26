@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jp.co.conol.favor_android.MyUtil;
@@ -35,7 +36,9 @@ import jp.co.conol.favorlib.favor.GetFavoritesTask;
 import jp.co.conol.favorlib.favor.GetShopDetailTask;
 import jp.co.conol.favorlib.favor.GetShopMenuTask;
 import jp.co.conol.favorlib.favor.GetVisitedShopHistoriesTask;
+import jp.co.conol.favorlib.favor.OrderMenuTask;
 import jp.co.conol.favorlib.favor.model.Favorite;
+import jp.co.conol.favorlib.favor.model.Order;
 import jp.co.conol.favorlib.favor.model.Shop;
 import jp.co.conol.favorlib.favor.model.ShopMenu;
 import jp.co.conol.favorlib.favor.model.User;
@@ -107,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(Exception e) {
                 Log.d("onFailure", e.toString());
             }
-        }).setAppToken(userTmp.getAppToken()).execute();
+        }).setAppToken(userTmp.getAppToken()).setShopId(1).execute();
 
 
         // 入店API
@@ -158,6 +161,20 @@ public class MainActivity extends AppCompatActivity {
 //                Log.d("onFailure", e.toString());
 //            }
 //        }).setAppToken(userTmp.getAppToken()).setFavoriteId(7).execute();
+
+        // 注文する
+        List<Order> orderList = new ArrayList<>();
+        orderList.add(new Order(1, 2));
+        new OrderMenuTask(new OrderMenuTask.AsyncCallback() {
+            @Override
+            public void onSuccess(List<Order> orderList) {
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.d("onFailure", e.toString());
+            }
+        }).setAppToken(userTmp.getAppToken()).setVisitHistoryId(17).setOrder(orderList).execute();
 
 
 

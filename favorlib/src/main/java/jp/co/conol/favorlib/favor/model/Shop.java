@@ -143,13 +143,13 @@ public class Shop {
         return shop.getGenre();
     }
 
-    public List<String> getShopImages() {
+    public String[] getShopImages() {
         List<String> shopImage = new ArrayList<>();
         for(ShopInfo.ShopImage shopImageObj : shop.getShopImages()) {
             shopImage.add(shopImageObj.getImageUrl());
         }
 
-        return shopImage;
+        return shopImage.toArray(new String[0]);
     }
 
     public int getShopZipCode() {
