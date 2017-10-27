@@ -1,4 +1,4 @@
-package jp.co.conol.favorlib.corona;
+package jp.co.conol.favorlib.cuona;
 
 public class NfcNotAvailableException extends Exception {
 }

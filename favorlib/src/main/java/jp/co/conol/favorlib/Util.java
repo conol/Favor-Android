@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -17,6 +18,8 @@ import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
 
+import static android.content.Context.WIFI_SERVICE;
+
 /**
  * Created by Masafumi_Ito on 2017/09/28.
  */
@@ -26,11 +29,22 @@ public class Util {
 
     public static class SharedPref {
 
-        public static void save(Context context, String key, String objString) {
+        /**
+         * SharedPreferenceにjsonを保存
+         * @param context
+         * @param key 取り出すためのKey
+         * @param jsonString 保存するjson
+         */
+        public static void save(Context context, String key, String jsonString) {
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-            pref.edit().putString(key ,objString).apply();
+            pref.edit().putString(key ,jsonString).apply();
         }
 
+        /**
+         * SharedPreferenceからjsonを取得
+         * @param context
+         * @param key 取り出すためのKey
+         */
         public static String get(Context context, String key) {
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
             return pref.getString(key, null);
@@ -49,6 +63,19 @@ public class Util {
             NetworkInfo info = cm.getActiveNetworkInfo();
 
             return info != null && info.isConnected();
+        }
+    }
+
+    public static class Wifi {
+
+        /**
+         * Wifiに接続されているかをチェック
+         * @param context
+         * @return 接続：true / 未接続：false
+         */
+        public static boolean isEnable(Context context) {
+            WifiManager wifiManager = (WifiManager)context.getApplicationContext().getSystemService(WIFI_SERVICE);
+            return wifiManager.isWifiEnabled();
         }
     }
 
@@ -189,7 +216,7 @@ public class Util {
             String deviceIdTmp = deviceId.replace(" ", "").toLowerCase();
             StringBuilder deviceIdToSend = new StringBuilder(deviceIdTmp);
             for (int i = 0; i < 6; i++) {
-                deviceIdToSend.insert(12 - (2 * i), " ");
+                deviceIdToSend.insert((deviceIdToSend.length() - 2) - (2 * i), " ");
             }
             return deviceIdToSend.toString();
         }

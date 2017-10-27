@@ -1,4 +1,4 @@
-package jp.co.conol.favorlib.corona.corona_writer;
+package jp.co.conol.favorlib.cuona.cuona_writer;
 
 import android.nfc.FormatException;
 import android.nfc.NdefMessage;
@@ -10,15 +10,16 @@ import android.util.Log;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-public class CNFCT2WriterTag extends CoronaWriterTag {
+public class CuonaWritableT2 extends CuonaWritableTag {
 
     private MifareUltralight mul;
+    private boolean useShortKeyFlag = false;
 
-    public CNFCT2WriterTag(MifareUltralight mul) {
+    public CuonaWritableT2(MifareUltralight mul, boolean useShortKeyFlag) {
         this.mul = mul;
+        this.useShortKeyFlag = useShortKeyFlag;
     }
 
-    @Override
     public void writeJson(String json) throws IOException {
         Log.i("nfc", "T2 detected");
 
@@ -31,9 +32,9 @@ public class CNFCT2WriterTag extends CoronaWriterTag {
 
         mul.close();
 
-        byte[] jsonData = json.getBytes(StandardCharsets.UTF_8);
+        byte[] jsonData = ("JSON" + json).getBytes(StandardCharsets.UTF_8);
 
-        NdefRecord rec = CNFCNDEF.createRecord(deviceId, jsonData);
+        NdefRecord rec = CuonaNDEF.createRecord(deviceId, jsonData, useShortKeyFlag);
         NdefMessage msg = new NdefMessage(rec);
 
         Ndef ndef = Ndef.get(mul.getTag());

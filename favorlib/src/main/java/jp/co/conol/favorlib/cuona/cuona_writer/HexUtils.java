@@ -1,4 +1,4 @@
-package jp.co.conol.favorlib.corona.corona_writer;
+package jp.co.conol.favorlib.cuona.cuona_writer;
 
 import android.util.Log;
 

@@ -27,8 +27,8 @@ import java.util.List;
 
 import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
-import jp.co.conol.favorlib.corona.Corona;
-import jp.co.conol.favorlib.corona.NfcNotAvailableException;
+import jp.co.conol.favorlib.cuona.Cuona;
+import jp.co.conol.favorlib.cuona.NfcNotAvailableException;
 import jp.co.conol.favorlib.favor.AddFavoriteTask;
 import jp.co.conol.favorlib.favor.EnterShopTask;
 import jp.co.conol.favorlib.favor.GetFavoritesTask;
@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean isScanning = false;
     private Handler mScanDialogAutoCloseHandler = new Handler();
-    private Corona mCorona;
+    private Cuona mCuona;
     private ConstraintLayout mShopHistoryConstraintLayout;
     private ConstraintLayout mUserSettingConstraintLayout;
     private TextView mUserSettingTextView;
@@ -235,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         try {
-            mCorona = new Corona(this);
+            mCuona = new Cuona(this);
         } catch (NfcNotAvailableException e) {
             Log.d("Corona", e.toString());
             finish();
@@ -256,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // nfcがオフの場合はダイアログを表示
-        if(!mCorona.isEnable()) {
+        if(!mCuona.isEnable()) {
             new AlertDialog.Builder(this)
                     .setMessage(getString(R.string.nfc_dialog))
                     .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
@@ -315,7 +315,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
         // nfcがオフの場合はダイアログを表示
-        else if(!mCorona.isEnable()) {
+        else if(!mCuona.isEnable()) {
             new AlertDialog.Builder(this)
                     .setMessage(getString(R.string.nfc_dialog))
                     .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
@@ -330,7 +330,7 @@ public class MainActivity extends AppCompatActivity {
             if (!isScanning) {
 
                 // nfc読み込み待機
-                mCorona.enableForegroundDispatch(MainActivity.this);
+                mCuona.enableForegroundDispatch(MainActivity.this);
                 isScanning = true;
                 openScanPage();
 
@@ -358,7 +358,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void cancelScan() {
         // nfc読み込み待機を解除
-        mCorona.disableForegroundDispatch(MainActivity.this);
+        mCuona.disableForegroundDispatch(MainActivity.this);
         isScanning = false;
         closeScanPage();
     }

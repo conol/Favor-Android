@@ -1,4 +1,4 @@
-package jp.co.conol.favorlib.corona;
+package jp.co.conol.favorlib.cuona;
 
 /**
  * Created by Masafumi_Ito on 2017/10/14.
