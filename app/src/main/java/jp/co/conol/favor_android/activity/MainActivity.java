@@ -45,6 +45,7 @@ import jp.co.conol.favorlib.favor.model.Order;
 import jp.co.conol.favorlib.favor.model.Menu;
 import jp.co.conol.favorlib.favor.model.Shop;
 import jp.co.conol.favorlib.favor.model.User;
+import jp.co.conol.favorlib.favor.model.UsersAllOrder;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -208,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
         orderList.add(new Order(1, 2));
         new GetUsersAllOrderTask(new GetUsersAllOrderTask.AsyncCallback() {
             @Override
-            public void onSuccess(List<Order> orderList) {
+            public void onSuccess(List<UsersAllOrder> usersAllOrderList) {
             }
 
             @Override

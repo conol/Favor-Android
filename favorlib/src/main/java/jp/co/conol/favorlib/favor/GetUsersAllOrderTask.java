@@ -10,12 +10,13 @@ import java.util.List;
 
 import jp.co.conol.favorlib.Util;
 import jp.co.conol.favorlib.favor.model.Order;
+import jp.co.conol.favorlib.favor.model.UsersAllOrder;
 
 /**
  * Created by Masafumi_Ito on 2017/10/26.
  */
 
-public class GetUsersAllOrderTask extends AsyncTask<Void, Void, List<Order>> {
+public class GetUsersAllOrderTask extends AsyncTask<Void, Void, List<UsersAllOrder>> {
 
     private AsyncCallback mAsyncCallback = null;
     private String mAppToken = null;
@@ -26,7 +27,7 @@ public class GetUsersAllOrderTask extends AsyncTask<Void, Void, List<Order>> {
     }
 
     public interface AsyncCallback {
-        void onSuccess(List<Order> orderList);
+        void onSuccess(List<UsersAllOrder> usersAllOrderList);
         void onFailure(Exception e);
     }
 
@@ -35,7 +36,7 @@ public class GetUsersAllOrderTask extends AsyncTask<Void, Void, List<Order>> {
     }
 
     @Override
-    protected List<Order> doInBackground(Void... params) {
+    protected List<UsersAllOrder> doInBackground(Void... params) {
 
         Gson gson = new Gson();
 
@@ -48,17 +49,17 @@ public class GetUsersAllOrderTask extends AsyncTask<Void, Void, List<Order>> {
             onFailure(e);
         }
 
-        return gson.fromJson(responseJsonString, new TypeToken<ArrayList<Order>>(){}.getType());
+        return gson.fromJson(responseJsonString, new TypeToken<ArrayList<UsersAllOrder>>(){}.getType());
     }
 
     @Override
-    protected void onPostExecute(List<Order> orderList) {
-        super.onPostExecute(orderList);
-        onSuccess(orderList);
+    protected void onPostExecute(List<UsersAllOrder> usersAllOrderList) {
+        super.onPostExecute(usersAllOrderList);
+        onSuccess(usersAllOrderList);
     }
 
-    private void onSuccess(List<Order> orderList) {
-        this.mAsyncCallback.onSuccess(orderList);
+    private void onSuccess(List<UsersAllOrder> usersAllOrderList) {
+        this.mAsyncCallback.onSuccess(usersAllOrderList);
     }
 
     private void onFailure(Exception e) {
