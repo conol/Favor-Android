@@ -5,7 +5,7 @@ package jp.co.conol.favorlib.favor.model;
  */
 
 // TODO api修正
-public class VisitedShopOrder {
+public class UsersAllOrder {
 
     private String enter_at;
     private Shop shop;
