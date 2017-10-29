@@ -58,7 +58,7 @@ public class Util {
          * @param context
          * @return 接続：true / 未接続：false
          */
-        public static boolean isConnected(Context context) {
+        public static boolean isEnable(Context context) {
             ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo info = cm.getActiveNetworkInfo();
 
