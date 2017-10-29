@@ -5,11 +5,16 @@ package jp.co.conol.favorlib.favor.model;
  */
 
 public class Favorite {
-    private int id;
+    private int id = 0;
     private String name;
     private int level;
-    private String created_at;
-    private String updated_at;
+    private String created_at = null;
+    private String updated_at = null;
+
+    public Favorite(String name, int level) {
+        this.name = name;
+        this.level = level;
+    }
 
     public int getId() {
         return id;

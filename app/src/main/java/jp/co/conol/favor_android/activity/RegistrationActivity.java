@@ -14,7 +14,7 @@ import com.google.gson.Gson;
 
 import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
-import jp.co.conol.favorlib.favor.RegisterUserTask;
+import jp.co.conol.favorlib.favor.Favor;
 import jp.co.conol.favorlib.favor.model.UsersSetting;
 import jp.co.conol.favorlib.favor.model.User;
 
@@ -93,9 +93,10 @@ public class RegistrationActivity extends AppCompatActivity {
         );
 
         // ユーザー情報を登録
-        new RegisterUserTask(new RegisterUserTask.AsyncCallback() {
+        new Favor(new Favor.AsyncCallback() {
             @Override
-            public void onSuccess(User user) {
+            public void onSuccess(Object object) {
+                User user = (User) object;
 
                 // ユーザー情報を端末に保存
                 Gson gson = new Gson();

@@ -22,31 +22,12 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favorlib.cuona.Cuona;
 import jp.co.conol.favorlib.cuona.NfcNotAvailableException;
-import jp.co.conol.favorlib.favor.AddFavoriteTask;
-import jp.co.conol.favorlib.favor.EditUserTask;
-import jp.co.conol.favorlib.favor.EnterShopTask;
-import jp.co.conol.favorlib.favor.GetFavoritesTask;
-import jp.co.conol.favorlib.favor.GetUserGroupsOrderInShopTask;
-import jp.co.conol.favorlib.favor.GetUsersOrderInShopTask;
-import jp.co.conol.favorlib.favor.GetShopDetailTask;
-import jp.co.conol.favorlib.favor.GetMenuTask;
-import jp.co.conol.favorlib.favor.GetUsersAllOrderTask;
-import jp.co.conol.favorlib.favor.GetVisitedShopHistoryTask;
-import jp.co.conol.favorlib.favor.OrderStopTask;
-import jp.co.conol.favorlib.favor.OrderTask;
-import jp.co.conol.favorlib.favor.model.Favorite;
-import jp.co.conol.favorlib.favor.model.Order;
-import jp.co.conol.favorlib.favor.model.Menu;
-import jp.co.conol.favorlib.favor.model.Shop;
+import jp.co.conol.favorlib.favor.Favor;
 import jp.co.conol.favorlib.favor.model.User;
-import jp.co.conol.favorlib.favor.model.UsersAllOrder;
 import jp.co.conol.favorlib.favor.model.UsersSetting;
 
 public class MainActivity extends AppCompatActivity {
@@ -79,96 +60,89 @@ public class MainActivity extends AppCompatActivity {
         Gson gsonTmp = new Gson();
         User userTmp = gsonTmp.fromJson(MyUtil.SharedPref.get(this, "userSetting"), User.class);
 
+
+
         // ユーザー情報を編集
-        new EditUserTask(new EditUserTask.AsyncCallback() {
+        new Favor(new Favor.AsyncCallback() {
             @Override
-            public void onSuccess(User user) {
+            public void onSuccess(Object object) {
             }
 
             @Override
             public void onFailure(Exception e) {
                 Log.d("onFailure", e.toString());
             }
-        }).setAppToken(userTmp.getAppToken()).setUsersSetting(new UsersSetting("test", "male", 20, null)).execute();
+        }).setAppToken(userTmp.getAppToken())
+//                .setDeviceId("04 b5 38 01 72 d5 38")
+                .setShopId(1)
+                .execute(Favor.Task.GetVisitedShopHistory);
 
-        // 入店履歴一覧取得API
-        new GetVisitedShopHistoryTask(new GetVisitedShopHistoryTask.AsyncCallback() {
-            @Override
-            public void onSuccess(List<Shop> visitedShopList) {
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                Log.d("onFailure", e.toString());
-            }
-        }).setAppToken(userTmp.getAppToken()).execute();
-
-
-        // 店舗詳細取得API
-        new GetShopDetailTask(new GetShopDetailTask.AsyncCallback() {
-            @Override
-            public void onSuccess(Shop shop) {
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                Log.d("onFailure", e.toString());
-            }
-        }).setAppToken(userTmp.getAppToken()).execute();
-
-
-        // 店舗メニュー取得API
-        new GetMenuTask(new GetMenuTask.AsyncCallback() {
-            @Override
-            public void onSuccess(List<Menu> menuList) {
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                Log.d("onFailure", e.toString());
-            }
-        }).setAppToken(userTmp.getAppToken()).setShopId(1).execute();
-
-
-        // 入店API
-        new EnterShopTask(new EnterShopTask.AsyncCallback() {
-            @Override
-            public void onSuccess(Shop shop) {
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                Log.d("onFailure", e.toString());
-            }
-        }).setAppToken(userTmp.getAppToken()).setDeviceId("04 b5 38 01 72 d5 38").execute();
-
-
-        // お気に入り追加
-        new AddFavoriteTask(new AddFavoriteTask.AsyncCallback() {
-            @Override
-            public void onSuccess(Favorite favorite) {
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                Log.d("onFailure", e.toString());
-            }
-        }).setAppToken(userTmp.getAppToken()).setName("酢豚").setLevel(5).execute();
-
-        // お気に入り一覧取得
-        new GetFavoritesTask(new GetFavoritesTask.AsyncCallback() {
-            @Override
-            public void onSuccess(List<Favorite> favoriteList) {
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                Log.d("onFailure", e.toString());
-            }
-        }).setAppToken(userTmp.getAppToken()).execute();
-
-        // お気に入り削除
-//        new DeleteFavoriteTask(new DeleteFavoriteTask.AsyncCallback() {
+//        // 入店履歴一覧取得API
+//        new GetVisitedShopHistoryTask(new GetVisitedShopHistoryTask.AsyncCallback() {
+//            @Override
+//            public void onSuccess(List<Shop> visitedShopList) {
+//            }
+//
+//            @Override
+//            public void onFailure(Exception e) {
+//                Log.d("onFailure", e.toString());
+//            }
+//        }).setAppToken(userTmp.getAppToken()).execute();
+//
+//
+//        // 店舗詳細取得API
+//        new GetShopDetailTask(new GetShopDetailTask.AsyncCallback() {
+//            @Override
+//            public void onSuccess(Shop shop) {
+//            }
+//
+//            @Override
+//            public void onFailure(Exception e) {
+//                Log.d("onFailure", e.toString());
+//            }
+//        }).setAppToken(userTmp.getAppToken()).execute();
+//
+//
+//        // 店舗メニュー取得API
+//        new GetMenuTask(new GetMenuTask.AsyncCallback() {
+//            @Override
+//            public void onSuccess(List<Menu> menuList) {
+//            }
+//
+//            @Override
+//            public void onFailure(Exception e) {
+//                Log.d("onFailure", e.toString());
+//            }
+//        }).setAppToken(userTmp.getAppToken()).setShopId(1).execute();
+//
+//
+//        // 入店API
+//        new EnterShopTask(new EnterShopTask.AsyncCallback() {
+//            @Override
+//            public void onSuccess(Shop shop) {
+//            }
+//
+//            @Override
+//            public void onFailure(Exception e) {
+//                Log.d("onFailure", e.toString());
+//            }
+//        }).setAppToken(userTmp.getAppToken()).setDeviceId("04 b5 38 01 72 d5 38").execute();
+//
+//
+//        // お気に入り追加
+//        new AddFavoriteTask(new AddFavoriteTask.AsyncCallback() {
+//            @Override
+//            public void onSuccess(Favorite favorite) {
+//            }
+//
+//            @Override
+//            public void onFailure(Exception e) {
+//                Log.d("onFailure", e.toString());
+//            }
+//        }).setAppToken(userTmp.getAppToken()).setName("酢豚").setLevel(5).execute();
+//
+//        // お気に入り一覧取得
+//        new GetFavoritesTask(new GetFavoritesTask.AsyncCallback() {
 //            @Override
 //            public void onSuccess(List<Favorite> favoriteList) {
 //            }
@@ -177,73 +151,85 @@ public class MainActivity extends AppCompatActivity {
 //            public void onFailure(Exception e) {
 //                Log.d("onFailure", e.toString());
 //            }
-//        }).setAppToken(userTmp.getAppToken()).setFavoriteId(7).execute();
-
-        // 注文する
-        List<Order> orderList = new ArrayList<>();
-        orderList.add(new Order(1, 2));
-        new OrderTask(new OrderTask.AsyncCallback() {
-            @Override
-            public void onSuccess(List<Order> orderList) {
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                Log.d("onFailure", e.toString());
-            }
-        }).setAppToken(userTmp.getAppToken()).setVisitHistoryId(5).setOrder(orderList).execute();
-
-        // 店舗の注文一覧取得(来店個人単位)
-        orderList.add(new Order(1, 2));
-        new GetUsersOrderInShopTask(new GetUsersOrderInShopTask.AsyncCallback() {
-            @Override
-            public void onSuccess(List<Order> orderList) {
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                Log.d("onFailure", e.toString());
-            }
-        }).setAppToken(userTmp.getAppToken()).setVisitHistoryId(5).execute();
-
-        // 店舗の注文一覧取得(来店グループ単位)
-        orderList.add(new Order(1, 2));
-        new GetUserGroupsOrderInShopTask(new GetUserGroupsOrderInShopTask.AsyncCallback() {
-            @Override
-            public void onSuccess(List<Order> orderList) {
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                Log.d("onFailure", e.toString());
-            }
-        }).setAppToken(userTmp.getAppToken()).setVisitGroupId(1).execute();
-
-        // ユーザーの注文一覧取得
-        orderList.add(new Order(1, 2));
-        new GetUsersAllOrderTask(new GetUsersAllOrderTask.AsyncCallback() {
-            @Override
-            public void onSuccess(List<UsersAllOrder> usersAllOrderList) {
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                Log.d("onFailure", e.toString());
-            }
-        }).setAppToken(userTmp.getAppToken()).execute();
-
-        // オーダーストップ
-        orderList.add(new Order(1, 2));
-        new OrderStopTask(new OrderStopTask.AsyncCallback() {
-            @Override
-            public void onSuccess(List<Order> orderList) {
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                Log.d("onFailure", e.toString());
-            }
-        }).setAppToken(userTmp.getAppToken()).setVisitHistoryId(1).execute();
+//        }).setAppToken(userTmp.getAppToken()).execute();
+//
+//        // お気に入り削除
+////        new DeleteFavoriteTask(new DeleteFavoriteTask.AsyncCallback() {
+////            @Override
+////            public void onSuccess(List<Favorite> favoriteList) {
+////            }
+////
+////            @Override
+////            public void onFailure(Exception e) {
+////                Log.d("onFailure", e.toString());
+////            }
+////        }).setAppToken(userTmp.getAppToken()).setFavoriteId(7).execute();
+//
+//        // 注文する
+//        List<Order> orderList = new ArrayList<>();
+//        orderList.add(new Order(1, 2));
+//        new OrderTask(new OrderTask.AsyncCallback() {
+//            @Override
+//            public void onSuccess(List<Order> orderList) {
+//            }
+//
+//            @Override
+//            public void onFailure(Exception e) {
+//                Log.d("onFailure", e.toString());
+//            }
+//        }).setAppToken(userTmp.getAppToken()).setVisitHistoryId(5).setOrder(orderList).execute();
+//
+//        // 店舗の注文一覧取得(来店個人単位)
+//        orderList.add(new Order(1, 2));
+//        new GetUsersOrderInShopTask(new GetUsersOrderInShopTask.AsyncCallback() {
+//            @Override
+//            public void onSuccess(List<Order> orderList) {
+//            }
+//
+//            @Override
+//            public void onFailure(Exception e) {
+//                Log.d("onFailure", e.toString());
+//            }
+//        }).setAppToken(userTmp.getAppToken()).setVisitHistoryId(5).execute();
+//
+//        // 店舗の注文一覧取得(来店グループ単位)
+//        orderList.add(new Order(1, 2));
+//        new GetUserGroupsOrderInShopTask(new GetUserGroupsOrderInShopTask.AsyncCallback() {
+//            @Override
+//            public void onSuccess(List<Order> orderList) {
+//            }
+//
+//            @Override
+//            public void onFailure(Exception e) {
+//                Log.d("onFailure", e.toString());
+//            }
+//        }).setAppToken(userTmp.getAppToken()).setVisitGroupId(1).execute();
+//
+//        // ユーザーの注文一覧取得
+//        orderList.add(new Order(1, 2));
+//        new GetUsersAllOrderTask(new GetUsersAllOrderTask.AsyncCallback() {
+//            @Override
+//            public void onSuccess(List<UsersAllOrder> usersAllOrderList) {
+//            }
+//
+//            @Override
+//            public void onFailure(Exception e) {
+//                Log.d("onFailure", e.toString());
+//            }
+//        }).setAppToken(userTmp.getAppToken()).execute();
+//
+//        // オーダーストップ
+//        orderList.add(new Order(1, 2));
+//        new OrderStopTask(new OrderStopTask.AsyncCallback() {
+//            @Override
+//            public void onSuccess(List<Order> orderList) {
+//            }
+//
+//            @Override
+//            public void onFailure(Exception e) {
+//                Log.d("onFailure", e.toString());
+//            }
+//        }).setAppToken(userTmp.getAppToken()).setVisitHistoryId(1).execute();
 
 
 
