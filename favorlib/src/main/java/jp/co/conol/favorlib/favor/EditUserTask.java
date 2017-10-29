@@ -9,12 +9,13 @@ import jp.co.conol.favorlib.favor.model.UsersSetting;
 import jp.co.conol.favorlib.favor.model.User;
 
 /**
- * Created by Masafumi_Ito on 2017/10/13.
+ * Created by Masafumi_Ito on 2017/10/29.
  */
 
-public class RegisterUserTask extends AsyncTask<Void, Void, User> {
+public class EditUserTask extends AsyncTask<Void, Void, User> {
 
     private AsyncCallback mAsyncCallback = null;
+    private String mAppToken = null;
     private UsersSetting mUsersSetting = null;
 
     public interface AsyncCallback{
@@ -22,12 +23,17 @@ public class RegisterUserTask extends AsyncTask<Void, Void, User> {
         void onFailure(Exception e);
     }
 
-    public RegisterUserTask setUsersSetting(UsersSetting usersSetting) {
+    public EditUserTask setAppToken(String appToken) {
+        mAppToken = appToken;
+        return this;
+    }
+
+    public EditUserTask setUsersSetting(UsersSetting usersSetting) {
         mUsersSetting = usersSetting;
         return this;
     }
 
-    public RegisterUserTask(AsyncCallback asyncCallback){
+    public EditUserTask(AsyncCallback asyncCallback){
         this.mAsyncCallback = asyncCallback;
     }
 
@@ -37,15 +43,17 @@ public class RegisterUserTask extends AsyncTask<Void, Void, User> {
         Gson gson = new Gson();
 
         // ユーザー登録用のjsonを作成
-        String registrationUserString = gson.toJson(mUsersSetting);
+        String editUserString = gson.toJson(mUsersSetting);
 
         // サーバーにjsonを送信
         String responseJsonString = null;
         try {
-            responseJsonString = Util.Http.post("http://52.196.33.58/api/users/register.json", null, registrationUserString);
+            responseJsonString = Util.Http.patch("http://52.196.33.58/api/users/setting.json", mAppToken, editUserString);
         } catch (Exception e) {
             onFailure(e);
         }
+
+        User test = gson.fromJson(responseJsonString, User.class);
 
         return gson.fromJson(responseJsonString, User.class);
     }

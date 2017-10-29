@@ -30,6 +30,7 @@ import jp.co.conol.favor_android.R;
 import jp.co.conol.favorlib.cuona.Cuona;
 import jp.co.conol.favorlib.cuona.NfcNotAvailableException;
 import jp.co.conol.favorlib.favor.AddFavoriteTask;
+import jp.co.conol.favorlib.favor.EditUserTask;
 import jp.co.conol.favorlib.favor.EnterShopTask;
 import jp.co.conol.favorlib.favor.GetFavoritesTask;
 import jp.co.conol.favorlib.favor.GetUserGroupsOrderInShopTask;
@@ -46,6 +47,7 @@ import jp.co.conol.favorlib.favor.model.Menu;
 import jp.co.conol.favorlib.favor.model.Shop;
 import jp.co.conol.favorlib.favor.model.User;
 import jp.co.conol.favorlib.favor.model.UsersAllOrder;
+import jp.co.conol.favorlib.favor.model.UsersSetting;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -76,6 +78,18 @@ public class MainActivity extends AppCompatActivity {
 
         Gson gsonTmp = new Gson();
         User userTmp = gsonTmp.fromJson(MyUtil.SharedPref.get(this, "userSetting"), User.class);
+
+        // ユーザー情報を編集
+        new EditUserTask(new EditUserTask.AsyncCallback() {
+            @Override
+            public void onSuccess(User user) {
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.d("onFailure", e.toString());
+            }
+        }).setAppToken(userTmp.getAppToken()).setUsersSetting(new UsersSetting("test", "male", 20, null)).execute();
 
         // 入店履歴一覧取得API
         new GetVisitedShopHistoryTask(new GetVisitedShopHistoryTask.AsyncCallback() {
