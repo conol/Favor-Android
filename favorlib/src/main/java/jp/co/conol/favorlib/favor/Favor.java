@@ -15,6 +15,7 @@ import jp.co.conol.favorlib.favor.model.Menu;
 import jp.co.conol.favorlib.favor.model.Order;
 import jp.co.conol.favorlib.favor.model.Shop;
 import jp.co.conol.favorlib.favor.model.User;
+import jp.co.conol.favorlib.favor.model.UsersAllOrder;
 import jp.co.conol.favorlib.favor.model.UsersSetting;
 
 /**
@@ -44,6 +45,7 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
         Order,                      // 注文
         GetUsersOrderInShop,        // 注文履歴一覧取得(来店個人単位)
         GetUserGroupsOrderInShop,   // 注文履歴一覧取得(来店グループ単位)
+        GetUsersAllOrder,           // 注文履歴一覧取得(ユーザーの全店舗での注文履歴)
         OrderStop,                  // オーダーストップ
         AddFavorite,                // お気に入り登録
         EditFavorite,               // お気に入り編集
@@ -185,6 +187,13 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
                     apiUrl = "/api/users/visit_groups/" + mVisitGroupId + "/orders.json";
                     responseJsonString = Util.Http.get(endPoint + apiUrl, mAppToken);
                     type = new TypeToken<ArrayList<Order>>(){}.getType();
+                    break;
+
+                // 注文履歴一覧取得(ユーザーの全店舗での注文履歴)
+                case GetUsersAllOrder:
+                    apiUrl = "/api/users/orders.json?page=1&per=20";
+                    responseJsonString = Util.Http.get(endPoint + apiUrl, mAppToken);
+                    type = new TypeToken<ArrayList<UsersAllOrder>>(){}.getType();
                     break;
 
                 // オーダーストップ
