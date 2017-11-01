@@ -1,9 +1,14 @@
 package jp.co.conol.favorlib.favor;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -35,6 +40,7 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
     private List<Order> mOrderList = new ArrayList<>();
 
     public enum Task {
+        GetAvailableDevices,        // Favorを利用可能なデバイスのデバイスID一覧取得
         ResisterUser,               // ユーザー情報登録
         EditUser,                   // ユーザー情報編集
         EnterShop,                  // 入店
@@ -120,6 +126,28 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
 
         try {
             switch (params[0]) {
+
+                // Favorを利用可能なデバイスのデバイスID一覧取得
+                case GetAvailableDevices:
+                    responseJsonString = Util.Http.get("http://13.112.232.171/api/services/UXbfYJ6SXm8G.json", null);
+                    List<String> deviceIdList = new ArrayList<>();
+                    if(responseJsonString != null) {
+                        try {
+                            JSONArray jsonArray = new JSONArray(responseJsonString);
+
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                JSONObject jRec = jsonArray.getJSONObject(i);
+                                String deviceId = jRec.getString("device_id").replace(" ", "").toLowerCase();
+                                deviceIdList.add(deviceId);
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        responseJsonString = gson.toJson(deviceIdList);
+                        type = new TypeToken<ArrayList<String>>(){}.getType();
+                    }
+                    break;
 
                 // ユーザー情報登録
                 case ResisterUser:
@@ -236,10 +264,9 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
                     break;
             }
         } catch (Exception e) {
+            Log.e("FavorError", "Please set Task in execute() argument");
             onFailure(e);
         }
-
-        Object test = gson.fromJson(responseJsonString, type);
 
         return gson.fromJson(responseJsonString, type);
     }

@@ -109,8 +109,8 @@ public class RegistrationActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Exception e) {
-                Log.d("failUserRegistration", e.toString());
+                Log.d("onFailure", e.toString());
             }
-        }).setUser(user).execute();
+        }).setUser(user).execute(Favor.Task.ResisterUser);
     }
 }
