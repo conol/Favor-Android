@@ -22,18 +22,27 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
+import jp.co.conol.favorlib.Util;
 import jp.co.conol.favorlib.cuona.Cuona;
+import jp.co.conol.favorlib.cuona.CuonaException;
 import jp.co.conol.favorlib.cuona.NfcNotAvailableException;
 import jp.co.conol.favorlib.favor.Favor;
+import jp.co.conol.favorlib.favor.model.Shop;
 import jp.co.conol.favorlib.favor.model.User;
 
 public class MainActivity extends AppCompatActivity {
 
     private boolean isScanning = false;
     private Handler mScanDialogAutoCloseHandler = new Handler();
+    private final Gson mGson = new Gson();
     private Cuona mCuona;
+    private User mUser;
+    List<String> mDeviceIds = new ArrayList<>();    // Favorのサービスに登録されているデバイスのID一覧
     private ConstraintLayout mShopHistoryConstraintLayout;
     private ConstraintLayout mUserSettingConstraintLayout;
     private TextView mUserSettingTextView;
@@ -51,22 +60,6 @@ public class MainActivity extends AppCompatActivity {
         mUserSettingTextView = (TextView) findViewById(R.id.userSettingTextView);
         mScanBackgroundConstraintLayout = (ConstraintLayout) findViewById(R.id.ScanBackgroundConstraintLayout);
         mScanDialogConstraintLayout = (ConstraintLayout) findViewById(R.id.scanDialogConstraintLayout);
-
-
-
-        new Favor(new Favor.AsyncCallback() {
-            @Override
-            public void onSuccess(Object object) {
-
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                Log.d("onFailure", e.toString());
-            }
-        }).execute(Favor.Task.GetAvailableDevices);
-
-
 
         try {
             mCuona = new Cuona(this);
@@ -116,11 +109,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // ユーザー情報を取得
-        Gson gson = new Gson();
-        User user = gson.fromJson(MyUtil.SharedPref.get(this, "userSetting"), User.class);
+        mUser = mGson.fromJson(MyUtil.SharedPref.get(this, "userSetting"), User.class);
 
         // ユーザー名を表示
-        String userSettingTitle = user.getNickname() + getResources().getString(R.string.user_setting_title);
+        String userSettingTitle = mUser.getNickname() + getResources().getString(R.string.user_setting_title);
         mUserSettingTextView.setText(userSettingTitle);
 
         // ユーザー情報をタップした時の動作
@@ -134,6 +126,110 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
+    }
+
+    @Override
+    protected void onNewIntent(final Intent intent) {
+        if(isScanning) {
+
+            // サーバーに登録されているデバイスIDを取得
+            final Handler handler = new Handler();
+            if (Util.Network.isEnable(this) || Util.Wifi.isEnable(MainActivity.this)) {
+                new Favor(new Favor.AsyncCallback() {
+                    @Override
+                    public void onSuccess(Object object) {
+                        @SuppressWarnings("unchecked")
+                        List<String> deviceIdList = (List<String>) object;
+
+                        // 接続成功してもデバイスID一覧が無ければエラー
+                        if(deviceIdList == null || deviceIdList.size() == 0) {
+                            showAlertDialog();
+                            return;
+                        } else {
+                            // デバイスIDのリストを作成
+                            mDeviceIds.addAll(deviceIdList);
+                        }
+
+                        // nfc読み込み処理実行
+                        String deviceId;
+                        try {
+                            deviceId = mCuona.readDeviceId(intent);
+                        } catch (CuonaException e) {
+                            Log.d("CuonaReader", e.toString());
+                            new AlertDialog.Builder(MainActivity.this)
+                                    .setMessage(getString(R.string.error_not_exist_in_devise_ids))
+                                    .setPositiveButton(getString(R.string.ok), null)
+                                    .show();
+                            return;
+                        }
+
+                        // サーバーに登録されているWifiHelper利用可能なデバイスに、タッチされたNFCが含まれているか否か確認
+                        if(mDeviceIds != null && deviceId != null) {
+
+                            // デバイスIDを小文字にする
+                            deviceId = deviceId.toLowerCase();
+
+                            if (!mDeviceIds.contains(deviceId)) {
+                                new AlertDialog.Builder(MainActivity.this)
+                                        .setMessage(getString(R.string.error_not_exist_in_devise_ids))
+                                        .setPositiveButton(getString(R.string.ok), null)
+                                        .show();
+                            }
+                            // 含まれていれば処理を進める
+                            else {
+
+                                // 入店処理
+                                new Favor(new Favor.AsyncCallback() {
+                                    @Override
+                                    public void onSuccess(Object object) {
+                                        Shop shop = (Shop) object;
+
+                                        Intent shopDetailIntent = new Intent(MainActivity.this, ShopDetailActivity.class);
+                                        shopDetailIntent.putExtra("shop", mGson.toJson(shop));
+                                        startActivity(shopDetailIntent);
+                                        isScanning = false;
+                                        closeScanPage();
+                                    }
+
+                                    @Override
+                                    public void onFailure(Exception e) {
+                                        Log.d("onFailure", e.toString());
+                                        new AlertDialog.Builder(MainActivity.this)
+                                                .setMessage(getString(R.string.error_touch_cuona))
+                                                .setPositiveButton(getString(R.string.ok), null)
+                                                .show();
+                                    }
+                                }).setAppToken(mUser.getAppToken()).setDeviceId(deviceId).execute(Favor.Task.EnterShop);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        showAlertDialog();
+                    }
+
+                    // デバイスID取得失敗でアラートを表示
+                    private void showAlertDialog() {
+                        handler.post(new Runnable() {
+                            public void run() {
+                                new AlertDialog.Builder(MainActivity.this)
+                                        .setMessage(getString(R.string.error_fail_get_device_ids))
+                                        .setPositiveButton(getString(R.string.ok), null)
+                                        .show();
+                            }
+                        });
+                    }
+                }).execute(Favor.Task.GetAvailableDevices);
+            }
+            // ネットに未接続の場合はエラー
+            else {
+                new AlertDialog.Builder(this)
+                        .setMessage(getString(R.string.error_network_disable))
+                        .setPositiveButton(getString(R.string.ok), null)
+                        .show();
+            }
+        }
     }
 
     public void onStartScanButtonClicked(View view) {

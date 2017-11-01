@@ -35,9 +35,10 @@
 
     <!-- エラー -->
     <string name="error_network_disable">利用可能なデバイス情報一覧の取得に失敗しました。\nインターネットに接続してください。</string>
+    <string name="error_touch_cuona">必要なデータの取得に失敗しました。\n再度タッチしてください。</string>
     <string name="error_fail_get_device_ids">一覧データの取得に失敗しました。\nアプリを再起動して再取得してください。</string>
     <string name="load_devices_failed">デバイス一覧の取得に失敗しました</string>
-    <string name="error_read_service_failed">このNFCではWi-Fiサービスがご利用できません。</string>
+    <string name="error_read_service_failed">このNFCではFavorサービスがご利用できません。</string>
     <string name="error_not_exist_in_devise_ids">利用されたNFCは本アプリに対応していません。</string>
 
     <!-- 全体 -->
