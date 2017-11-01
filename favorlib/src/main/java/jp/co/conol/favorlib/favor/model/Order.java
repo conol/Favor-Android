@@ -69,8 +69,8 @@ public class Order {
     }
 
     // 注文用コンストラクタ
-    public Order(int menu_item_id, int quantity) {
-        this.menu_item_id = menu_item_id;
+    public Order(int orderedItemId, int quantity) {
+        this.menu_item_id = orderedItemId;
         this.quantity = quantity;
     }
 
@@ -82,12 +82,24 @@ public class Order {
         return visit_history_id;
     }
 
-    public int getMenuItemId() {
+    public int getOrderedItemId() {
         return menu_item.getId();
     }
 
-    public int getQuantity() {
+    public String getOrderedItemName() {
+        return menu_item.getName();
+    }
+
+    public int getOrderedItemPrice() {
+        return menu_item.getPrice();
+    }
+
+    public int getOrderedItemQuantity() {
         return quantity;
+    }
+
+    public String getOrderedItemNotes() {
+        return menu_item.getNotes();
     }
 
     public String getStatus() {
@@ -102,27 +114,15 @@ public class Order {
         return updated_at;
     }
 
-    public String getMenuItemName() {
-        return menu_item.getName();
-    }
-
-    public int getMenuItemPrice() {
-        return menu_item.getPrice();
-    }
-
-    public String getMenuItemNotes() {
-        return menu_item.getNotes();
-    }
-
-    public int getUserId() {
+    public int getOrderedUserId() {
         return user.getId();
     }
 
-    public String getUserNickname() {
+    public String getOrderedUserNickname() {
         return user.getNickname();
     }
 
-    public String[] getMenuItemImages() {
+    public String[] getOrderedItemImages() {
         List<String> itemImage = new ArrayList<>();
         for(MenuItem.MenuImage imageObj : menu_item.getImages()) {
             itemImage.add(imageObj.getImage_url());

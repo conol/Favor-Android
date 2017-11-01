@@ -178,7 +178,7 @@ public class Shop {
         return shop.getClosing_day();
     }
 
-    public String[] getShopCardDrands() {
+    public String[] getShopCardBrands() {
         return shop.getCard_brands();
     }
 
@@ -211,15 +211,11 @@ public class Shop {
         return visit_history.getLast_visit_at();
     }
 
-    public int getTotalPriceId() {
+    public int getTotalPrice() {
         return visit_history.getTotal_price();
     }
 
-    public String getVisitHistoryCreatedAt() {
+    public String getEnterShopAt() {
         return visit_history.getCreated_at();
-    }
-
-    public String getVisitHistoryUpdatedAt() {
-        return visit_history.getUpdated_at();
     }
 }

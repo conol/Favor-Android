@@ -16,7 +16,6 @@ import jp.co.conol.favorlib.favor.model.Order;
 import jp.co.conol.favorlib.favor.model.Shop;
 import jp.co.conol.favorlib.favor.model.User;
 import jp.co.conol.favorlib.favor.model.UsersAllOrder;
-import jp.co.conol.favorlib.favor.model.UsersSetting;
 
 /**
  * Created by Masafumi_Ito on 2017/10/29.
@@ -30,7 +29,7 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
     private String mShopId = null;
     private String mVisitHistoryId = null;
     private String mVisitGroupId = null;
-    private UsersSetting mUsersSetting = null;
+    private User mUser = null;
     private Favorite mFavorite = null;
     private String mFavoriteId = null;
     private List<Order> mOrderList = new ArrayList<>();
@@ -87,8 +86,8 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
         return this;
     }
 
-    public Favor setUsersSetting(UsersSetting usersSetting) {
-        mUsersSetting = usersSetting;
+    public Favor setUser(User user) {
+        mUser = user;
         return this;
     }
 
@@ -125,7 +124,7 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
                 // ユーザー情報登録
                 case ResisterUser:
                     apiUrl = "/api/users/register.json";
-                    requestJsonString = gson.toJson(mUsersSetting);
+                    requestJsonString = gson.toJson(mUser);
                     responseJsonString = Util.Http.post(endPoint + apiUrl, null, requestJsonString);
                     type = new TypeToken<User>(){}.getType();
                     break;
@@ -133,7 +132,7 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
                 // ユーザー情報編集
                 case EditUser:
                     apiUrl = "/api/users/setting.json";
-                    requestJsonString = gson.toJson(mUsersSetting);
+                    requestJsonString = gson.toJson(mUser);
                     responseJsonString = Util.Http.patch(endPoint + apiUrl, mAppToken, requestJsonString);
                     type = new TypeToken<User>(){}.getType();
                     break;

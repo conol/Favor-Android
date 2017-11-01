@@ -50,11 +50,11 @@ public class Menu {
         return image_urls.toArray(new String[0]);
     }
 
-    public int getCategory_id() {
+    public int getCategoryId() {
         return category_id;
     }
 
-    public String getCategory_name() {
+    public String getCategoryName() {
         return category_name;
     }
 }

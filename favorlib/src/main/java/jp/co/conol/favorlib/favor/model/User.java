@@ -15,26 +15,11 @@ public class User {
     private String created_at = null;
     private String updated_at = null;
 
-    public User(
-            int id,
-            String nickname,
-            String gender,
-            int age,
-            String app_token,
-            String push_token,
-            boolean notifiable,
-            String created_at,
-            String updated_at) {
-
-        this.id = id;
+    public User(String nickname, String gender, int age, String pushToken) {
         this.nickname = nickname;
         this.gender = gender;
         this.age = age;
-        this.app_token = app_token;
-        this.push_token = push_token;
-        this.notifiable = notifiable;
-        this.created_at = created_at;
-        this.updated_at = updated_at;
+        this.push_token = pushToken;
     }
 
     public int getId() {
