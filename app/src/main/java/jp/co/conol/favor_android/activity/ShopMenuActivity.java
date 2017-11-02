@@ -46,7 +46,8 @@ public class ShopMenuActivity extends AppCompatActivity {
                 mShopMenuRecyclerView.setLayoutManager(new LinearLayoutManager(ShopMenuActivity.this));
 
                 // アダプターをセット
-                ShopMenuRecyclerAdapter shopMenuRecyclerAdapter = new ShopMenuRecyclerAdapter(ShopMenuActivity.this);
+                ShopMenuRecyclerAdapter shopMenuRecyclerAdapter
+                        = new ShopMenuRecyclerAdapter(ShopMenuActivity.this, menuList);
                 mShopMenuRecyclerView.setAdapter(shopMenuRecyclerAdapter);
             }
 

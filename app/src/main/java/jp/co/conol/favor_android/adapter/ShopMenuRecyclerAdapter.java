@@ -5,8 +5,15 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import jp.co.conol.favor_android.R;
+import jp.co.conol.favorlib.favor.model.Menu;
 
 /**
  * Created by Masafumi_Ito on 2017/10/25.
@@ -15,22 +22,24 @@ import jp.co.conol.favor_android.R;
 public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecyclerAdapter.ViewHolder> {
 
     private Context mContext;
+    private List<Menu> mMenuList = new ArrayList<>();
 
     // ViewHolder
     class ViewHolder extends RecyclerView.ViewHolder {
 
+        @BindView(R.id.menuNameTextView) TextView mMenuNameTextView;
+
         // ViewHolderのコンストラクタ
         private ViewHolder(View v) {
             super(v);
-
-            // ButterKnifeのバインド
-//            ButterKnife.bind(this, v);
+            ButterKnife.bind(this, v);
         }
     }
 
     // コンストラクタ
-    public ShopMenuRecyclerAdapter(Context context) {
+    public ShopMenuRecyclerAdapter(Context context, List<Menu> menuList) {
         mContext = context;
+        mMenuList = menuList;
     }
 
     // ViewHolder作成
@@ -61,10 +70,11 @@ public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecycl
     // 画面に表示する内容をセット
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+        holder.mMenuNameTextView.setText(mMenuList.get(position).getName());
     }
 
     @Override
     public int getItemCount() {
-        return 20;
+        return mMenuList.size();
     }
 }
