@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.userSettingTextView) TextView mUserSettingTextView;
     @BindView(R.id.ScanBackgroundConstraintLayout) ConstraintLayout mScanBackgroundConstraintLayout;
     @BindView(R.id.scanDialogConstraintLayout) ConstraintLayout mScanDialogConstraintLayout;
+    @BindView(R.id.shopHistoryTitleTextView) TextView mShopHistoryTitleTextView;
     private final int PERMISSION_REQUEST_CODE = 1000;
 
     @Override
@@ -93,6 +94,29 @@ public class MainActivity extends AppCompatActivity {
                     .show();
         }
 
+        // ユーザー情報を取得
+        mUser = mGson.fromJson(MyUtil.SharedPref.get(this, "userSetting"), User.class);
+
+        // 入店履歴を取得
+        new Favor(new Favor.AsyncCallback() {
+            @Override
+            public void onSuccess(Object object) {
+                @SuppressWarnings("unchecked")
+                List<Shop> shopList = (List<Shop>) object;
+
+                if(shopList != null && shopList.size() != 0) {
+                    mShopHistoryTitleTextView.setText(shopList.get(shopList.size() - 1).getShopName());
+                } else {
+                    mShopHistoryTitleTextView.setText(getString(R.string.shop_history_none));
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.e("onFailure", e.toString());
+            }
+        }).setAppToken(mUser.getAppToken()).execute(Favor.Task.GetVisitedShopHistory);
+
         // 入店履歴をタップした時の動作
         mShopHistoryConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -104,9 +128,6 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
-
-        // ユーザー情報を取得
-        mUser = mGson.fromJson(MyUtil.SharedPref.get(this, "userSetting"), User.class);
 
         // ユーザー名を表示
         String userSettingTitle = mUser.getNickname() + getResources().getString(R.string.user_setting_title);

@@ -83,13 +83,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
                 android:layout_marginTop="16dp"
-                android:text="@string/shop_history_title"
                 android:textColor="@android:color/white"
                 android:textSize="22sp"
                 android:textStyle="bold"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                android:layout_marginStart="16dp" />
+                tools:text="入店履歴" />
         </android.support.constraint.ConstraintLayout>
 
     </android.support.constraint.ConstraintLayout>

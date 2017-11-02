@@ -11,6 +11,7 @@
     <!-- メイン画面 -->
     <string name="touch_nfc">タッチして入店する</string>
     <string name="shop_history_title">入店履歴</string>
+    <string name="shop_history_none">入店履歴はありません</string>
     <string name="user_setting_title"> の情報</string>
 
     <!-- ユーザー画面 -->
