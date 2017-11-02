@@ -25,6 +25,8 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favorlib.Util;
@@ -43,23 +45,18 @@ public class MainActivity extends AppCompatActivity {
     private Cuona mCuona;
     private User mUser;
     List<String> mDeviceIds = new ArrayList<>();    // Favorのサービスに登録されているデバイスのID一覧
-    private ConstraintLayout mShopHistoryConstraintLayout;
-    private ConstraintLayout mUserSettingConstraintLayout;
-    private TextView mUserSettingTextView;
-    private ConstraintLayout mScanBackgroundConstraintLayout;
-    private ConstraintLayout mScanDialogConstraintLayout;
+    @BindView(R.id.shopHistoryConstraintLayout) ConstraintLayout mShopHistoryConstraintLayout;
+    @BindView(R.id.userSettingConstraintLayout) ConstraintLayout mUserSettingConstraintLayout;
+    @BindView(R.id.userSettingTextView) TextView mUserSettingTextView;
+    @BindView(R.id.ScanBackgroundConstraintLayout) ConstraintLayout mScanBackgroundConstraintLayout;
+    @BindView(R.id.scanDialogConstraintLayout) ConstraintLayout mScanDialogConstraintLayout;
     private final int PERMISSION_REQUEST_CODE = 1000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        mShopHistoryConstraintLayout = (ConstraintLayout) findViewById(R.id.shopHistoryConstraintLayout);
-        mUserSettingConstraintLayout = (ConstraintLayout) findViewById(R.id.userSettingConstraintLayout);
-        mUserSettingTextView = (TextView) findViewById(R.id.userSettingTextView);
-        mScanBackgroundConstraintLayout = (ConstraintLayout) findViewById(R.id.ScanBackgroundConstraintLayout);
-        mScanDialogConstraintLayout = (ConstraintLayout) findViewById(R.id.scanDialogConstraintLayout);
+        ButterKnife.bind(this);
 
         try {
             mCuona = new Cuona(this);
@@ -124,6 +121,14 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(intent);
                 }
                 return false;
+            }
+        });
+
+        // スキャン画面が開いているときは、背景のタップを出来ないように設定
+        mScanBackgroundConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return isScanning;
             }
         });
     }

@@ -9,6 +9,8 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import jp.co.conol.favor_android.MyUtil;
@@ -37,7 +39,8 @@ public class ShopMenuActivity extends AppCompatActivity {
         new Favor(new Favor.AsyncCallback() {
             @Override
             public void onSuccess(Object object) {
-                Menu menu = (Menu) object;
+                @SuppressWarnings("unchecked")
+                List<Menu> menuList = (List<Menu>) object;
 
                 // レイアウトマネージャーのセット
                 mShopMenuRecyclerView.setLayoutManager(new LinearLayoutManager(ShopMenuActivity.this));
