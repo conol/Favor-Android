@@ -44,66 +44,92 @@ public class ShopDetailActivity extends AppCompatActivity {
         // 遷移前の情報を取得
         Intent intent = getIntent();
         String deviceId = intent.getStringExtra("deviceId");
+        int shopId = intent.getIntExtra("shopId", 0);
         User user = mGson.fromJson(MyUtil.SharedPref.get(this, "userSetting"), User.class);
 
-        // 入店処理
-        final Handler handler = new Handler();
-        new Favor(new Favor.AsyncCallback() {
-            @Override
-            public void onSuccess(Object object) {
-                final Shop shop = (Shop) object;
+        // 入店処理（入店した際に店舗情報を表示）
+        if(deviceId != null) {
+            final Handler handler = new Handler();
+            new Favor(new Favor.AsyncCallback() {
+                @Override
+                public void onSuccess(Object object) {
+                    Shop shop = (Shop) object;
 
-                if(shop != null) {
+                    if (shop != null) {
+                        setShopInfo(shop);
+                    } else {
+                        showAlertDialog();
+                    }
+                }
 
-                    // 店舗情報をViewに反映
-                    mShopNameTextView.setText(shop.getShopName());
-                    mShopIntroductionTextView.setText(shop.getShopIntroduction());
-
-                    // ViewPagerにアダプターをセット
-                    ShopDetailFragmentStatePagerAdapter shopDetailFragmentStatePagerAdapter
-                            = new ShopDetailFragmentStatePagerAdapter(ShopDetailActivity.this, getSupportFragmentManager());
-                    mShopDetailViewPager.setAdapter(shopDetailFragmentStatePagerAdapter);
-                    mShopDetailTabLayout.setupWithViewPager(mShopDetailViewPager);
-
-                    // 「注文メニューを表示する」をタップした場合
-                    mShowShopMenuConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
-                        @Override
-                        public boolean onTouch(View view, MotionEvent motionEvent) {
-                            if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                                Intent intent = new Intent(ShopDetailActivity.this, ShopMenuActivity.class);
-                                intent.putExtra("shopId", shop.getShopId());
-                                startActivity(intent);
-                            }
-                            return false;
-                        }
-                    });
-
-                } else {
+                @Override
+                public void onFailure(Exception e) {
+                    Log.d("onFailure", e.toString());
                     showAlertDialog();
                 }
-            }
 
-            @Override
-            public void onFailure(Exception e) {
-                Log.d("onFailure", e.toString());
-                showAlertDialog();
-            }
+                private void showAlertDialog() {
+                    handler.post(new Runnable() {
+                        public void run() {
+                            new AlertDialog.Builder(ShopDetailActivity.this)
+                                    .setMessage(getString(R.string.error_touch_cuona))
+                                    .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            finish();
+                                        }
+                                    })
+                                    .show();
+                        }
+                    });
+                }
+            }).setAppToken(user.getAppToken()).setDeviceId(deviceId).execute(Favor.Task.EnterShop);
+        }
 
-            private void showAlertDialog() {
-                handler.post(new Runnable() {
-                    public void run() {
-                        new AlertDialog.Builder(ShopDetailActivity.this)
-                                .setMessage(getString(R.string.error_touch_cuona))
-                                .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        finish();
-                                    }
-                                })
-                                .show();
+        // 店舗詳細表示（入店履歴から表示された場合）
+        else {
+            new Favor(new Favor.AsyncCallback() {
+                @Override
+                public void onSuccess(Object object) {
+                    Shop shop = (Shop) object;
+
+                    if (shop != null) {
+                        setShopInfo(shop);
                     }
-                });
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    Log.e("onFailure", e.toString());
+                }
+            }).setAppToken(user.getAppToken()).setShopId(shopId).execute(Favor.Task.GetShopDetail);
+        }
+    }
+
+    //
+    private void setShopInfo(final Shop shop) {
+
+        // 店舗情報をViewに反映
+        mShopNameTextView.setText(shop.getShopName());
+        mShopIntroductionTextView.setText(shop.getShopIntroduction());
+
+        // ViewPagerにアダプターをセット
+        ShopDetailFragmentStatePagerAdapter shopDetailFragmentStatePagerAdapter
+                = new ShopDetailFragmentStatePagerAdapter(ShopDetailActivity.this, getSupportFragmentManager());
+        mShopDetailViewPager.setAdapter(shopDetailFragmentStatePagerAdapter);
+        mShopDetailTabLayout.setupWithViewPager(mShopDetailViewPager);
+
+        // 「注文メニューを表示する」をタップした場合
+        mShowShopMenuConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                    Intent intent = new Intent(ShopDetailActivity.this, ShopMenuActivity.class);
+                    intent.putExtra("shopId", shop.getShopId());
+                    startActivity(intent);
+                }
+                return false;
             }
-        }).setAppToken(user.getAppToken()).setDeviceId(deviceId).execute(Favor.Task.EnterShop);
+        });
     }
 }
