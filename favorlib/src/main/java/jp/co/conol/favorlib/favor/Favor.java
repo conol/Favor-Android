@@ -191,7 +191,7 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
                 case GetMenu:
                     apiUrl = "/api/users/shops/" + mShopId + "/menu.json";
                     responseJsonString = Util.Http.get(endPoint + apiUrl, mAppToken);
-                    type = new TypeToken<Menu>(){}.getType();
+                    type = new TypeToken<ArrayList<Menu>>(){}.getType();
                     break;
 
                 // 注文

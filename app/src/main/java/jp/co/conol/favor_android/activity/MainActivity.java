@@ -178,28 +178,11 @@ public class MainActivity extends AppCompatActivity {
                             // 含まれていれば処理を進める
                             else {
 
-                                // 入店処理
-                                new Favor(new Favor.AsyncCallback() {
-                                    @Override
-                                    public void onSuccess(Object object) {
-                                        Shop shop = (Shop) object;
-
-                                        Intent shopDetailIntent = new Intent(MainActivity.this, ShopDetailActivity.class);
-                                        shopDetailIntent.putExtra("shop", mGson.toJson(shop));
-                                        startActivity(shopDetailIntent);
-                                        isScanning = false;
-                                        closeScanPage();
-                                    }
-
-                                    @Override
-                                    public void onFailure(Exception e) {
-                                        Log.d("onFailure", e.toString());
-                                        new AlertDialog.Builder(MainActivity.this)
-                                                .setMessage(getString(R.string.error_touch_cuona))
-                                                .setPositiveButton(getString(R.string.ok), null)
-                                                .show();
-                                    }
-                                }).setAppToken(mUser.getAppToken()).setDeviceId(deviceId).execute(Favor.Task.EnterShop);
+                                Intent shopDetailIntent = new Intent(MainActivity.this, ShopDetailActivity.class);
+                                shopDetailIntent.putExtra("deviceId", deviceId);
+                                startActivity(shopDetailIntent);
+                                isScanning = false;
+                                closeScanPage();
                             }
                         }
                     }
