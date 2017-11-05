@@ -23,6 +23,7 @@ public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecycl
 
     private Context mContext;
     private List<Menu> mMenuList = new ArrayList<>();
+    protected void showOrderDialog() {}
 
     // ViewHolder
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -54,6 +55,9 @@ public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecycl
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                // 注文ダイアログを表示
+                showOrderDialog();
 
                 // positionを取得
 //                final int position = holder.getAdapterPosition();

@@ -26,6 +26,7 @@
     <!-- ショップメニュー画面 -->
     <string name="shop_menu_title">MENU</string>
     <string name="shop_menu_order_button">注文する</string>
+    <string name="shop_menu_order_dialog_title">注文数を選択してください</string>
 
     <!-- nfc -->
     <string name="nfc_scan_title">スキャンの準備ができました</string>
@@ -45,6 +46,7 @@
 
     <!-- 全体 -->
     <string name="ok">OK</string>
+    <string name="select">選択する</string>
     <string name="cancel">Cancel</string>
     <string name="cancel_kana">キャンセル</string>
 
