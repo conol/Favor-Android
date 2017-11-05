@@ -1,6 +1,7 @@
 package jp.co.conol.favor_android.adapter;
 
 import android.content.Context;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,12 +24,15 @@ public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecycl
 
     private Context mContext;
     private List<Menu> mMenuList = new ArrayList<>();
-    protected void showOrderDialog() {}
+    private List<Integer> mOrderNumList = new ArrayList<>();
+    protected void showOrderDialog(int position, int orderNum) {}
 
     // ViewHolder
     class ViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.menuNameTextView) TextView mMenuNameTextView;
+        @BindView(R.id.selectedOrderNumConstraintLayout) ConstraintLayout mSelectedOrderNumConstraintLayout;
+        @BindView(R.id.selectedOrderNumTextView) TextView mSelectedOrderNumTextView;
 
         // ViewHolderのコンストラクタ
         private ViewHolder(View v) {
@@ -38,9 +42,10 @@ public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecycl
     }
 
     // コンストラクタ
-    public ShopMenuRecyclerAdapter(Context context, List<Menu> menuList) {
+    public ShopMenuRecyclerAdapter(Context context, List<Menu> menuList, List<Integer> orderNumList) {
         mContext = context;
         mMenuList = menuList;
+        mOrderNumList = orderNumList;
     }
 
     // ViewHolder作成
@@ -56,11 +61,17 @@ public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecycl
             @Override
             public void onClick(View v) {
 
-                // 注文ダイアログを表示
-                showOrderDialog();
-
                 // positionを取得
-//                final int position = holder.getAdapterPosition();
+                final int position = holder.getAdapterPosition();
+
+                // 注文ダイアログを表示
+                int orderNum;
+                if(mOrderNumList.get(position) != null && mOrderNumList.get(position) != 0) {
+                    orderNum = Integer.parseInt(mOrderNumList.get(position).toString());
+                } else {
+                    orderNum = 1;
+                }
+                showOrderDialog(position, orderNum);
 
                 // 店舗詳細ページへ移動
 //                Intent intent = new Intent(mContext, ShopDetailActivity.class);
@@ -75,6 +86,12 @@ public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecycl
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         holder.mMenuNameTextView.setText(mMenuList.get(position).getName());
+
+        // 注文数が指定された場合、注文数を表示
+        if(mOrderNumList.get(position) != null && mOrderNumList.get(position) != 0) {
+            holder.mSelectedOrderNumConstraintLayout.setVisibility(View.VISIBLE);
+            holder.mSelectedOrderNumTextView.setText(String.valueOf(mOrderNumList.get(position)));
+        }
     }
 
     @Override
