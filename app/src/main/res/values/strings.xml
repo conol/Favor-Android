@@ -25,6 +25,7 @@
 
     <!-- ショップメニュー画面 -->
     <string name="shop_menu_title">MENU</string>
+    <string name="shop_menu_order_button">注文する</string>
 
     <!-- nfc -->
     <string name="nfc_scan_title">スキャンの準備ができました</string>
