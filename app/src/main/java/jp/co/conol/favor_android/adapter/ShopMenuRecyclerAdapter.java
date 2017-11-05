@@ -69,7 +69,7 @@ public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecycl
                 if(mOrderNumList.get(position) != null && mOrderNumList.get(position) != 0) {
                     orderNum = Integer.parseInt(mOrderNumList.get(position).toString());
                 } else {
-                    orderNum = 1;
+                    orderNum = 1; // 注文数の初期値
                 }
                 showOrderDialog(position, orderNum);
 

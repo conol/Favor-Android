@@ -1,9 +1,14 @@
 package jp.co.conol.favor_android.activity;
 
+import android.Manifest;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.os.Handler;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -15,6 +20,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,13 +36,22 @@ import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favor_android.adapter.ShopMenuRecyclerAdapter;
 import jp.co.conol.favor_android.custom.NumberPickerDialog;
+import jp.co.conol.favorlib.Util;
+import jp.co.conol.favorlib.cuona.Cuona;
+import jp.co.conol.favorlib.cuona.CuonaException;
+import jp.co.conol.favorlib.cuona.NfcNotAvailableException;
 import jp.co.conol.favorlib.favor.Favor;
 import jp.co.conol.favorlib.favor.model.Menu;
+import jp.co.conol.favorlib.favor.model.Order;
 import jp.co.conol.favorlib.favor.model.User;
 
 public class ShopMenuActivity extends AppCompatActivity implements NumberPickerDialog.OnPositiveButtonClickedListener {
 
+    private boolean isScanning = false;
+    private Handler mScanDialogAutoCloseHandler = new Handler();
+    private Cuona mCuona;
     private final Gson mGson = new Gson();
+    private List<Order> orderList = new ArrayList<>(); // 注文するメニューのリスト
     private boolean isShownOrderDialog = false;
     private int mTappedPosition;    // メニューをタップした際のメニュー位置
     @BindView(R.id.shopMenuRecyclerView) RecyclerView mShopMenuRecyclerView;
@@ -45,12 +60,22 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
     @BindView(R.id.orderNumTextView) TextView mOrderNumTextView;
     @BindView(R.id.cancelButtonConstraintLayout) ConstraintLayout mCancelButtonConstraintLayout;
     @BindView(R.id.selectButtonConstraintLayout) ConstraintLayout mSelectButtonConstraintLayout;
+    @BindView(R.id.orderButtonConstraintLayout) ConstraintLayout mOrderButtonConstraintLayout;
+    @BindView(R.id.ScanBackgroundConstraintLayout) ConstraintLayout mScanBackgroundConstraintLayout;
+    @BindView(R.id.scanDialogConstraintLayout) ConstraintLayout mScanDialogConstraintLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shop_menu);
         ButterKnife.bind(this);
+
+        try {
+            mCuona = new Cuona(this);
+        } catch (NfcNotAvailableException e) {
+            Log.d("Corona", e.toString());
+            finish();
+        }
 
         // 遷移前の情報を取得
         Intent intent = getIntent();
@@ -60,8 +85,7 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
         new Favor(new Favor.AsyncCallback() {
             @Override
             public void onSuccess(Object object) {
-                @SuppressWarnings("unchecked")
-                List<Menu> menuList = (List<Menu>) object;
+                @SuppressWarnings("unchecked") final List<Menu> menuList = (List<Menu>) object;
 
                 // メニュー注文数のリスト
                 final List<Integer> orderNumList = new ArrayList<>();
@@ -132,8 +156,12 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
                             isShownOrderDialog = false;
 
                             // 注文数をメニューに表示
-                            orderNumList.set(mTappedPosition, Integer.parseInt(mOrderNumTextView.getText().toString()));
+                            int orderNum =  Integer.parseInt(mOrderNumTextView.getText().toString());
+                            orderNumList.set(mTappedPosition,orderNum);
                             shopMenuRecyclerAdapter.notifyItemChanged(mTappedPosition);
+
+                            // 注文するメニューのオブジェクトを作成し、注文リストに追加
+                            orderList.add(new Order(menuList.get(mTappedPosition).getId(), orderNum));
                         }
                         return false;
                     }
@@ -145,6 +173,14 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
                 Log.d("onFailure", e.toString());
             }
         }).setAppToken(user.getAppToken()).setShopId(shopId).execute(Favor.Task.GetMenu);
+
+        // スキャン画面が開いているときは、背景のタップを出来ないように設定
+        mScanBackgroundConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return isScanning;
+            }
+        });
     }
 
     @Override
@@ -164,5 +200,78 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
     @Override
     public void onPositiveButtonClicked(int value) {
         mOrderNumTextView.setText(String.valueOf(value));
+    }
+
+    @Override
+    protected void onNewIntent(final Intent intent) {
+        if(isScanning) {
+
+        }
+    }
+
+    public void onStartScanButtonClicked(View view) {
+        // nfcがオフの場合はダイアログを表示
+        if(!mCuona.isEnable()) {
+            new AlertDialog.Builder(this)
+                    .setMessage(getString(R.string.nfc_dialog))
+                    .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            startActivity(new Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS));
+                        }
+                    })
+                    .setNegativeButton(getString(R.string.cancel), null)
+                    .show();
+        } else {
+            if (!isScanning) {
+
+                // nfc読み込み待機
+                mCuona.enableForegroundDispatch(ShopMenuActivity.this);
+                isScanning = true;
+                openScanPage();
+
+                // 60秒後に自動で閉じる
+                mScanDialogAutoCloseHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (isScanning) {
+                            cancelScan();
+                        }
+                    }
+                }, 60000);
+            }
+        }
+    }
+
+    public void onCancelScanButtonClicked(View view) {
+        if(isScanning) {
+            cancelScan();
+
+            // 60秒後に閉じる予約をキャンセル
+            mScanDialogAutoCloseHandler.removeCallbacksAndMessages(null);
+        }
+    }
+
+    private void cancelScan() {
+        // nfc読み込み待機を解除
+        mCuona.disableForegroundDispatch(ShopMenuActivity.this);
+        isScanning = false;
+        closeScanPage();
+    }
+
+    private void closeScanPage() {
+        mScanDialogConstraintLayout.setVisibility(View.GONE);
+        mScanBackgroundConstraintLayout.setVisibility(View.GONE);
+        mScanDialogConstraintLayout.setAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_out_to_bottom));
+        mScanBackgroundConstraintLayout.setAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_out_slowly));
+        mScanDialogAutoCloseHandler.removeCallbacksAndMessages(null);
+    }
+
+    // 読み込み画面を表示
+    private void openScanPage() {
+        mScanDialogConstraintLayout.setVisibility(View.VISIBLE);
+        mScanBackgroundConstraintLayout.setVisibility(View.VISIBLE);
+        mScanDialogConstraintLayout.setAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_in_from_bottom));
+        mScanBackgroundConstraintLayout.setAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in_slowly));
     }
 }
