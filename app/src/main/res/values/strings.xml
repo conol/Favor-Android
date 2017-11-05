@@ -28,6 +28,9 @@
     <string name="shop_menu_order_button">注文する</string>
     <string name="shop_menu_order_dialog_title">注文数を選択してください</string>
 
+    <!-- 注文完了画面 -->
+    <string name="order_done_message">注文が完了しました</string>
+
     <!-- nfc -->
     <string name="nfc_scan_title">スキャンの準備ができました</string>
     <string name="nfc_scan_message">CORONAへタッチしてください</string>

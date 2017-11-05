@@ -20,7 +20,8 @@
         <activity android:name=".activity.ShopHistoryActivity" />
         <activity android:name=".activity.UserActivity" />
         <activity android:name=".activity.ShopDetailActivity" />
-        <activity android:name=".activity.ShopMenuActivity"></activity>
+        <activity android:name=".activity.ShopMenuActivity" />
+        <activity android:name=".activity.OrderDoneActivity"></activity>
     </application>
 
 </manifest>
