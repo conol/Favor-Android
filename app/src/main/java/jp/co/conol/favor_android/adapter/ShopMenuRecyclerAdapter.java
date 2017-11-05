@@ -72,10 +72,6 @@ public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecycl
                     orderNum = 1; // 注文数の初期値
                 }
                 showOrderDialog(position, orderNum);
-
-                // 店舗詳細ページへ移動
-//                Intent intent = new Intent(mContext, ShopDetailActivity.class);
-//                mContext.startActivity(intent);
             }
         });
 
