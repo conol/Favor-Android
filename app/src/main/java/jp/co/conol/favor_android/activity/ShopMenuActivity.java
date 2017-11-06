@@ -1,15 +1,9 @@
 package jp.co.conol.favor_android.activity;
 
-import android.Manifest;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Handler;
 import android.support.constraint.ConstraintLayout;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,13 +11,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
-import android.widget.NumberPicker;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 
@@ -36,9 +27,7 @@ import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favor_android.adapter.ShopMenuRecyclerAdapter;
 import jp.co.conol.favor_android.custom.NumberPickerDialog;
-import jp.co.conol.favorlib.Util;
 import jp.co.conol.favorlib.cuona.Cuona;
-import jp.co.conol.favorlib.cuona.CuonaException;
 import jp.co.conol.favorlib.cuona.NfcNotAvailableException;
 import jp.co.conol.favorlib.favor.Favor;
 import jp.co.conol.favorlib.favor.model.Menu;
@@ -51,7 +40,9 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
     private Handler mScanDialogAutoCloseHandler = new Handler();
     private Cuona mCuona;
     private final Gson mGson = new Gson();
-    private List<Order> orderList = new ArrayList<>(); // 注文するメニューのリスト
+    private User mUser;
+    private int mVisitHistoryId;
+    private List<Order> mOrderList = new ArrayList<>(); // 注文するメニューのリスト
     private boolean isShownOrderDialog = false;
     private int mTappedPosition;    // メニューをタップした際のメニュー位置
     @BindView(R.id.shopMenuRecyclerView) RecyclerView mShopMenuRecyclerView;
@@ -80,12 +71,14 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
         // 遷移前の情報を取得
         Intent intent = getIntent();
         int shopId = intent.getIntExtra("shopId", 0);
-        User user = mGson.fromJson(MyUtil.SharedPref.get(this, "userSetting"), User.class);
+        mVisitHistoryId = intent.getIntExtra("visitHistoryId", 0);
+        mUser = mGson.fromJson(MyUtil.SharedPref.get(this, "userSetting"), User.class);
 
         new Favor(new Favor.AsyncCallback() {
             @Override
             public void onSuccess(Object object) {
-                @SuppressWarnings("unchecked") final List<Menu> menuList = (List<Menu>) object;
+                @SuppressWarnings("unchecked")
+                final List<Menu> menuList = (List<Menu>) object;
 
                 // メニュー注文数のリスト
                 final List<Integer> orderNumList = new ArrayList<>();
@@ -161,7 +154,7 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
                             shopMenuRecyclerAdapter.notifyItemChanged(mTappedPosition);
 
                             // 注文するメニューのオブジェクトを作成し、注文リストに追加
-                            orderList.add(new Order(menuList.get(mTappedPosition).getId(), orderNum));
+                            mOrderList.add(new Order(menuList.get(mTappedPosition).getId(), orderNum));
                         }
                         return false;
                     }
@@ -172,7 +165,7 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
             public void onFailure(Exception e) {
                 Log.d("onFailure", e.toString());
             }
-        }).setAppToken(user.getAppToken()).setShopId(shopId).execute(Favor.Task.GetMenu);
+        }).setAppToken(mUser.getAppToken()).setShopId(shopId).execute(Favor.Task.GetMenu);
 
         // スキャン画面が開いているときは、背景のタップを出来ないように設定
         mScanBackgroundConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
@@ -202,10 +195,28 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
         mOrderNumTextView.setText(String.valueOf(value));
     }
 
+    // NFCにタップされた時の処理
     @Override
     protected void onNewIntent(final Intent intent) {
         if(isScanning) {
 
+            // 注文処理
+            new Favor(new Favor.AsyncCallback() {
+                @Override
+                public void onSuccess(Object object) {
+//                    @SuppressWarnings("unchecked")
+//                    List<Order> orderList = (List<Order>) object;
+                    Intent intent = new Intent(ShopMenuActivity.this, OrderDoneActivity.class);
+                    startActivity(intent);
+                    cancelScan();
+                    finish();
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    Log.e("onFailure", e.toString());
+                }
+            }).setAppToken(mUser.getAppToken()).setVisitHistoryId(mVisitHistoryId).setOrder(mOrderList).execute(Favor.Task.Order);
         }
     }
 

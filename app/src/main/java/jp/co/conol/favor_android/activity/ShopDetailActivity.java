@@ -106,14 +106,14 @@ public class ShopDetailActivity extends AppCompatActivity {
         }
     }
 
-    //
+    // 店舗情報をセット
     private void setShopInfo(final Shop shop) {
 
         // 店舗情報をViewに反映
         mShopNameTextView.setText(shop.getShopName());
         mShopIntroductionTextView.setText(shop.getShopIntroduction());
 
-        // ViewPagerにアダプターをセット
+        // 基本情報と注文履歴のViewPagerにアダプターをセット
         ShopDetailFragmentStatePagerAdapter shopDetailFragmentStatePagerAdapter
                 = new ShopDetailFragmentStatePagerAdapter(ShopDetailActivity.this, getSupportFragmentManager());
         mShopDetailViewPager.setAdapter(shopDetailFragmentStatePagerAdapter);
@@ -126,6 +126,7 @@ public class ShopDetailActivity extends AppCompatActivity {
                 if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
                     Intent intent = new Intent(ShopDetailActivity.this, ShopMenuActivity.class);
                     intent.putExtra("shopId", shop.getShopId());
+                    intent.putExtra("visitHistoryId", shop.getVisitHistoryId());
                     startActivity(intent);
                 }
                 return false;

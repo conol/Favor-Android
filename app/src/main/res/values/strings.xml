@@ -30,6 +30,8 @@
 
     <!-- 注文完了画面 -->
     <string name="order_done_message">注文が完了しました</string>
+    <string name="order_done_message_sub">注文が送信されました。\n届くまでの間しばらくお待ちください。</string>
+    <string name="order_done_back_button_text">この画面を閉じる</string>
 
     <!-- nfc -->
     <string name="nfc_scan_title">スキャンの準備ができました</string>

@@ -93,6 +93,7 @@ public class NumberPickerDialog extends DialogFragment {
         final NumberPicker numberPicker = (NumberPicker) view.findViewById(R.id.numberPicker);
         numberPicker.setMaxValue(mMaxValue);
         numberPicker.setMinValue(mMinValue);
+        numberPicker.setValue(1);
         numberPicker.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
