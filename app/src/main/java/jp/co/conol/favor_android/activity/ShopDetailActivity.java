@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Handler;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -29,6 +28,9 @@ import jp.co.conol.favorlib.favor.model.User;
 public class ShopDetailActivity extends AppCompatActivity {
 
     private final Gson mGson = new Gson();
+    private int mVisitGroupId;
+    private int mVisitHistoryId;
+    @BindView(R.id.orderStopButtonConstraintLayout) ConstraintLayout mOrderStopButtonConstraintLayout;
     @BindView(R.id.shopDetailTabLayout) TabLayout mShopDetailTabLayout;
     @BindView(R.id.shopDetailViewPager) ViewPager mShopDetailViewPager;
     @BindView(R.id.showShopMenuConstraintLayout) ConstraintLayout mShowShopMenuConstraintLayout;
@@ -42,7 +44,7 @@ public class ShopDetailActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         // 遷移前の情報を取得
-        Intent intent = getIntent();
+        final Intent intent = getIntent();
         String deviceId = intent.getStringExtra("deviceId");
         int shopId = intent.getIntExtra("shopId", 0);
         User user = mGson.fromJson(MyUtil.SharedPref.get(this, "userSetting"), User.class);
@@ -104,10 +106,28 @@ public class ShopDetailActivity extends AppCompatActivity {
                 }
             }).setAppToken(user.getAppToken()).setShopId(shopId).execute(Favor.Task.GetShopDetail);
         }
+
+        // お会計するボタンが押された場合、お会計ページへ移動
+        mOrderStopButtonConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                    Intent intent = new Intent(ShopDetailActivity.this, OrderStopActivity.class);
+                    intent.putExtra("visitHistoryId", mVisitHistoryId);
+                    intent.putExtra("visitGroupId", mVisitGroupId);
+                    startActivity(intent);
+                }
+                return false;
+            }
+        });
     }
 
     // 店舗情報をセット
     private void setShopInfo(final Shop shop) {
+
+        // visitGroupIdを取得
+        mVisitGroupId = shop.getVisitGroupId();
+        mVisitHistoryId = shop.getVisitHistoryId();
 
         // 店舗情報をViewに反映
         mShopNameTextView.setText(shop.getShopName());
@@ -115,7 +135,7 @@ public class ShopDetailActivity extends AppCompatActivity {
 
         // 基本情報と注文履歴のViewPagerにアダプターをセット
         ShopDetailFragmentStatePagerAdapter shopDetailFragmentStatePagerAdapter
-                = new ShopDetailFragmentStatePagerAdapter(ShopDetailActivity.this, getSupportFragmentManager(), shop.getVisitGroupId());
+                = new ShopDetailFragmentStatePagerAdapter(ShopDetailActivity.this, getSupportFragmentManager(), mVisitGroupId);
         mShopDetailViewPager.setAdapter(shopDetailFragmentStatePagerAdapter);
         mShopDetailTabLayout.setupWithViewPager(mShopDetailViewPager);
 

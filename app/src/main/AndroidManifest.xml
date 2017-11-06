@@ -21,7 +21,8 @@
         <activity android:name=".activity.UserActivity" />
         <activity android:name=".activity.ShopDetailActivity" />
         <activity android:name=".activity.ShopMenuActivity" />
-        <activity android:name=".activity.OrderDoneActivity"></activity>
+        <activity android:name=".activity.OrderDoneActivity" />
+        <activity android:name=".activity.OrderStopActivity"></activity>
     </application>
 
 </manifest>
