@@ -8,19 +8,31 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.gson.Gson;
+
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favor_android.adapter.UserFavoriteRecyclerAdapter;
 import jp.co.conol.favor_android.adapter.UserOrderHistoryRecyclerAdapter;
+import jp.co.conol.favorlib.favor.Favor;
+import jp.co.conol.favorlib.favor.model.User;
+import jp.co.conol.favorlib.favor.model.UsersAllOrder;
 
 public class UserOrderHistoryFragment extends Fragment {
 
+    private final Gson mGson = new Gson();
     private Context mContext;
     private UserOrderHistoryRecyclerAdapter mUserOrderHistoryRecyclerAdapter;
-    private RecyclerView mUserOrderHistoryRecyclerView;
+    @BindView(R.id.userOrderHistoryRecyclerView) RecyclerView mUserOrderHistoryRecyclerView;
 
     public UserOrderHistoryFragment() {
     }
@@ -53,14 +65,33 @@ public class UserOrderHistoryFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_user_order_history, container, false);
-        mUserOrderHistoryRecyclerView = (RecyclerView) view.findViewById(R.id.userOrderHistoryRecyclerView);
+        ButterKnife.bind(this, view);
 
-        // レイアウトマネージャーのセット
-        mUserOrderHistoryRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+        // ユーザー情報の取得
+        User user = mGson.fromJson(MyUtil.SharedPref.get(mContext, "userSetting"), User.class);
 
-        // アダプターのセット
-        mUserOrderHistoryRecyclerAdapter = new UserOrderHistoryRecyclerAdapter(mContext);
-        mUserOrderHistoryRecyclerView.setAdapter(mUserOrderHistoryRecyclerAdapter);
+        new Favor(new Favor.AsyncCallback() {
+            @Override
+            public void onSuccess(Object object) {
+                List<UsersAllOrder> usersAllOrderList = (List<UsersAllOrder>) object;
+
+                if(usersAllOrderList != null) {
+
+                    // レイアウトマネージャーのセット
+                    mUserOrderHistoryRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+
+                    // アダプターのセット
+                    mUserOrderHistoryRecyclerAdapter = new UserOrderHistoryRecyclerAdapter(mContext, usersAllOrderList);
+                    mUserOrderHistoryRecyclerView.setAdapter(mUserOrderHistoryRecyclerAdapter);
+                }
+
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.e("onFailure", e.toString());
+            }
+        }).setAppToken(user.getAppToken()).execute(Favor.Task.GetUsersAllOrder);
 
         return view;
     }

@@ -5,8 +5,14 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import jp.co.conol.favor_android.R;
+import jp.co.conol.favorlib.favor.model.UsersAllOrder;
 
 /**
  * Created by Masafumi_Ito on 2017/10/24.
@@ -15,21 +21,24 @@ import jp.co.conol.favor_android.R;
 public class UserOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<UserOrderHistoryRecyclerAdapter.ViewHolder> {
 
     private Context mContext;
+    private List<UsersAllOrder> mUsersAllOrderList;
 
     class ViewHolder extends RecyclerView.ViewHolder {
+
+        @BindView(R.id.userOrderMenuTextView) TextView mUserOrderMenuTextView;
+        @BindView(R.id.userOrderMenuPriceTextView) TextView mUserOrderMenuPriceTextView;
 
         // ViewHolderのコンストラクタ
         private ViewHolder(View v) {
             super(v);
-
-            // ButterKnifeのバインド
-//            ButterKnife.bind(this, v);
+            ButterKnife.bind(this, v);
         }
     }
 
     // コンストラクタ
-    public UserOrderHistoryRecyclerAdapter(Context context) {
+    public UserOrderHistoryRecyclerAdapter(Context context, List<UsersAllOrder> usersAllOrderList) {
         mContext = context;
+        mUsersAllOrderList = usersAllOrderList;
     }
 
     @Override
@@ -45,10 +54,16 @@ public class UserOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<UserOr
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
 
+        // 注文内容のオブジェクトを取得
+        UsersAllOrder usersAllOrder = mUsersAllOrderList.get(position);
+
+        // 内容を反映
+        holder.mUserOrderMenuTextView.setText(usersAllOrder.getOrderedItemName());
+        holder.mUserOrderMenuPriceTextView.setText(String.valueOf(usersAllOrder.getOrderedItemPrice()));
     }
 
     @Override
     public int getItemCount() {
-        return 20;
+        return mUsersAllOrderList.size();
     }
 }

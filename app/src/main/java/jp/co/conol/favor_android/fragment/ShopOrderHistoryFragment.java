@@ -80,27 +80,29 @@ public class ShopOrderHistoryFragment extends Fragment {
         // ユーザー情報の取得
         User user = mGson.fromJson(MyUtil.SharedPref.get(mContext, "userSetting"), User.class);
 
-        new Favor(new Favor.AsyncCallback() {
-            @Override
-            public void onSuccess(Object object) {
-                List<Order> orderList = (List<Order>) object;
+        if(mVisitGroupId != 0) {
+            new Favor(new Favor.AsyncCallback() {
+                @Override
+                public void onSuccess(Object object) {
+                    List<Order> orderList = (List<Order>) object;
 
-                if(orderList != null) {
+                    if (orderList != null) {
 
-                    // レイアウトマネージャーのセット
-                    mShopOrderHistoryRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+                        // レイアウトマネージャーのセット
+                        mShopOrderHistoryRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
 
-                    // アダプターのセット
-                    mShopOrderHistoryRecyclerAdapter = new ShopOrderHistoryRecyclerAdapter(mContext, orderList);
-                    mShopOrderHistoryRecyclerView.setAdapter(mShopOrderHistoryRecyclerAdapter);
+                        // アダプターのセット
+                        mShopOrderHistoryRecyclerAdapter = new ShopOrderHistoryRecyclerAdapter(mContext, orderList);
+                        mShopOrderHistoryRecyclerView.setAdapter(mShopOrderHistoryRecyclerAdapter);
+                    }
                 }
-            }
 
-            @Override
-            public void onFailure(Exception e) {
-                Log.e("onFailure", e.toString());
-            }
-        }).setAppToken(user.getAppToken()).setVisitGroupId(mVisitGroupId).execute(Favor.Task.GetUserGroupsOrderInShop);
+                @Override
+                public void onFailure(Exception e) {
+                    Log.e("onFailure", e.toString());
+                }
+            }).setAppToken(user.getAppToken()).setVisitGroupId(mVisitGroupId).execute(Favor.Task.GetUserGroupsOrderInShop);
+        }
 
         return view;
     }
