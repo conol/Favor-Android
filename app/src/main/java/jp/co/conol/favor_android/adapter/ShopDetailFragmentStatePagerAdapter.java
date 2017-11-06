@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favor_android.fragment.ShopDetailInfoFragment;
+import jp.co.conol.favor_android.fragment.ShopOrderHistoryFragment;
 import jp.co.conol.favor_android.fragment.UserFavoriteFragment;
 import jp.co.conol.favor_android.fragment.UserOrderHistoryFragment;
 
@@ -18,19 +19,23 @@ import jp.co.conol.favor_android.fragment.UserOrderHistoryFragment;
 public class ShopDetailFragmentStatePagerAdapter extends FragmentStatePagerAdapter {
 
     private Context mContext;
+    private int mVisitGroupId;
 
-    public ShopDetailFragmentStatePagerAdapter(Context context, FragmentManager fm) {
+    public ShopDetailFragmentStatePagerAdapter(Context context, FragmentManager fm, int visitGroupId) {
         super(fm);
         mContext = context;
+        mVisitGroupId = visitGroupId;
     }
 
     @Override
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
+                // 店舗情報詳細のフラグメントを返す
                 return new ShopDetailInfoFragment();
             default:
-                return new UserOrderHistoryFragment();
+                // 注文履歴のフラグメントを返す
+                return ShopOrderHistoryFragment.newInstance(mVisitGroupId);
         }
     }
 
