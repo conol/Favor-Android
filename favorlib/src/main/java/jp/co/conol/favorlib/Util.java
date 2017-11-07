@@ -28,6 +28,23 @@ import static android.content.Context.WIFI_SERVICE;
 @SuppressWarnings("ALL")
 public class Util {
 
+    public static class Str {
+
+        /**
+         * 文字列が、空白のみ、null、"" ならtrue それ以外は false
+         * @param string
+         * @param boolean
+         */
+        public static boolean isBlank(String string) {
+            String stringTmp = string.replace(" ", "");
+
+            if(stringTmp == null || stringTmp == "") {
+                return true;
+            }
+            return false;
+        }
+    }
+
     public static class SharedPref {
 
         /**

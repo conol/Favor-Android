@@ -23,6 +23,7 @@
     <string name="add_favorite_message">あなたの好きなものを追加してみましょう。\n食べ物や飲み物など何でも追加することで\nおもてなしを受けやすくなります。</string>
     <string name="add_favorite_hint"><font size="12">例：ビーフカレー、ハイボールなど</font></string>
     <string name="add_favorite_button">お気に入りを追加する</string>
+    <string name="add_favorite_error">好きなものの名前を入力してください</string>
 
     <!-- ショップ詳細画面 -->
     <string name="shop_detail_order_stop">お会計する</string>
