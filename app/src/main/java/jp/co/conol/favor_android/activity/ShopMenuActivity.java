@@ -80,85 +80,88 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
                 @SuppressWarnings("unchecked")
                 final List<Menu> menuList = (List<Menu>) object;
 
-                // メニュー注文数のリスト
-                final List<Integer> orderNumList = new ArrayList<>();
-                for(int i = 0; i < menuList.size(); i++) {
-                    orderNumList.add(0);
-                }
+                if(menuList != null && menuList.size() != 0) {
 
-                // レイアウトマネージャーのセット
-                mShopMenuRecyclerView.setLayoutManager(new LinearLayoutManager(ShopMenuActivity.this));
-
-                // アダプターをセット
-                final ShopMenuRecyclerAdapter shopMenuRecyclerAdapter
-                        = new ShopMenuRecyclerAdapter(ShopMenuActivity.this, menuList, orderNumList) {
-                    // メニュータップ時に注文ダイアログを表示
-                    @Override
-                    protected void showOrderDialog(int position, int orderNum) {
-                        mTappedPosition = position; // タップされたポジションを取得
-                        mOrderNumTextView.setText(String.valueOf(orderNum));
-                        mLayoutOrderDialog.setVisibility(View.VISIBLE);
-                        isShownOrderDialog = true;
+                    // メニュー注文数のリスト
+                    final List<Integer> orderNumList = new ArrayList<>();
+                    for (int i = 0; i < menuList.size(); i++) {
+                        orderNumList.add(0);
                     }
-                };
-                mShopMenuRecyclerView.setAdapter(shopMenuRecyclerAdapter);
 
-                // 注文数タップ時の処理
-                mOrderNumConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View view, MotionEvent motionEvent) {
-                        if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                            if(isShownOrderDialog) {
-                                NumberPickerDialog dialog = NumberPickerDialog.newInstance(
-                                        R.layout.layout_number_picker_dialog,
-                                        getString(R.string.shop_menu_order_dialog_title),
-                                        0,
-                                        9,
-                                        getString(R.string.ok),
-                                        getString(R.string.cancel_kana)
-                                );
-                                dialog.show(getSupportFragmentManager(), "numberPickerDialog");
-                            }
+                    // レイアウトマネージャーのセット
+                    mShopMenuRecyclerView.setLayoutManager(new LinearLayoutManager(ShopMenuActivity.this));
+
+                    // アダプターをセット
+                    final ShopMenuRecyclerAdapter shopMenuRecyclerAdapter
+                            = new ShopMenuRecyclerAdapter(ShopMenuActivity.this, menuList, orderNumList) {
+                        // メニュータップ時に注文ダイアログを表示
+                        @Override
+                        protected void showOrderDialog(int position, int orderNum) {
+                            mTappedPosition = position; // タップされたポジションを取得
+                            mOrderNumTextView.setText(String.valueOf(orderNum));
+                            mLayoutOrderDialog.setVisibility(View.VISIBLE);
+                            isShownOrderDialog = true;
                         }
-                        return false;
-                    }
-                });
+                    };
+                    mShopMenuRecyclerView.setAdapter(shopMenuRecyclerAdapter);
 
-                // 注文ダイアログのキャンセルボタンタップ時の処理
-                mCancelButtonConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View view, MotionEvent motionEvent) {
-                        if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                            if(isShownOrderDialog) {
+                    // 注文数タップ時の処理
+                    mOrderNumConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
+                        @Override
+                        public boolean onTouch(View view, MotionEvent motionEvent) {
+                            if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                                if (isShownOrderDialog) {
+                                    NumberPickerDialog dialog = NumberPickerDialog.newInstance(
+                                            R.layout.layout_number_picker_dialog,
+                                            getString(R.string.shop_menu_order_dialog_title),
+                                            0,
+                                            9,
+                                            getString(R.string.ok),
+                                            getString(R.string.cancel_kana)
+                                    );
+                                    dialog.show(getSupportFragmentManager(), "numberPickerDialog");
+                                }
+                            }
+                            return false;
+                        }
+                    });
+
+                    // 注文ダイアログのキャンセルボタンタップ時の処理
+                    mCancelButtonConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
+                        @Override
+                        public boolean onTouch(View view, MotionEvent motionEvent) {
+                            if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                                if (isShownOrderDialog) {
+                                    mLayoutOrderDialog.setVisibility(View.GONE);
+                                    isShownOrderDialog = false;
+                                }
+                            }
+                            return false;
+                        }
+                    });
+
+                    // 注文ダイアログの選択ボタンタップ時の処理
+                    mSelectButtonConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
+                        @Override
+                        public boolean onTouch(View view, MotionEvent motionEvent) {
+                            if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+
+                                // 注文ダイアログを非表示
                                 mLayoutOrderDialog.setVisibility(View.GONE);
                                 isShownOrderDialog = false;
+
+                                // 注文数をメニューに表示
+                                int orderNum = Integer.parseInt(mOrderNumTextView.getText().toString());
+                                orderNumList.set(mTappedPosition, orderNum);
+                                shopMenuRecyclerAdapter.notifyItemChanged(mTappedPosition);
+
+                                // 注文するメニューのオブジェクトを作成し、注文リストに追加
+                                mOrderList.add(new Order(menuList.get(mTappedPosition).getId(), orderNum));
                             }
+                            return false;
                         }
-                        return false;
-                    }
-                });
-
-                // 注文ダイアログの選択ボタンタップ時の処理
-                mSelectButtonConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View view, MotionEvent motionEvent) {
-                        if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
-
-                            // 注文ダイアログを非表示
-                            mLayoutOrderDialog.setVisibility(View.GONE);
-                            isShownOrderDialog = false;
-
-                            // 注文数をメニューに表示
-                            int orderNum =  Integer.parseInt(mOrderNumTextView.getText().toString());
-                            orderNumList.set(mTappedPosition,orderNum);
-                            shopMenuRecyclerAdapter.notifyItemChanged(mTappedPosition);
-
-                            // 注文するメニューのオブジェクトを作成し、注文リストに追加
-                            mOrderList.add(new Order(menuList.get(mTappedPosition).getId(), orderNum));
-                        }
-                        return false;
-                    }
-                });
+                    });
+                }
             }
 
             @Override

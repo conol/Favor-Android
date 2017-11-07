@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 
@@ -44,27 +45,28 @@ public class OrderStopActivity extends AppCompatActivity {
         mVisitGroupId = intent.getIntExtra("visitGroupId", 0);
 
         // 会計するボタンを押した場合、サーバーに退店を通知する
-//        mOrderStopButtonConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View view, MotionEvent motionEvent) {
-//                if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
-//                    new Favor(new Favor.AsyncCallback() {
-//                        @Override
-//                        public void onSuccess(Object object) {
-//                            List<Order> orderList = (List<Order>) object;
-//
-//                            Log.d("test", orderList.get(0).getOrderedItemName());
-//                        }
-//
-//                        @Override
-//                        public void onFailure(Exception e) {
-//                            Log.e("onFailure", e.toString());
-//                        }
-//                    }).setAppToken(user.getAppToken()).setVisitHistoryId(visitHistoryId).execute(Favor.Task.OrderStop);
-//                }
-//                return false;
-//            }
-//        });
+        mOrderStopButtonConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                    new Favor(new Favor.AsyncCallback() {
+                        @Override
+                        public void onSuccess(Object object) {
+                            List<Order> orderList = (List<Order>) object;
+                            Toast.makeText(OrderStopActivity.this, "会計するボタンが押されたよ！", Toast.LENGTH_LONG).show();
+                            Intent intent = new Intent(OrderStopActivity.this, MainActivity.class);
+                            startActivity(intent);
+                        }
+
+                        @Override
+                        public void onFailure(Exception e) {
+                            Log.e("onFailure", e.toString());
+                        }
+                    }).setAppToken(user.getAppToken()).setVisitHistoryId(visitHistoryId).execute(Favor.Task.OrderStop);
+                }
+                return false;
+            }
+        });
 
         if(mVisitGroupId != 0) {
             new Favor(new Favor.AsyncCallback() {

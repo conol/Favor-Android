@@ -121,6 +121,7 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
         // サーバーに送信用するjsonをURLを作成
         String apiUrl = null;
         String requestJsonString = null;
+        JSONObject json = null;
         String responseJsonString = null;
         Type type = null;
 
@@ -168,7 +169,8 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
                 // 入店
                 case EnterShop:
                     apiUrl = "/api/users/enter.json";
-                    requestJsonString = gson.toJson(mDeviceId);
+                    json = new JSONObject("{\"device_id\": \"" + mDeviceId + "\"}");
+                    requestJsonString = json.toString();
                     responseJsonString = Util.Http.post(endPoint + apiUrl, mAppToken, requestJsonString);
                     type = new TypeToken<Shop>(){}.getType();
                     break;
@@ -233,7 +235,8 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
                 // お気に入り登録
                 case AddFavorite:
                     apiUrl = "/api/users/favorites.json";
-                    requestJsonString = "{\"name\": \"" + mFavorite.getName() + "\",\"level\": " + String.valueOf(mFavorite.getLevel()) + "}";
+                    json = new JSONObject("{\"name\": \"" + mFavorite.getName() + "\",\"level\": " + String.valueOf(mFavorite.getLevel()) + "}");
+                    requestJsonString = json.toString();
                     responseJsonString = Util.Http.post(endPoint + apiUrl, mAppToken, requestJsonString);
                     type = new TypeToken<Favorite>(){}.getType();
                     break;
@@ -241,7 +244,8 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
                 // お気に入り編集
                 case EditFavorite:
                     apiUrl = "/api/users/favorites/" + mFavoriteId + ".json";
-                    requestJsonString = "{\"name\": \"" + mFavorite.getName() + "\",\"level\": " + String.valueOf(mFavorite.getLevel()) + "}";
+                    json = new JSONObject("{\"name\": \"" + mFavorite.getName() + "\",\"level\": " + String.valueOf(mFavorite.getLevel()) + "}");
+                    requestJsonString = json.toString();
                     responseJsonString = Util.Http.patch(endPoint + apiUrl, mAppToken, requestJsonString);
                     type = new TypeToken<Favorite>(){}.getType();
                     break;

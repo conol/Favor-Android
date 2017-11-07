@@ -60,9 +60,13 @@ public class ShopHistoryRecyclerAdapter extends RecyclerView.Adapter<ShopHistory
                 // positionを取得
                 final int position = holder.getAdapterPosition();
 
+                // 店舗情報を取得
+                Shop shop = mShopList.get(position);
+
                 // 店舗詳細ページへ移動
                 Intent intent = new Intent(mContext, ShopDetailActivity.class);
-                intent.putExtra("shopId", mShopList.get(position).getShopId());
+                intent.putExtra("shopId", shop.getShopId());
+                intent.putExtra("visitGroupId", shop.getVisitGroupId());
                 mContext.startActivity(intent);
             }
         });

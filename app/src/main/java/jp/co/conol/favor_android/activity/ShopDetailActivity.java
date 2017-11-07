@@ -28,9 +28,11 @@ import jp.co.conol.favorlib.favor.model.User;
 public class ShopDetailActivity extends AppCompatActivity {
 
     private final Gson mGson = new Gson();
+    private Intent mIntent = null;
     private int mVisitGroupId;
     private int mVisitHistoryId;
-    @BindView(R.id.orderStopButtonConstraintLayout) ConstraintLayout mOrderStopButtonConstraintLayout;
+    private boolean enterFlag;  // 入店中か否か
+    @BindView(R.id.orderStopButtonConstraintLayout) ConstraintLayout mOrderStopButtonConstraintLayout; // 「お会計する」ボタン
     @BindView(R.id.shopDetailTabLayout) TabLayout mShopDetailTabLayout;
     @BindView(R.id.shopDetailViewPager) ViewPager mShopDetailViewPager;
     @BindView(R.id.showShopMenuConstraintLayout) ConstraintLayout mShowShopMenuConstraintLayout;
@@ -44,13 +46,22 @@ public class ShopDetailActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         // 遷移前の情報を取得
-        final Intent intent = getIntent();
-        String deviceId = intent.getStringExtra("deviceId");
-        int shopId = intent.getIntExtra("shopId", 0);
+        mIntent = getIntent();
+        String deviceId = mIntent.getStringExtra("deviceId");
+        int shopId = mIntent.getIntExtra("shopId", 0);
         User user = mGson.fromJson(MyUtil.SharedPref.get(this, "userSetting"), User.class);
 
+        // デバイスIDがnullなら、履歴から表示されていると判断
+        if(deviceId == null)
+            enterFlag = false;
+        else
+            enterFlag = true;
+
         // 入店処理（入店した際に店舗情報を表示）
-        if(deviceId != null) {
+        if(enterFlag) {
+            // 入店している場合は「お会計する」ボタンを表示
+            mOrderStopButtonConstraintLayout.setVisibility(View.VISIBLE);
+
             final Handler handler = new Handler();
             new Favor(new Favor.AsyncCallback() {
                 @Override
@@ -90,6 +101,9 @@ public class ShopDetailActivity extends AppCompatActivity {
 
         // 店舗詳細表示（入店履歴から表示された場合）
         else {
+            // 入店していない場合は「お会計する」ボタンを非表示
+            mOrderStopButtonConstraintLayout.setVisibility(View.GONE);
+
             new Favor(new Favor.AsyncCallback() {
                 @Override
                 public void onSuccess(Object object) {
@@ -125,8 +139,13 @@ public class ShopDetailActivity extends AppCompatActivity {
     // 店舗情報をセット
     private void setShopInfo(final Shop shop) {
 
-        // visitGroupIdを取得
-        mVisitGroupId = shop.getVisitGroupId();
+        // visitGroupIdを取得（入店時はAPIの店舗情報から、履歴から表示時はintentから）
+        if(enterFlag)
+            mVisitGroupId = shop.getVisitGroupId();
+        else
+            mVisitGroupId = mIntent.getIntExtra("visitGroupId", 0);
+
+        // visitHistoryIdを取得
         mVisitHistoryId = shop.getVisitHistoryId();
 
         // 店舗情報をViewに反映
