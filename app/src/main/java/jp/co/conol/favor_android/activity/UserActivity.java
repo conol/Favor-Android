@@ -1,16 +1,23 @@
 package jp.co.conol.favor_android.activity;
 
+import android.graphics.drawable.Drawable;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favor_android.adapter.UserFragmentStatePagerAdapter;
@@ -19,24 +26,26 @@ import jp.co.conol.favorlib.favor.model.User;
 public class UserActivity extends AppCompatActivity {
 
     private UserFragmentStatePagerAdapter mUserFragmentStatePagerAdapter;
-    private TextView mUserNameTextView;
-    private TextView mUserGenderTextView;
-    private TextView mUserAgeTextView;
-    private TabLayout mUserTabLayout;
-    private ViewPager mUserViewPager;
-    private FloatingActionButton mAddUserFavoriteFloatingActionButton;
+    private boolean isShownAddFavorite = false;
+    @BindView(R.id.userNameTextView) TextView mUserNameTextView;
+    @BindView(R.id.userGenderTextView) TextView mUserGenderTextView;
+    @BindView(R.id.userAgeTextView) TextView mUserAgeTextView;
+    @BindView(R.id.userTabLayout) TabLayout mUserTabLayout;
+    @BindView(R.id.userViewPager) ViewPager mUserViewPager;
+    @BindView(R.id.addUserFavoriteFloatingActionButton) FloatingActionButton mAddUserFavoriteFloatingActionButton;
+    @BindView(R.id.addFavoriteLayout) ConstraintLayout mAddFavoriteLayout; // お気に入り追加画面
+    @BindView(R.id.favIcon1) ImageView mFavIcon1; // お気に入りのハート画像1
+    @BindView(R.id.favIcon2) ImageView mFavIcon2; // お気に入りのハート画像2
+    @BindView(R.id.favIcon3) ImageView mFavIcon3; // お気に入りのハート画像3
+    @BindView(R.id.favIcon4) ImageView mFavIcon4; // お気に入りのハート画像4
+    @BindView(R.id.favIcon5) ImageView mFavIcon5; // お気に入りのハート画像5
+    @BindView(R.id.favoriteLecelTextView) TextView mFavoriteLecelTextView; // お気に入りのレベル
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user);
-
-        mUserNameTextView = (TextView) findViewById(R.id.userNameTextView);
-        mUserGenderTextView = (TextView) findViewById(R.id.userGenderTextView);
-        mUserAgeTextView = (TextView) findViewById(R.id.userAgeTextView);
-        mUserTabLayout = (TabLayout) findViewById(R.id.userTabLayout);
-        mUserViewPager = (ViewPager) findViewById(R.id.userViewPager);
-        mAddUserFavoriteFloatingActionButton = (FloatingActionButton) findViewById(R.id.addUserFavoriteFloatingActionButton);
+        ButterKnife.bind(this);
 
         // ViewPagerにアダプターをセット
         mUserFragmentStatePagerAdapter = new UserFragmentStatePagerAdapter(this, getSupportFragmentManager());
@@ -81,5 +90,96 @@ public class UserActivity extends AppCompatActivity {
         mUserNameTextView.setText(user.getNickname());
         mUserGenderTextView.setText(user.getGender());
         mUserAgeTextView.setText(String.valueOf(user.getAge()));
+
+        // FABを押した場合、お気に入り追加画面を表示
+        mAddUserFavoriteFloatingActionButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                    mAddFavoriteLayout.setVisibility(View.VISIBLE);
+                    isShownAddFavorite = true;
+                }
+                return false;
+            }
+        });
+
+        // お気に入りのハートのアイコンを押した時の処理
+        mFavIcon1.setOnTouchListener(tapFavIcon);
+        mFavIcon2.setOnTouchListener(tapFavIcon);
+        mFavIcon3.setOnTouchListener(tapFavIcon);
+        mFavIcon4.setOnTouchListener(tapFavIcon);
+        mFavIcon5.setOnTouchListener(tapFavIcon);
+
+        // お気に入り追加画面が開いているときは、背景のタップを出来ないように設定
+        mAddFavoriteLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return isShownAddFavorite;
+            }
+        });
     }
+
+    // お気に入りのハートのアイコンを押した時の処理の内容
+    private View.OnTouchListener tapFavIcon = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View view, MotionEvent motionEvent) {
+            if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+
+                switch (view.getId()) {
+                    case R.id.favIcon1:
+                        mFavIcon2.setImageResource(R.drawable.ic_healt_blank);
+                        mFavIcon3.setImageResource(R.drawable.ic_healt_blank);
+                        mFavIcon4.setImageResource(R.drawable.ic_healt_blank);
+                        mFavIcon5.setImageResource(R.drawable.ic_healt_blank);
+                        mFavoriteLecelTextView.setText("1.0");
+                        break;
+                    case R.id.favIcon2:
+                        mFavIcon2.setImageResource(R.drawable.ic_heart_fill);
+                        mFavIcon3.setImageResource(R.drawable.ic_healt_blank);
+                        mFavIcon4.setImageResource(R.drawable.ic_healt_blank);
+                        mFavIcon5.setImageResource(R.drawable.ic_healt_blank);
+                        mFavoriteLecelTextView.setText("2.0");
+                        break;
+                    case R.id.favIcon3:
+                        mFavIcon2.setImageResource(R.drawable.ic_heart_fill);
+                        mFavIcon3.setImageResource(R.drawable.ic_heart_fill);
+                        mFavIcon4.setImageResource(R.drawable.ic_healt_blank);
+                        mFavIcon5.setImageResource(R.drawable.ic_healt_blank);
+                        mFavoriteLecelTextView.setText("3.0");
+                        break;
+                    case R.id.favIcon4:
+                        mFavIcon2.setImageResource(R.drawable.ic_heart_fill);
+                        mFavIcon3.setImageResource(R.drawable.ic_heart_fill);
+                        mFavIcon4.setImageResource(R.drawable.ic_heart_fill);
+                        mFavIcon5.setImageResource(R.drawable.ic_healt_blank);
+                        mFavoriteLecelTextView.setText("4.0");
+                        break;
+                    case R.id.favIcon5:
+                        mFavIcon2.setImageResource(R.drawable.ic_heart_fill);
+                        mFavIcon3.setImageResource(R.drawable.ic_heart_fill);
+                        mFavIcon4.setImageResource(R.drawable.ic_heart_fill);
+                        mFavIcon5.setImageResource(R.drawable.ic_heart_fill);
+                        mFavoriteLecelTextView.setText("5.0");
+                        break;
+                    default:
+                        break;
+                }
+            }
+            return false;
+        }
+    };
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event){
+        if(keyCode == KeyEvent.KEYCODE_BACK) {
+            if(isShownAddFavorite) {
+                mAddFavoriteLayout.setVisibility(View.GONE);
+                isShownAddFavorite = false;
+            } else {
+                finish();
+            }
+        }
+        return false;
+    }
+
 }

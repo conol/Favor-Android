@@ -18,6 +18,12 @@
     <string name="user_favorite">お気に入り</string>
     <string name="user_order_history">注文履歴</string>
 
+    <!-- お気に入り追加画面 -->
+    <string name="add_favorite_title">お気に入りを追加</string>
+    <string name="add_favorite_message">あなたの好きなものを追加してみましょう。\n食べ物や飲み物など何でも追加することで\nおもてなしを受けやすくなります。</string>
+    <string name="add_favorite_hint"><font size="12">例：ビーフカレー、ハイボールなど</font></string>
+    <string name="add_favorite_button">お気に入りを追加する</string>
+
     <!-- ショップ詳細画面 -->
     <string name="shop_detail_order_stop">お会計する</string>
     <string name="shop_detail_info">基本情報</string>
