@@ -17,6 +17,8 @@
     <!-- ユーザー画面 -->
     <string name="user_favorite">お気に入り</string>
     <string name="user_order_history">注文履歴</string>
+    <string name="user_gender_male">男性</string>
+    <string name="user_gender_female">女性</string>
 
     <!-- お気に入り追加画面 -->
     <string name="add_favorite_title">お気に入りを追加</string>

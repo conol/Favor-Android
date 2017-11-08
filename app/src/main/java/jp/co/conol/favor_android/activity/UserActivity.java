@@ -19,6 +19,8 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import java.util.Objects;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import jp.co.conol.favor_android.MyUtil;
@@ -55,8 +57,6 @@ public class UserActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user);
         ButterKnife.bind(this);
-
-        String test = mAddFavoriteEditText.getText().toString();
 
         // ViewPagerにアダプターをセット
         mUserFragmentStatePagerAdapter = new UserFragmentStatePagerAdapter(this, getSupportFragmentManager());
@@ -97,10 +97,13 @@ public class UserActivity extends AppCompatActivity {
         Gson gson = new Gson();
         final User user = gson.fromJson(MyUtil.SharedPref.get(this, "userSetting"), User.class);
 
+
         // ユーザー情報のセット
+        String userGender = getString(R.string.user_gender_male);
+        if(!Objects.equals(user.getGender(), "male")) userGender = getString(R.string.user_gender_female);
         mUserNameTextView.setText(user.getNickname());
-        mUserGenderTextView.setText(user.getGender());
-        mUserAgeTextView.setText(String.valueOf(user.getAge()));
+        mUserGenderTextView.setText(userGender);
+        mUserAgeTextView.setText(String.valueOf(user.getAge()) + "代");
 
         // FABを押した場合、お気に入り追加画面を表示
         mAddUserFavoriteFloatingActionButton.setOnTouchListener(new View.OnTouchListener() {
