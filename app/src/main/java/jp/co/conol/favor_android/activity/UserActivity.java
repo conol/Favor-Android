@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -106,8 +107,7 @@ public class UserActivity extends AppCompatActivity {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    mAddFavoriteLayout.setVisibility(View.VISIBLE);
-                    isShownAddFavorite = true;
+                    openFavoriteDialog();
                 }
                 return false;
             }
@@ -144,8 +144,7 @@ public class UserActivity extends AppCompatActivity {
                                 mFavIcon5.setImageResource(R.drawable.ic_heart_blank);
                                 mFavoriteLevelTextView.setText("3.0");
                                 mAddFavoriteEditText.setText("");
-                                mAddFavoriteLayout.setVisibility(View.GONE);
-                                isShownAddFavorite = false;
+                                closeFavoriteDialog();
 
                                 // お気に入り一覧のフラグメントを取得して、変更を伝える
                                 Fragment fragment = (Fragment) mUserFragmentStatePagerAdapter.instantiateItem(mUserViewPager, 0);
@@ -182,44 +181,46 @@ public class UserActivity extends AppCompatActivity {
         public boolean onTouch(View view, MotionEvent motionEvent) {
             if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
 
-                switch (view.getId()) {
-                    case R.id.favIcon1:
-                        mFavIcon2.setImageResource(R.drawable.ic_heart_blank);
-                        mFavIcon3.setImageResource(R.drawable.ic_heart_blank);
-                        mFavIcon4.setImageResource(R.drawable.ic_heart_blank);
-                        mFavIcon5.setImageResource(R.drawable.ic_heart_blank);
-                        mFavoriteLevelTextView.setText("1.0");
-                        break;
-                    case R.id.favIcon2:
-                        mFavIcon2.setImageResource(R.drawable.ic_heart_fill);
-                        mFavIcon3.setImageResource(R.drawable.ic_heart_blank);
-                        mFavIcon4.setImageResource(R.drawable.ic_heart_blank);
-                        mFavIcon5.setImageResource(R.drawable.ic_heart_blank);
-                        mFavoriteLevelTextView.setText("2.0");
-                        break;
-                    case R.id.favIcon3:
-                        mFavIcon2.setImageResource(R.drawable.ic_heart_fill);
-                        mFavIcon3.setImageResource(R.drawable.ic_heart_fill);
-                        mFavIcon4.setImageResource(R.drawable.ic_heart_blank);
-                        mFavIcon5.setImageResource(R.drawable.ic_heart_blank);
-                        mFavoriteLevelTextView.setText("3.0");
-                        break;
-                    case R.id.favIcon4:
-                        mFavIcon2.setImageResource(R.drawable.ic_heart_fill);
-                        mFavIcon3.setImageResource(R.drawable.ic_heart_fill);
-                        mFavIcon4.setImageResource(R.drawable.ic_heart_fill);
-                        mFavIcon5.setImageResource(R.drawable.ic_heart_blank);
-                        mFavoriteLevelTextView.setText("4.0");
-                        break;
-                    case R.id.favIcon5:
-                        mFavIcon2.setImageResource(R.drawable.ic_heart_fill);
-                        mFavIcon3.setImageResource(R.drawable.ic_heart_fill);
-                        mFavIcon4.setImageResource(R.drawable.ic_heart_fill);
-                        mFavIcon5.setImageResource(R.drawable.ic_heart_fill);
-                        mFavoriteLevelTextView.setText("5.0");
-                        break;
-                    default:
-                        break;
+                if(isShownAddFavorite) {
+                    switch (view.getId()) {
+                        case R.id.favIcon1:
+                            mFavIcon2.setImageResource(R.drawable.ic_heart_blank);
+                            mFavIcon3.setImageResource(R.drawable.ic_heart_blank);
+                            mFavIcon4.setImageResource(R.drawable.ic_heart_blank);
+                            mFavIcon5.setImageResource(R.drawable.ic_heart_blank);
+                            mFavoriteLevelTextView.setText("1.0");
+                            break;
+                        case R.id.favIcon2:
+                            mFavIcon2.setImageResource(R.drawable.ic_heart_fill);
+                            mFavIcon3.setImageResource(R.drawable.ic_heart_blank);
+                            mFavIcon4.setImageResource(R.drawable.ic_heart_blank);
+                            mFavIcon5.setImageResource(R.drawable.ic_heart_blank);
+                            mFavoriteLevelTextView.setText("2.0");
+                            break;
+                        case R.id.favIcon3:
+                            mFavIcon2.setImageResource(R.drawable.ic_heart_fill);
+                            mFavIcon3.setImageResource(R.drawable.ic_heart_fill);
+                            mFavIcon4.setImageResource(R.drawable.ic_heart_blank);
+                            mFavIcon5.setImageResource(R.drawable.ic_heart_blank);
+                            mFavoriteLevelTextView.setText("3.0");
+                            break;
+                        case R.id.favIcon4:
+                            mFavIcon2.setImageResource(R.drawable.ic_heart_fill);
+                            mFavIcon3.setImageResource(R.drawable.ic_heart_fill);
+                            mFavIcon4.setImageResource(R.drawable.ic_heart_fill);
+                            mFavIcon5.setImageResource(R.drawable.ic_heart_blank);
+                            mFavoriteLevelTextView.setText("4.0");
+                            break;
+                        case R.id.favIcon5:
+                            mFavIcon2.setImageResource(R.drawable.ic_heart_fill);
+                            mFavIcon3.setImageResource(R.drawable.ic_heart_fill);
+                            mFavIcon4.setImageResource(R.drawable.ic_heart_fill);
+                            mFavIcon5.setImageResource(R.drawable.ic_heart_fill);
+                            mFavoriteLevelTextView.setText("5.0");
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
             return false;
@@ -230,8 +231,7 @@ public class UserActivity extends AppCompatActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event){
         if(keyCode == KeyEvent.KEYCODE_BACK) {
             if(isShownAddFavorite) {
-                mAddFavoriteLayout.setVisibility(View.GONE);
-                isShownAddFavorite = false;
+                closeFavoriteDialog();
             } else {
                 finish();
             }
@@ -239,4 +239,21 @@ public class UserActivity extends AppCompatActivity {
         return false;
     }
 
+    // お気に入り追加画面を表示
+    private void openFavoriteDialog() {
+        mAddFavoriteLayout.setVisibility(View.VISIBLE);
+        isShownAddFavorite = true;
+        mAddFavoriteEditText.setEnabled(true);
+        mAddFavoriteButtonConstraintLayout.setClickable(true);
+        mAddFavoriteLayout.setAnimation(AnimationUtils.loadAnimation(UserActivity.this, R.anim.fade_in_slowly));
+    }
+
+    // お気に入り追加画面を非表示
+    private void closeFavoriteDialog() {
+        mAddFavoriteLayout.setVisibility(View.GONE);
+        mAddFavoriteLayout.setAnimation(AnimationUtils.loadAnimation(UserActivity.this, R.anim.fade_out_slowly));
+        mAddFavoriteEditText.setEnabled(false);
+        mAddFavoriteButtonConstraintLayout.setClickable(false);
+        isShownAddFavorite = false;
+    }
 }
