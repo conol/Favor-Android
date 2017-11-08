@@ -97,61 +97,64 @@ public class MainActivity extends AppCompatActivity {
         // ユーザー情報を取得
         mUser = mGson.fromJson(MyUtil.SharedPref.get(this, "userSetting"), User.class);
 
-        // 入店履歴を取得
-        new Favor(new Favor.AsyncCallback() {
-            @Override
-            public void onSuccess(Object object) {
-                @SuppressWarnings("unchecked")
-                List<Shop> shopList = (List<Shop>) object;
+        if(mUser != null) {
+            
+            // 入店履歴を取得
+            new Favor(new Favor.AsyncCallback() {
+                @Override
+                public void onSuccess(Object object) {
+                    @SuppressWarnings("unchecked")
+                    List<Shop> shopList = (List<Shop>) object;
 
-                if(shopList != null && shopList.size() != 0) {
-                    mShopHistoryTitleTextView.setText(shopList.get(shopList.size() - 1).getShopName());
-                } else {
-                    mShopHistoryTitleTextView.setText(getString(R.string.shop_history_none));
+                    if (shopList != null && shopList.size() != 0) {
+                        mShopHistoryTitleTextView.setText(shopList.get(shopList.size() - 1).getShopName());
+                    } else {
+                        mShopHistoryTitleTextView.setText(getString(R.string.shop_history_none));
+                    }
                 }
-            }
 
-            @Override
-            public void onFailure(Exception e) {
-                Log.e("onFailure", e.toString());
-            }
-        }).setAppToken(mUser.getAppToken()).execute(Favor.Task.GetVisitedShopHistory);
-
-        // 入店履歴をタップした時の動作
-        mShopHistoryConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    Intent intent = new Intent(MainActivity.this, ShopHistoryActivity.class);
-                    startActivity(intent);
+                @Override
+                public void onFailure(Exception e) {
+                    Log.e("onFailure", e.toString());
                 }
-                return false;
-            }
-        });
+            }).setAppToken(mUser.getAppToken()).execute(Favor.Task.GetVisitedShopHistory);
 
-        // ユーザー名を表示
-        String userSettingTitle = mUser.getNickname() + getResources().getString(R.string.user_setting_title);
-        mUserSettingTextView.setText(userSettingTitle);
-
-        // ユーザー情報をタップした時の動作
-        mUserSettingConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    Intent intent = new Intent(MainActivity.this, UserActivity.class);
-                    startActivity(intent);
+            // 入店履歴をタップした時の動作
+            mShopHistoryConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View view, MotionEvent motionEvent) {
+                    if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                        Intent intent = new Intent(MainActivity.this, ShopHistoryActivity.class);
+                        startActivity(intent);
+                    }
+                    return false;
                 }
-                return false;
-            }
-        });
+            });
 
-        // スキャン画面が開いているときは、背景のタップを出来ないように設定
-        mScanBackgroundConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return isScanning;
-            }
-        });
+            // ユーザー名を表示
+            String userSettingTitle = mUser.getNickname() + getResources().getString(R.string.user_setting_title);
+            mUserSettingTextView.setText(userSettingTitle);
+
+            // ユーザー情報をタップした時の動作
+            mUserSettingConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View view, MotionEvent motionEvent) {
+                    if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                        Intent intent = new Intent(MainActivity.this, UserActivity.class);
+                        startActivity(intent);
+                    }
+                    return false;
+                }
+            });
+
+            // スキャン画面が開いているときは、背景のタップを出来ないように設定
+            mScanBackgroundConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    return isScanning;
+                }
+            });
+        }
     }
 
     @Override

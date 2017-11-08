@@ -7,7 +7,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -25,13 +29,31 @@ public class UserOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<UserOr
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
-        @BindView(R.id.userOrderMenuTextView) TextView mUserOrderMenuTextView;
-        @BindView(R.id.userOrderMenuPriceTextView) TextView mUserOrderMenuPriceTextView;
+        private TextView mUserOrderMenuTextView;
+        private TextView mUserOrderMenuPriceTextView;
+        private TextView mUserOrderDateTextView;
+        private TextView mUserOrderShopNameTextView;
 
         // ViewHolderのコンストラクタ
-        private ViewHolder(View v) {
+        private ViewHolder(View v, int viewType) {
             super(v);
-            ButterKnife.bind(this, v);
+            switch (viewType) {
+
+                // 要素がヘッダーの場合
+                case 0:
+                    mUserOrderDateTextView = (TextView) v.findViewById(R.id.userOrderDateTextView);
+                    mUserOrderShopNameTextView = (TextView) v.findViewById(R.id.userOrderShopNameTextView);
+                    break;
+
+                // 要素が注文した商品の場合
+                case 1:
+                    mUserOrderMenuTextView = (TextView) v.findViewById(R.id.userOrderMenuTextView);
+                    mUserOrderMenuPriceTextView = (TextView) v.findViewById(R.id.userOrderMenuPriceTextView);
+                    break;
+
+                default:
+                    break;
+            }
         }
     }
 
@@ -43,10 +65,26 @@ public class UserOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<UserOr
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user_order_history, parent, false);
+
+        View view  = null;
+        switch (viewType) {
+
+            // 要素がヘッダーの場合
+            case 0:
+                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user_order_history_header, parent, false);
+                break;
+
+            // 要素が注文した商品の場合
+            case 1:
+                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user_order_history, parent, false);
+                break;
+
+            default:
+                break;
+        }
 
         // ViewHolder作成
-        final ViewHolder holder = new ViewHolder(view);
+        final ViewHolder holder = new ViewHolder(view, viewType);
 
         return holder;
     }
@@ -58,12 +96,42 @@ public class UserOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<UserOr
         UsersAllOrder usersAllOrder = mUsersAllOrderList.get(position);
 
         // 内容を反映
-        holder.mUserOrderMenuTextView.setText(usersAllOrder.getOrderedItemName());
-        holder.mUserOrderMenuPriceTextView.setText(String.valueOf(usersAllOrder.getOrderedItemPrice()));
+        if(holder.mUserOrderMenuTextView != null && holder.mUserOrderMenuPriceTextView != null) {
+            holder.mUserOrderMenuTextView.setText(usersAllOrder.getOrderedItemName());
+            holder.mUserOrderMenuPriceTextView.setText(String.valueOf(usersAllOrder.getOrderedItemPrice()) + "円");
+        } else if(holder.mUserOrderDateTextView != null && holder.mUserOrderShopNameTextView != null && 1 < mUsersAllOrderList.size()) {
+            SimpleDateFormat sdFormat = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
+            Date date = null;
+            String dateString = mUsersAllOrderList.get(position + 1).getEnterAt();
+            try {
+                date = sdFormat.parse(dateString);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+//            if(date != null) holder.mUserOrderDateTextView.setText(date.toString());
+            holder.mUserOrderDateTextView.setText(mUsersAllOrderList.get(position + 1).getEnterAt());
+            holder.mUserOrderShopNameTextView.setText(mUsersAllOrderList.get(position + 1).getShopName());
+        }
     }
 
     @Override
     public int getItemCount() {
         return mUsersAllOrderList.size();
+    }
+
+    // ViewTypeでリストのポジションを返す
+    @Override
+    public int getItemViewType(int position) {
+
+        UsersAllOrder usersAllOrder = mUsersAllOrderList.get(position);
+
+        int viewType = 0;
+        if(usersAllOrder.getEnterAt() != null) {
+            viewType = 1;
+        }
+
+        // ヘッダーの場合は0、それ以外の場合は1を返す
+        return viewType;
     }
 }

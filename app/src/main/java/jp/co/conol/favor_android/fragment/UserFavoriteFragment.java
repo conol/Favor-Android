@@ -126,7 +126,9 @@ public class UserFavoriteFragment extends Fragment {
 
     // お気に入り追加をadapterに伝える（UserActivityから呼び出して使用）
     public void notifyDataChanged(Favorite favorite) {
-        mFavoriteList.add(favorite);
-        mUserFavoriteRecyclerAdapter.notifyDataSetChanged();
+        if(mFavoriteList != null) {
+            mFavoriteList.add(favorite);
+            mUserFavoriteRecyclerAdapter.notifyDataSetChanged();
+        }
     }
 }
