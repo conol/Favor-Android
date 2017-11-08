@@ -50,7 +50,8 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.userSettingTextView) TextView mUserSettingTextView;
     @BindView(R.id.ScanBackgroundConstraintLayout) ConstraintLayout mScanBackgroundConstraintLayout;
     @BindView(R.id.scanDialogConstraintLayout) ConstraintLayout mScanDialogConstraintLayout;
-    @BindView(R.id.shopHistoryTitleTextView) TextView mShopHistoryTitleTextView;
+//    @BindView(R.id.shopHistoryTitleTextView) TextView mShopHistoryTitleTextView;
+    @BindView(R.id.shopNameTextView) TextView mShopNameTextView;
     private final int PERMISSION_REQUEST_CODE = 1000;
 
     @Override
@@ -107,9 +108,13 @@ public class MainActivity extends AppCompatActivity {
                     List<Shop> shopList = (List<Shop>) object;
 
                     if (shopList != null && shopList.size() != 0) {
-                        mShopHistoryTitleTextView.setText(shopList.get(shopList.size() - 1).getShopName());
+
+                        // 最後に入店した店舗のオブジェクトを取得
+                        Shop shop = shopList.get(shopList.size() - 1);
+
+                        mShopNameTextView.setText(shop.getShopName());
                     } else {
-                        mShopHistoryTitleTextView.setText(getString(R.string.shop_history_none));
+                        mShopNameTextView.setText(getString(R.string.shop_history_none));
                     }
                 }
 
