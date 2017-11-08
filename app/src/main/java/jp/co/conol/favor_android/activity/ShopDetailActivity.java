@@ -154,7 +154,12 @@ public class ShopDetailActivity extends AppCompatActivity {
 
         // 基本情報と注文履歴のViewPagerにアダプターをセット
         ShopDetailFragmentStatePagerAdapter shopDetailFragmentStatePagerAdapter
-                = new ShopDetailFragmentStatePagerAdapter(ShopDetailActivity.this, getSupportFragmentManager(), mVisitGroupId);
+                = new ShopDetailFragmentStatePagerAdapter(
+                    ShopDetailActivity.this,
+                    getSupportFragmentManager(),
+                    mVisitGroupId,
+                    mGson.toJson(shop)
+        );
         mShopDetailViewPager.setAdapter(shopDetailFragmentStatePagerAdapter);
         mShopDetailTabLayout.setupWithViewPager(mShopDetailViewPager);
 

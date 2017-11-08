@@ -20,11 +20,13 @@ public class ShopDetailFragmentStatePagerAdapter extends FragmentStatePagerAdapt
 
     private Context mContext;
     private int mVisitGroupId;
+    private String mShopJson;
 
-    public ShopDetailFragmentStatePagerAdapter(Context context, FragmentManager fm, int visitGroupId) {
+    public ShopDetailFragmentStatePagerAdapter(Context context, FragmentManager fm, int visitGroupId, String shopJson) {
         super(fm);
         mContext = context;
         mVisitGroupId = visitGroupId;
+        mShopJson = shopJson;
     }
 
     @Override
@@ -32,7 +34,7 @@ public class ShopDetailFragmentStatePagerAdapter extends FragmentStatePagerAdapt
         switch (position) {
             case 0:
                 // 店舗情報詳細のフラグメントを返す
-                return new ShopDetailInfoFragment();
+                return ShopDetailInfoFragment.newInstance(mShopJson);
             default:
                 // 注文履歴のフラグメントを返す
                 return ShopOrderHistoryFragment.newInstance(mVisitGroupId);

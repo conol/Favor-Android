@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -100,17 +101,9 @@ public class UserOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<UserOr
             holder.mUserOrderMenuTextView.setText(usersAllOrder.getOrderedItemName());
             holder.mUserOrderMenuPriceTextView.setText(String.valueOf(usersAllOrder.getOrderedItemPrice()) + "円");
         } else if(holder.mUserOrderDateTextView != null && holder.mUserOrderShopNameTextView != null && 1 < mUsersAllOrderList.size()) {
-            SimpleDateFormat sdFormat = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
-            Date date = null;
             String dateString = mUsersAllOrderList.get(position + 1).getEnterAt();
-            try {
-                date = sdFormat.parse(dateString);
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-
-//            if(date != null) holder.mUserOrderDateTextView.setText(date.toString());
-            holder.mUserOrderDateTextView.setText(mUsersAllOrderList.get(position + 1).getEnterAt());
+            String[] dateStringTmp = dateString.split("T", 0);
+            holder.mUserOrderDateTextView.setText(dateStringTmp[0].replace("-", "/"));
             holder.mUserOrderShopNameTextView.setText(mUsersAllOrderList.get(position + 1).getShopName());
         }
     }

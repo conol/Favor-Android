@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
         mUser = mGson.fromJson(MyUtil.SharedPref.get(this, "userSetting"), User.class);
 
         if(mUser != null) {
-            
+
             // 入店履歴を取得
             new Favor(new Favor.AsyncCallback() {
                 @Override

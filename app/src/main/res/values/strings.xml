@@ -32,6 +32,12 @@
     <string name="shop_detail_info">基本情報</string>
     <string name="shop_detail_order_menu">注文履歴</string>
     <string name="shop_menu_show">注文メニューを表示する</string>
+    <string name="shop_open_at">営業時間</string>
+    <string name="shop_closed_day">定休日</string>
+    <string name="shop_address">住所</string>
+    <string name="shop_phone_number">電話番号</string>
+    <string name="shop_charge">チャージ料金</string>
+    <string name="shop_card_brands">利用可能カード</string>
 
     <!-- ショップメニュー画面 -->
     <string name="shop_menu_title">MENU</string>
@@ -68,8 +74,5 @@
     <string name="select">選択する</string>
     <string name="cancel">Cancel</string>
     <string name="cancel_kana">キャンセル</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>
