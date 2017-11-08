@@ -38,10 +38,13 @@ public class Util {
         public static boolean isBlank(String string) {
             String stringTmp = string.replace(" ", "");
 
-            if(stringTmp == null || stringTmp == "") {
+            int stringTmpLength = stringTmp.length();
+
+            if(stringTmp == null || stringTmpLength == 0) {
                 return true;
+            } else {
+                return false;
             }
-            return false;
         }
     }
 

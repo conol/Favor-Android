@@ -5,8 +5,15 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import jp.co.conol.favor_android.R;
+import jp.co.conol.favorlib.favor.model.Favorite;
+import jp.co.conol.favorlib.favor.model.UsersAllOrder;
 
 /**
  * Created by Masafumi_Ito on 2017/10/24.
@@ -15,21 +22,24 @@ import jp.co.conol.favor_android.R;
 public class UserFavoriteRecyclerAdapter extends RecyclerView.Adapter<UserFavoriteRecyclerAdapter.ViewHolder> {
 
     private Context mContext;
+    private List<Favorite> mFavoriteList;
 
     class ViewHolder extends RecyclerView.ViewHolder {
+
+        @BindView(R.id.userFavoriteLevelTextView) TextView mUserFavoriteLevelTextView;
+        @BindView(R.id.userFavoriteMenuTextView) TextView mUserFavoriteMenuTextView;
 
         // ViewHolderのコンストラクタ
         private ViewHolder(View v) {
             super(v);
-
-            // ButterKnifeのバインド
-//            ButterKnife.bind(this, v);
+            ButterKnife.bind(this, v);
         }
     }
 
     // コンストラクタ
-    public UserFavoriteRecyclerAdapter(Context context) {
+    public UserFavoriteRecyclerAdapter(Context context, List<Favorite> favoriteList) {
         mContext = context;
+        mFavoriteList = favoriteList;
     }
 
     @Override
@@ -45,10 +55,21 @@ public class UserFavoriteRecyclerAdapter extends RecyclerView.Adapter<UserFavori
     @Override
     public void onBindViewHolder(UserFavoriteRecyclerAdapter.ViewHolder holder, int position) {
 
+        // お気に入りのオブジェクトを取得
+        Favorite favorite = mFavoriteList.get(position);
+
+        holder.mUserFavoriteLevelTextView.setText(String.valueOf(favorite.getLevel()) + ".0");
+        holder.mUserFavoriteMenuTextView.setText(favorite.getName());
     }
 
     @Override
     public int getItemCount() {
-        return 20;
+        return mFavoriteList.size();
+    }
+
+    // 要素を削除
+    public void remove(int position) {
+        mFavoriteList.remove(position);
+        notifyItemRemoved(position);
     }
 }

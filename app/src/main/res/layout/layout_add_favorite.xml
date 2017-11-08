@@ -61,7 +61,7 @@
             android:layout_marginTop="32dp"
             android:ems="10"
             android:hint="@string/add_favorite_hint"
-            android:inputType="textPersonName"
+            android:inputType="text"
             android:maxLines="1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -102,7 +102,7 @@
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@+id/favIcon1"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_healt_blank" />
+                app:srcCompat="@drawable/ic_heart_fill" />
 
             <ImageView
                 android:id="@+id/favIcon3"
@@ -115,7 +115,7 @@
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@+id/favIcon2"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_healt_blank" />
+                app:srcCompat="@drawable/ic_heart_fill" />
 
             <ImageView
                 android:id="@+id/favIcon4"
@@ -128,7 +128,7 @@
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@+id/favIcon3"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_healt_blank" />
+                app:srcCompat="@drawable/ic_heart_blank" />
 
             <ImageView
                 android:id="@+id/favIcon5"
@@ -141,7 +141,7 @@
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@+id/favIcon4"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_healt_blank" />
+                app:srcCompat="@drawable/ic_heart_blank" />
 
             <TextView
                 android:id="@+id/favoriteLecelTextView"
@@ -149,7 +149,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="15dp"
                 android:layout_marginTop="16dp"
-                android:text="1.0"
+                android:text="3.0"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
