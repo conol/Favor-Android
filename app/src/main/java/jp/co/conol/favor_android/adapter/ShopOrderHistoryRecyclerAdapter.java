@@ -27,7 +27,7 @@ public class ShopOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<ShopOr
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
-        @BindView(R.id.shopOrderUserNameTextView) TextView mShopOrderUserNameTextView;
+//        @BindView(R.id.shopOrderUserNameTextView) TextView mShopOrderUserNameTextView;
         @BindView(R.id.shopOrderMenuNameTextView) TextView mShopOrderMenuNameTextView;
         @BindView(R.id.shopOrderMenuPriceTextView) TextView mShopOrderMenuPriceTextView;
 
@@ -61,9 +61,9 @@ public class ShopOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<ShopOr
         Order order = mOrderList.get(position);
 
         // 内容を反映
-        holder.mShopOrderUserNameTextView.setText(order.getOrderedUserNickname());
+//        holder.mShopOrderUserNameTextView.setText(order.getOrderedUserNickname());
         holder.mShopOrderMenuNameTextView.setText(order.getOrderedItemName());
-        holder.mShopOrderMenuPriceTextView.setText(String.valueOf(order.getOrderedItemPrice()));
+        holder.mShopOrderMenuPriceTextView.setText(String.valueOf(order.getOrderedItemPrice()) + "円");
     }
 
     @Override
