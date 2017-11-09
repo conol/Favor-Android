@@ -13,6 +13,7 @@ import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
+import android.nfc.tech.IsoDep;
 import android.nfc.tech.MifareUltralight;
 import android.nfc.tech.Ndef;
 import android.nfc.tech.NfcA;
@@ -44,6 +45,7 @@ import jp.co.conol.favorlib.cuona.cuona_reader.CuonaReaderLegacyTag;
 import jp.co.conol.favorlib.cuona.cuona_reader.CuonaReaderSecureTag;
 import jp.co.conol.favorlib.cuona.cuona_reader.CuonaReaderTag;
 import jp.co.conol.favorlib.cuona.cuona_writer.CuonaWritableT2;
+import jp.co.conol.favorlib.cuona.cuona_writer.CuonaWritableT4;
 import jp.co.conol.favorlib.cuona.cuona_writer.CuonaWritableTag;
 
 /**
@@ -57,8 +59,8 @@ public class Cuona {
     private final PendingIntent pendingIntent;
     private final IntentFilter[] intentFilters;
     private final String[][] techList;
-    private String mReadLogMessage = "read!";
-    private String mWriteLogMessage = "write!";
+    private String mReadLogMessage = "Read";
+    private String mWriteLogMessage = "Write";
     public static final int TAG_TYPE_UNKNOWN = 0;
     public static final int TAG_TYPE_CUONA = 1;
     public static final int TAG_TYPE_SEAL = 2;
@@ -77,13 +79,18 @@ public class Cuona {
         IntentFilter actionNdef = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
         actionNdef.addDataScheme("vnd.android.nfc");
         actionNdef.addDataPath("/conol.jp:cuona", PatternMatcher.PATTERN_LITERAL);
+        actionNdef.addDataPath("/conol.co.jp:cnfc_bt_manu_data", PatternMatcher.PATTERN_LITERAL);
 
         intentFilters = new IntentFilter[]{
                 actionNdef
         };
 
         techList = new String[][]{
-                new String[] { NfcA.class.getName(), MifareUltralight.class.getName() }
+                // Typ2 2 Mifare UltraLight Seal, like NXP NTAG21x
+                new String[]{NfcA.class.getName(), MifareUltralight.class.getName(), Ndef.class.getName()},
+
+                // Type 4 Dynamic, like ST M24SRxx
+                new String[]{NfcA.class.getName(), IsoDep.class.getName(), Ndef.class.getName()}
         };
 
         // 本体に登録されているログを取得（2次元配列）
@@ -92,7 +99,7 @@ public class Cuona {
         String savedLog[][] = gson.fromJson(pref.getString("savedLog", null), String[][].class);
 
         // ネットに繋がっていればログの送信
-        if(savedLog != null && (Util.Network.isEnable(context) || Util.Wifi.isEnable(context))) {
+        if (savedLog != null && (Util.Network.isEnable(context) || Util.Wifi.isEnable(context))) {
             new SendLog(new SendLog.AsyncCallback() {
                 @Override
                 public void onSuccess(JSONObject responseJson) {
@@ -130,7 +137,7 @@ public class Cuona {
             e.printStackTrace();
             throw new CuonaException(e);
         }
-        if(tag != null) {
+        if (tag != null) {
             return tag.getType();
         } else {
             return Cuona.TAG_TYPE_UNKNOWN;
@@ -145,7 +152,7 @@ public class Cuona {
             e.printStackTrace();
             throw new CuonaException(e);
         }
-        if(tag != null) {
+        if (tag != null) {
             return tag.getDeviceIdString();
         } else {
             return null;
@@ -160,7 +167,23 @@ public class Cuona {
             e.printStackTrace();
             throw new CuonaException(e);
         }
-        if(tag != null) {
+        if (tag != null) {
+            return tag.getJSONString();
+        } else {
+            return null;
+        }
+    }
+
+    // ログ送信を行わない（書き込み時に一度読み込むが、その際はログを送信したくないので、そこで使用）
+    public String readJsonNonLog(Intent intent) throws CuonaException {
+        CuonaReaderTag tag;
+        try {
+            tag = getReadTagFromIntent(intent, false);
+        } catch (CuonaException e) {
+            e.printStackTrace();
+            throw new CuonaException(e);
+        }
+        if (tag != null) {
             return tag.getJSONString();
         } else {
             return null;
@@ -171,7 +194,7 @@ public class Cuona {
         CuonaWritableTag tag;
         try {
             tag = getWriteTagFromIntent(intent);
-            if(tag != null) tag.writeJSON(json);
+            if (tag != null) tag.writeJSON(json);
         } catch (CuonaException | IOException e) {
             e.printStackTrace();
             throw new CuonaException(e);
@@ -202,101 +225,18 @@ public class Cuona {
                 MifareUltralight mul = MifareUltralight.get(tag);
                 if (mul != null) {
 
-                    // 以下からログ送信に必要
-
-                    Ndef ndef = Ndef.get(tag);
-                    if (ndef == null) {
-                        throw new CuonaException("Not NDEF tag");
-                    }
-
-                    NdefMessage msg;
-                    try {
-                        ndef.connect();
-                        msg = ndef.getNdefMessage();
-                    } catch (IOException | FormatException e) {
-                        throw new CuonaException(e);
-                    } finally {
-                        try {
-                            ndef.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    if(msg == null) throw new CuonaException("Can not available WifiHelper!!");
-
-                    NdefRecord[] records = msg.getRecords();
-                    for (NdefRecord rec : records) {
-
-                        CuonaReaderTag cuonaReaderTag = null;
-
-                        CuonaReaderSecureTag stag = CuonaReaderSecureTag.get(rec);
-                        if (stag != null) {
-                            cuonaReaderTag = stag;
-                        }
-                        CuonaReaderLegacyTag ltag = CuonaReaderLegacyTag.get(rec);
-                        if (ltag != null) {
-                            cuonaReaderTag = ltag;
-                        }
-
-                        if (cuonaReaderTag != null) {
-
-                            // 位置情報の取得
-                            GetLocation location = new GetLocation(context);
-                            String locationInfo = "";
-                            if(location.getCurrentLocation() != null) {
-                                locationInfo = String.valueOf(location.getCurrentLocation().getLatitude()) + "," + String.valueOf(location.getCurrentLocation().getLongitude());
-                            }
-
-                            // デバイスIDをサーバーで送信可能な形式に変換
-                            String deviceId = Util.Transform.deviceIdForServer(cuonaReaderTag.getDeviceIdString());
-
-                            // 現在のログを作成
-                            String currentLog[] = {deviceId, locationInfo, mWriteLogMessage};
-
-                            Gson gson = new Gson();
-
-                            // 本体に登録されているログを取得（2次元配列）
-                            final SharedPreferences pref = context.getSharedPreferences("logs", Context.MODE_PRIVATE);
-                            String savedLog[][] = gson.fromJson(pref.getString("savedLog", null), String[][].class);
-
-                            // サーバーに送信するためのログを作成
-                            int toSendLogLength = 1;
-                            if(savedLog != null) {
-                                toSendLogLength += savedLog.length;
-                            }
-                            String toSendLog[][] = new String[toSendLogLength][currentLog.length];
-                            toSendLog[0] = currentLog;
-                            if(savedLog != null) {
-                                System.arraycopy(savedLog, 0, toSendLog, 1, toSendLogLength - 1);
-                            }
-
-                            // ネットに繋がっていればログの送信
-                            if(Util.Network.isEnable(context) || Util.Wifi.isEnable(context)) {
-                                new SendLog(new SendLog.AsyncCallback() {
-                                    @Override
-                                    public void onSuccess(JSONObject responseJson) {
-                                        // 保存されているログは削除
-                                        SharedPreferences.Editor editor = pref.edit();
-                                        editor.putString("savedLog", null);
-                                        editor.apply();
-                                    }
-
-                                    @Override
-                                    public void onFailure(Exception e) {
-                                        Log.d("SendLogFailure", e.toString());
-                                    }
-                                }).execute(toSendLog);
-                            }
-                            // ネットに繋がっていなければログを保存
-                            else {
-                                SharedPreferences.Editor editor = pref.edit();
-                                editor.putString("savedLog", gson.toJson(toSendLog));
-                                editor.apply();
-                            }
-                        }
-                    }
+                    // ログの送信
+                    sendWriteLog(tag);
 
                     return new CuonaWritableT2(mul);
+                }
+                IsoDep isoDep = IsoDep.get(tag);
+                if (isoDep != null) {
+
+                    // ログの送信
+                    sendWriteLog(tag);
+
+                    return new CuonaWritableT4(isoDep);
                 }
             }
         }
@@ -342,7 +282,7 @@ public class Cuona {
                 e.printStackTrace();
             }
         }
-        if(msg == null) throw new CuonaException("Can not available WifiHelper!!");
+        if (msg == null) throw new CuonaException("Can not available!!");
 
         NdefRecord[] records = msg.getRecords();
         for (NdefRecord rec : records) {
@@ -423,16 +363,113 @@ public class Cuona {
         throw new CuonaException("Not Cuona tag");
     }
 
+    // 書き込みログ送信用メソッド（MiFareULとIsoDepで使用するため、まとめる）
+    private void sendWriteLog(Tag tag) throws CuonaException {
+
+        Ndef ndef = Ndef.get(tag);
+        if (ndef == null) {
+            throw new CuonaException("Not NDEF tag");
+        }
+
+        NdefMessage msg;
+        try {
+            ndef.connect();
+            msg = ndef.getNdefMessage();
+        } catch (IOException | FormatException e) {
+            throw new CuonaException(e);
+        } finally {
+            try {
+                ndef.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if (msg == null) throw new CuonaException("Can not available!!");
+
+        NdefRecord[] records = msg.getRecords();
+        for (NdefRecord rec : records) {
+
+            CuonaReaderTag cuonaReaderTag = null;
+
+            CuonaReaderSecureTag stag = CuonaReaderSecureTag.get(rec);
+            if (stag != null) {
+                cuonaReaderTag = stag;
+            }
+            CuonaReaderLegacyTag ltag = CuonaReaderLegacyTag.get(rec);
+            if (ltag != null) {
+                cuonaReaderTag = ltag;
+            }
+
+            if (cuonaReaderTag != null) {
+
+                // 位置情報の取得
+                GetLocation location = new GetLocation(context);
+                String locationInfo = "";
+                if (location.getCurrentLocation() != null) {
+                    locationInfo = String.valueOf(location.getCurrentLocation().getLatitude()) + "," + String.valueOf(location.getCurrentLocation().getLongitude());
+                }
+
+                // デバイスIDをサーバーで送信可能な形式に変換
+                String deviceId = Util.Transform.deviceIdForServer(cuonaReaderTag.getDeviceIdString());
+
+                // 現在のログを作成
+                String currentLog[] = {deviceId, locationInfo, mWriteLogMessage};
+
+                Gson gson = new Gson();
+
+                // 本体に登録されているログを取得（2次元配列）
+                final SharedPreferences pref = context.getSharedPreferences("logs", Context.MODE_PRIVATE);
+                String savedLog[][] = gson.fromJson(pref.getString("savedLog", null), String[][].class);
+
+                // サーバーに送信するためのログを作成
+                int toSendLogLength = 1;
+                if (savedLog != null) {
+                    toSendLogLength += savedLog.length;
+                }
+                String toSendLog[][] = new String[toSendLogLength][currentLog.length];
+                toSendLog[0] = currentLog;
+                if (savedLog != null) {
+                    System.arraycopy(savedLog, 0, toSendLog, 1, toSendLogLength - 1);
+                }
+
+                // ネットに繋がっていればログの送信
+                if (Util.Network.isEnable(context) || Util.Wifi.isEnable(context)) {
+                    new SendLog(new SendLog.AsyncCallback() {
+                        @Override
+                        public void onSuccess(JSONObject responseJson) {
+                            // 保存されているログは削除
+                            SharedPreferences.Editor editor = pref.edit();
+                            editor.putString("savedLog", null);
+                            editor.apply();
+                        }
+
+                        @Override
+                        public void onFailure(Exception e) {
+                            Log.d("SendLogFailure", e.toString());
+                        }
+                    }).execute(toSendLog);
+                }
+                // ネットに繋がっていなければログを保存
+                else {
+                    SharedPreferences.Editor editor = pref.edit();
+                    editor.putString("savedLog", gson.toJson(toSendLog));
+                    editor.apply();
+                }
+            }
+        }
+    }
+
     public static class SendLog extends AsyncTask<String[][], Void, JSONObject> {
 
         private AsyncCallback mAsyncCallback = null;
 
-        public interface AsyncCallback{
+        public interface AsyncCallback {
             void onSuccess(JSONObject responseJson);
+
             void onFailure(Exception e);
         }
 
-        public SendLog(AsyncCallback asyncCallback){
+        public SendLog(AsyncCallback asyncCallback) {
             this.mAsyncCallback = asyncCallback;
         }
 
@@ -449,7 +486,7 @@ public class Cuona {
             JSONObject deviceLogsJson = new JSONObject();
             JSONArray deviceLogJsonArray = new JSONArray();
             try {
-                for(int i = 0; i < params[0].length; i++) {
+                for (int i = 0; i < params[0].length; i++) {
                     JSONObject jsonOneData;
                     jsonOneData = new JSONObject();
                     jsonOneData.put("device_id", params[0][i][0]);
