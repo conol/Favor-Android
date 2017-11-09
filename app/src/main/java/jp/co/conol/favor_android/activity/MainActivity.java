@@ -187,6 +187,7 @@ public class MainActivity extends AppCompatActivity {
                         // nfc読み込み処理実行
                         String deviceId;
                         try {
+                            mCuona.setReadLogMessage("入店");
                             deviceId = mCuona.readDeviceId(intent);
                         } catch (CuonaException e) {
                             Log.d("CuonaReader", e.toString());

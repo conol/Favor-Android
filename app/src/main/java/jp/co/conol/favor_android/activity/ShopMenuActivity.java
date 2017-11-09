@@ -2,6 +2,7 @@ package jp.co.conol.favor_android.activity;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
@@ -18,6 +19,8 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +31,7 @@ import jp.co.conol.favor_android.R;
 import jp.co.conol.favor_android.adapter.ShopMenuRecyclerAdapter;
 import jp.co.conol.favor_android.custom.NumberPickerDialog;
 import jp.co.conol.favorlib.cuona.Cuona;
+import jp.co.conol.favorlib.cuona.CuonaException;
 import jp.co.conol.favorlib.cuona.NfcNotAvailableException;
 import jp.co.conol.favorlib.favor.Favor;
 import jp.co.conol.favorlib.favor.model.Menu;
@@ -207,8 +211,15 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
             new Favor(new Favor.AsyncCallback() {
                 @Override
                 public void onSuccess(Object object) {
-//                    @SuppressWarnings("unchecked")
-//                    List<Order> orderList = (List<Order>) object;
+
+                    // ログ送信
+                    mCuona.setReadLogMessage("注文");
+                    try {
+                        mCuona.readDeviceId(intent);
+                    } catch (CuonaException e) {
+                        e.printStackTrace();
+                    }
+
                     Intent intent = new Intent(ShopMenuActivity.this, OrderDoneActivity.class);
                     startActivity(intent);
                     cancelScan();
