@@ -147,7 +147,7 @@ public class Cuona {
     public String readDeviceId(Intent intent) throws CuonaException {
         CuonaReaderTag tag;
         try {
-            tag = getReadTagFromIntent(intent, false);
+            tag = getReadTagFromIntent(intent, true);
         } catch (CuonaException e) {
             e.printStackTrace();
             throw new CuonaException(e);
@@ -162,7 +162,7 @@ public class Cuona {
     public String readJson(Intent intent) throws CuonaException {
         CuonaReaderTag tag;
         try {
-            tag = getReadTagFromIntent(intent, true);
+            tag = getReadTagFromIntent(intent, false);
         } catch (CuonaException e) {
             e.printStackTrace();
             throw new CuonaException(e);
@@ -506,7 +506,7 @@ public class Cuona {
             try {
                 String buffer = "";
                 HttpURLConnection con = null;
-                URL url = new URL("http://13.112.232.171/api/device_logs/H7Pa7pQaVxxG.json");
+                URL url = new URL("http://13.112.232.171/api/device_logs/UXbfYJ6SXm8G.json");
                 con = (HttpURLConnection) url.openConnection();
                 con.setRequestMethod("POST");
                 con.setInstanceFollowRedirects(false);
