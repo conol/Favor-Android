@@ -1,10 +1,13 @@
 package jp.co.conol.favor_android.activity;
 
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -35,13 +38,20 @@ import jp.co.conol.favorlib.favor.model.User;
 public class UserActivity extends AppCompatActivity {
 
     private UserFragmentStatePagerAdapter mUserFragmentStatePagerAdapter;
-    private boolean isShownAddFavorite = false;
+    private boolean isShownAddFavorite = false;  // お気に入り追加画面を開いているか否か
+    private boolean isShownEditUserSetting = false;  // ユーザー情報編集画面を開いているか否か
     @BindView(R.id.userNameTextView) TextView mUserNameTextView;
     @BindView(R.id.userGenderTextView) TextView mUserGenderTextView;
     @BindView(R.id.userAgeTextView) TextView mUserAgeTextView;
     @BindView(R.id.userTabLayout) TabLayout mUserTabLayout;
     @BindView(R.id.userViewPager) ViewPager mUserViewPager;
     @BindView(R.id.addUserFavoriteFloatingActionButton) FloatingActionButton mAddUserFavoriteFloatingActionButton;
+    @BindView(R.id.userProfConstraintLayout) ConstraintLayout mUserProfConstraintLayout; // ユーザー情報を表示している部分
+    @BindView(R.id.editUserLayout) ConstraintLayout mEditUserLayout; // ユーザー情報編集画面
+    @BindView(R.id.userNameEditText) EditText mUserNameEditText;     // ユーザー名編集
+    @BindView(R.id.userGenderEditText) EditText mUserGenderEditText; // ユーザー性別編集
+    @BindView(R.id.userAgeEditText) EditText mUserAgeEditText;       // ユーザー年代編集
+    @BindView(R.id.userEditButtonConstraintLayout) ConstraintLayout mUserEditButtonConstraintLayout; // ユーザー情報編集ボタン
     @BindView(R.id.addFavoriteLayout) ConstraintLayout mAddFavoriteLayout; // お気に入り追加画面
     @BindView(R.id.favIcon1) ImageView mFavIcon1; // お気に入りのハート画像1
     @BindView(R.id.favIcon2) ImageView mFavIcon2; // お気に入りのハート画像2
@@ -97,13 +107,15 @@ public class UserActivity extends AppCompatActivity {
         Gson gson = new Gson();
         final User user = gson.fromJson(MyUtil.SharedPref.get(this, "userSetting"), User.class);
 
-
         // ユーザー情報のセット
         String userGender = getString(R.string.user_gender_male);
         if(!Objects.equals(user.getGender(), "male")) userGender = getString(R.string.user_gender_female);
         mUserNameTextView.setText(user.getNickname());
+        mUserNameEditText.setText(user.getNickname());
         mUserGenderTextView.setText(userGender);
+        mUserGenderEditText.setText(userGender);
         mUserAgeTextView.setText(String.valueOf(user.getAge()) + "代");
+        mUserAgeEditText.setText(String.valueOf(user.getAge()));
 
         // FABを押した場合、お気に入り追加画面を表示
         mAddUserFavoriteFloatingActionButton.setOnTouchListener(new View.OnTouchListener() {
@@ -169,11 +181,70 @@ public class UserActivity extends AppCompatActivity {
             }
         });
 
+        // ユーザー情報タップでユーザー情報編集画面を表示
+        mUserProfConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                    openEditUserDialog();
+                }
+                return false;
+            }
+        });
+
+        // 手動入力を禁止
+        mUserGenderEditText.setKeyListener(null);
+        mUserAgeEditText.setKeyListener(null);
+
+        // 年代がタップされた場合
+        mUserAgeEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus){
+                    final String[] ages = {"20", "30", "40", "50", "60", "70"};
+                    new AlertDialog.Builder(UserActivity.this)
+                            .setItems(ages, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    mUserAgeEditText.setText(ages[which]);
+                                }
+                            })
+                            .show();
+                }
+            }
+        });
+
+        // 性別がタップされた場合
+        mUserGenderEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus){
+                    final String[] genders = {"男性", "女性"};
+                    new AlertDialog.Builder(UserActivity.this)
+                            .setItems(genders, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    mUserGenderEditText.setText(genders[which]);
+                                }
+                            })
+                            .show();
+                }
+            }
+        });
+
         // お気に入り追加画面が開いているときは、背景のタップを出来ないように設定
         mAddFavoriteLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 return isShownAddFavorite;
+            }
+        });
+
+        // ユーザー情報編集画面が開いているときは、背景のタップを出来ないように設定
+        mEditUserLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return isShownEditUserSetting;
             }
         });
     }
@@ -182,7 +253,7 @@ public class UserActivity extends AppCompatActivity {
     private View.OnTouchListener tapFavIcon = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
-            if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
+            if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
 
                 if(isShownAddFavorite) {
                     switch (view.getId()) {
@@ -230,11 +301,54 @@ public class UserActivity extends AppCompatActivity {
         }
     };
 
+    // ユーザー情報変更ボタンを押した場合の処理
+    public void onUserEditButtonClicked(View view) {
+
+        // 登録するユーザー情報
+        String gender = "male";
+        if(mUserGenderEditText.getText().toString().equals("女性")) gender = "female";
+        User user = new User(
+                mUserNameEditText.getText().toString(),
+                gender,
+                Integer.parseInt(mUserAgeEditText.getText().toString()),
+                null
+        );
+
+        // ユーザー情報のセット
+        String userGender = getString(R.string.user_gender_male);
+        if(!Objects.equals(user.getGender(), "male")) userGender = getString(R.string.user_gender_female);
+        mUserNameTextView.setText(user.getNickname());
+        mUserGenderTextView.setText(userGender);
+        mUserAgeTextView.setText(String.valueOf(user.getAge()) + "代");
+
+        // ダイアログを閉じる
+        closeEditUserDialog();
+
+        // ユーザー情報を登録
+        new Favor(new Favor.AsyncCallback() {
+            @Override
+            public void onSuccess(Object object) {
+                User user = (User) object;
+
+                // ユーザー情報を端末に保存
+                Gson gson = new Gson();
+                MyUtil.SharedPref.save(UserActivity.this, "userSetting", gson.toJson(user));
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.d("onFailure", e.toString());
+            }
+        }).setUser(user).execute(Favor.Task.ResisterUser);
+    }
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event){
         if(keyCode == KeyEvent.KEYCODE_BACK) {
             if(isShownAddFavorite) {
                 closeFavoriteDialog();
+            } else if(isShownEditUserSetting) {
+                closeEditUserDialog();
             } else {
                 finish();
             }
@@ -259,4 +373,27 @@ public class UserActivity extends AppCompatActivity {
         mAddFavoriteButtonConstraintLayout.setClickable(false);
         isShownAddFavorite = false;
     }
+
+    // ユーザー情報編集画面を表示
+    private void openEditUserDialog() {
+        mEditUserLayout.setVisibility(View.VISIBLE);
+        mUserNameEditText.setEnabled(true);
+        mUserGenderEditText.setEnabled(true);
+        mUserAgeEditText.setEnabled(true);
+        isShownEditUserSetting = true;
+        mUserEditButtonConstraintLayout.setClickable(true);
+        mEditUserLayout.setAnimation(AnimationUtils.loadAnimation(UserActivity.this, R.anim.fade_in_slowly));
+    }
+
+    // ユーザー情報編集画面を非表示
+    private void closeEditUserDialog() {
+        mEditUserLayout.setVisibility(View.GONE);
+        mEditUserLayout.setAnimation(AnimationUtils.loadAnimation(UserActivity.this, R.anim.fade_out_slowly));
+        mUserNameEditText.setEnabled(false);
+        mUserGenderEditText.setEnabled(false);
+        mUserAgeEditText.setEnabled(false);
+        mUserEditButtonConstraintLayout.setClickable(false);
+        isShownEditUserSetting = false;
+    }
+
 }

@@ -63,6 +63,7 @@
             android:hint="@string/add_favorite_hint"
             android:inputType="text"
             android:maxLines="1"
+            android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView6" />

@@ -3,9 +3,9 @@
     <string name="app_name_sub">〜あなたのお店を集める〜</string>
 
     <!-- ユーザー登録画面 -->
-    <string name="user_name">ユーザー名</string>
-    <string name="user_age">年代</string>
-    <string name="user_gender">性別</string>
+    <string name="user_name"><font size="12">ユーザー名</font></string>
+    <string name="user_age"><font size="12">年代</font></string>
+    <string name="user_gender"><font size="12">性別</font></string>
     <string name="registration_user">はじめる</string>
 
     <!-- メイン画面 -->
@@ -26,6 +26,11 @@
     <string name="add_favorite_hint"><font size="12">例：ビーフカレー、ハイボールなど</font></string>
     <string name="add_favorite_button">お気に入りを追加する</string>
     <string name="add_favorite_error">好きなものの名前を入力してください</string>
+
+    <!-- ユーザー情報編集画面 -->
+    <string name="edit_user_title">ユーザー情報編集</string>
+    <string name="edit_user_message">ユーザー情報を変更することが出来ます。</string>
+    <string name="edit_user_button">ユーザー情報を変更する</string>
 
     <!-- ショップ詳細画面 -->
     <string name="shop_detail_order_stop">お会計する</string>

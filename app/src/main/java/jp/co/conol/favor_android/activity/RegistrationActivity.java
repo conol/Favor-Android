@@ -12,6 +12,8 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favorlib.favor.Favor;
@@ -19,14 +21,15 @@ import jp.co.conol.favorlib.favor.model.User;
 
 public class RegistrationActivity extends AppCompatActivity {
 
-    private EditText mUserNameEditText;
-    private TextView mUserAgeEditText;
-    private TextView mUserGenderEditText;
+    @BindView(R.id.userNameEditText) EditText mUserNameEditText;
+    @BindView(R.id.userAgeEditText) TextView mUserAgeEditText;
+    @BindView(R.id.userGenderEditText) TextView mUserGenderEditText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registration);
+        ButterKnife.bind(this);
 
         // ユーザー情報が保存されていれば、登録画面は表示しない
         if(MyUtil.SharedPref.get(RegistrationActivity.this, "userSetting") != null) {
@@ -34,10 +37,6 @@ public class RegistrationActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         }
-
-        mUserNameEditText = (EditText) findViewById(R.id.userNameEditText);
-        mUserAgeEditText = (EditText) findViewById(R.id.userAgeEditText);
-        mUserGenderEditText = (EditText) findViewById(R.id.userGenderEditText);
 
         // 手動入力を禁止
         mUserAgeEditText.setKeyListener(null);
