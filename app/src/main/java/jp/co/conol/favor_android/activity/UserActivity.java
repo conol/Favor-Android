@@ -6,6 +6,8 @@ import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +16,8 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -253,7 +257,7 @@ public class UserActivity extends AppCompatActivity {
     private View.OnTouchListener tapFavIcon = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
-            if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+            if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
 
                 if(isShownAddFavorite) {
                     switch (view.getId()) {
@@ -359,40 +363,62 @@ public class UserActivity extends AppCompatActivity {
     // お気に入り追加画面を表示
     private void openFavoriteDialog() {
         mAddFavoriteLayout.setVisibility(View.VISIBLE);
-        isShownAddFavorite = true;
-        mAddFavoriteEditText.setEnabled(true);
-        mAddFavoriteButtonConstraintLayout.setClickable(true);
         mAddFavoriteLayout.setAnimation(AnimationUtils.loadAnimation(UserActivity.this, R.anim.fade_in_slowly));
+        isShownAddFavorite = true;
     }
 
     // お気に入り追加画面を非表示
     private void closeFavoriteDialog() {
-        mAddFavoriteLayout.setVisibility(View.GONE);
-        mAddFavoriteLayout.setAnimation(AnimationUtils.loadAnimation(UserActivity.this, R.anim.fade_out_slowly));
-        mAddFavoriteEditText.setEnabled(false);
-        mAddFavoriteButtonConstraintLayout.setClickable(false);
+
+        final AnimationSet animationSet = new AnimationSet(true);
+        animationSet.addAnimation(AnimationUtils.loadAnimation(UserActivity.this, R.anim.fade_out_slowly));
+        animationSet.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) { }
+
+            // アニメーションを終了した後の処理
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                mAddFavoriteLayout.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) { }
+        });
+
+        mAddFavoriteLayout.setVisibility(View.INVISIBLE);
+        mAddFavoriteLayout.setAnimation(animationSet);
         isShownAddFavorite = false;
     }
 
     // ユーザー情報編集画面を表示
     private void openEditUserDialog() {
         mEditUserLayout.setVisibility(View.VISIBLE);
-        mUserNameEditText.setEnabled(true);
-        mUserGenderEditText.setEnabled(true);
-        mUserAgeEditText.setEnabled(true);
-        isShownEditUserSetting = true;
-        mUserEditButtonConstraintLayout.setClickable(true);
         mEditUserLayout.setAnimation(AnimationUtils.loadAnimation(UserActivity.this, R.anim.fade_in_slowly));
+        isShownEditUserSetting = true;
     }
 
     // ユーザー情報編集画面を非表示
     private void closeEditUserDialog() {
-        mEditUserLayout.setVisibility(View.GONE);
-        mEditUserLayout.setAnimation(AnimationUtils.loadAnimation(UserActivity.this, R.anim.fade_out_slowly));
-        mUserNameEditText.setEnabled(false);
-        mUserGenderEditText.setEnabled(false);
-        mUserAgeEditText.setEnabled(false);
-        mUserEditButtonConstraintLayout.setClickable(false);
+
+        final AnimationSet animationSet = new AnimationSet(true);
+        animationSet.addAnimation(AnimationUtils.loadAnimation(UserActivity.this, R.anim.fade_out_slowly));
+        animationSet.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) { }
+
+            // アニメーションを終了した後の処理
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                mAddFavoriteLayout.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) { }
+        });
+
+        mEditUserLayout.setVisibility(View.INVISIBLE);
+        mEditUserLayout.setAnimation(animationSet);
         isShownEditUserSetting = false;
     }
 
