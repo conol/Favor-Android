@@ -97,7 +97,7 @@ public class Shop {
     private class VisitHistory {
         private int id;
         private int visit_group_id;
-        private int num_visit;
+        private int num_visits;
         private int total_price = 0;
         private String last_visit_at;
         private String created_at;
@@ -111,8 +111,8 @@ public class Shop {
             return visit_group_id;
         }
 
-        public int getNum_visit() {
-            return num_visit;
+        public int getNum_visits() {
+            return num_visits;
         }
 
         public int getTotal_price() {
@@ -203,8 +203,8 @@ public class Shop {
         return visit_history.getVisit_group_id();
     }
 
-    public int getNumVisit() {
-        return visit_history.getNum_visit();
+    public int getNumVisits() {
+        return visit_history.getNum_visits();
     }
 
     public String getLastVisitAt() {
