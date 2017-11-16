@@ -113,7 +113,6 @@ public class UserOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<UserOr
         return mUsersAllOrderList.size();
     }
 
-    // ViewTypeでリストのポジションを返す
     @Override
     public int getItemViewType(int position) {
 

@@ -20,10 +20,7 @@ public class Shop {
         private int zip_code;
         private String address;
         private String phone_number;
-        private String opens_at;
-        private String closing_day;
-        private String[] card_brands;
-        private String notes;
+        private ShopsExtensionField[] extension_fields;
         private String created_at;
         private String updated_at;
         private ShopImage[] shop_images;
@@ -64,21 +61,8 @@ public class Shop {
             return phone_number;
         }
 
-        public String getOpens_at() {
-            return opens_at;
-        }
-
-
-        public String getClosing_day() {
-            return closing_day;
-        }
-
-        public String[] getCard_brands() {
-            return card_brands;
-        }
-
-        public String getNotes() {
-            return notes;
+        public ShopsExtensionField[] getExtension_fields() {
+            return extension_fields;
         }
 
         public ShopImage[] getShopImages() {
@@ -169,21 +153,8 @@ public class Shop {
         return shop.getPhone_number();
     }
 
-    public String getShopOpenAt() {
-        return shop.getOpens_at();
-    }
-
-
-    public String getShopClosingDay() {
-        return shop.getClosing_day();
-    }
-
-    public String[] getShopCardBrands() {
-        return shop.getCard_brands();
-    }
-
-    public String getShopNotes() {
-        return shop.getNotes();
+    public ShopsExtensionField[] getShopsExtensionFields() {
+        return shop.getExtension_fields();
     }
 
     public String getShopCreatedAt() {

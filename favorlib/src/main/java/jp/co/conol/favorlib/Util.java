@@ -36,11 +36,12 @@ public class Util {
          * @param boolean
          */
         public static boolean isBlank(String string) {
+            if(string == null) return true;
             String stringTmp = string.replace(" ", "");
 
             int stringTmpLength = stringTmp.length();
 
-            if(stringTmp == null || stringTmpLength == 0) {
+            if(stringTmpLength == 0) {
                 return true;
             } else {
                 return false;

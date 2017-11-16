@@ -23,6 +23,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -37,6 +38,7 @@ import jp.co.conol.favorlib.favor.Favor;
 import jp.co.conol.favorlib.favor.model.Menu;
 import jp.co.conol.favorlib.favor.model.Order;
 import jp.co.conol.favorlib.favor.model.User;
+import jp.co.conol.favorlib.favor.model.UsersAllOrder;
 
 public class ShopMenuActivity extends AppCompatActivity implements NumberPickerDialog.OnPositiveButtonClickedListener {
 
@@ -49,8 +51,9 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
     private List<Order> mOrderList = new ArrayList<>(); // 注文するメニューのリスト
     private boolean isShownOrderDialog = false;
     private int mTappedPosition;    // メニューをタップした際のメニュー位置
+    @BindView(R.id.shopNameTextView) TextView mShopNameTextView;    // タイトルバー部分の店舗名
     @BindView(R.id.shopMenuRecyclerView) RecyclerView mShopMenuRecyclerView;
-    @BindView(R.id.layoutOrderDialog) ConstraintLayout mLayoutOrderDialog;
+    @BindView(R.id.layoutOrderDialog) ConstraintLayout mLayoutOrderDialog;  // メニュータップ時の注文数選択ダイアログ
     @BindView(R.id.orderNumConstraintLayout) ConstraintLayout mOrderNumConstraintLayout;
     @BindView(R.id.orderNumTextView) TextView mOrderNumTextView;
     @BindView(R.id.cancelButtonConstraintLayout) ConstraintLayout mCancelButtonConstraintLayout;
@@ -75,14 +78,19 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
         // 遷移前の情報を取得
         Intent intent = getIntent();
         int shopId = intent.getIntExtra("shopId", 0);
+        String shopName = intent.getStringExtra("shopName");
         mVisitHistoryId = intent.getIntExtra("visitHistoryId", 0);
         mUser = mGson.fromJson(MyUtil.SharedPref.get(this, "userSetting"), User.class);
+
+        // 店舗名を反映
+        if(shopName != null) mShopNameTextView.setText(shopName);
 
         new Favor(new Favor.AsyncCallback() {
             @Override
             public void onSuccess(Object object) {
                 @SuppressWarnings("unchecked")
                 final List<Menu> menuList = (List<Menu>) object;
+                List<Integer> insertHeaderPosition = new ArrayList<>();
 
                 if(menuList != null && menuList.size() != 0) {
 
@@ -91,6 +99,19 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
                     for (int i = 0; i < menuList.size(); i++) {
                         orderNumList.add(0);
                     }
+
+                    // メニューカテゴリーを表示するためのヘッダー部分の要素を追加
+                    for(int i = 0; i < menuList.size() - 1; i++) {
+                        if(!Objects.equals(menuList.get(i).getCategoryName(), menuList.get(i + 1).getCategoryName())) {
+                            insertHeaderPosition.add(i + 1);
+                        }
+                    }
+                    for(int i = 0; i < insertHeaderPosition.size(); i++) {
+                        menuList.add(insertHeaderPosition.get(insertHeaderPosition.size() - 1 - i), new Menu());
+                        orderNumList.add(insertHeaderPosition.get(insertHeaderPosition.size() - 1 - i), 0);
+                    }
+                    if(1 <= menuList.size()) menuList.add(0, new Menu()); // 先頭にヘッダー用要素を追加
+                    if(1 <= orderNumList.size()) orderNumList.add(0, 0); // 注文用リストの先頭にヘッダー用要素を追加
 
                     // レイアウトマネージャーのセット
                     mShopMenuRecyclerView.setLayoutManager(new LinearLayoutManager(ShopMenuActivity.this));

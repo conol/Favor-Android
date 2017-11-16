@@ -11,7 +11,8 @@ public class Menu {
 
     private int id;
     private String name;
-    private int price;
+    private int price_cents;
+    private String price_format;
     private String notes;
     private Image[] images;
     private int category_id;
@@ -33,8 +34,12 @@ public class Menu {
         return name;
     }
 
-    public int getPrice() {
-        return price;
+    public int getPriceCents() {
+        return price_cents;
+    }
+
+    public String getPriceFormat() {
+        return price_format;
     }
 
     public String getNotes() {

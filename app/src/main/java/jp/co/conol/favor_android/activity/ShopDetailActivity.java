@@ -170,6 +170,7 @@ public class ShopDetailActivity extends AppCompatActivity {
                 if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
                     Intent intent = new Intent(ShopDetailActivity.this, ShopMenuActivity.class);
                     intent.putExtra("shopId", shop.getShopId());
+                    intent.putExtra("shopName", shop.getShopName());
                     intent.putExtra("visitHistoryId", shop.getVisitHistoryId());
                     startActivity(intent);
                 }
