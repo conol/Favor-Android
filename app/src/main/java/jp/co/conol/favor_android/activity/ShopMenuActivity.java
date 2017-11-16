@@ -107,10 +107,10 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
                         }
                     }
                     for(int i = 0; i < insertHeaderPosition.size(); i++) {
-                        menuList.add(insertHeaderPosition.get(insertHeaderPosition.size() - 1 - i), new Menu());
+                        menuList.add(insertHeaderPosition.get(insertHeaderPosition.size() - 1 - i), null);
                         orderNumList.add(insertHeaderPosition.get(insertHeaderPosition.size() - 1 - i), 0);
                     }
-                    if(1 <= menuList.size()) menuList.add(0, new Menu()); // 先頭にヘッダー用要素を追加
+                    if(1 <= menuList.size()) menuList.add(0, null); // 先頭にヘッダー用要素を追加
                     if(1 <= orderNumList.size()) orderNumList.add(0, 0); // 注文用リストの先頭にヘッダー用要素を追加
 
                     // レイアウトマネージャーのセット
@@ -223,7 +223,7 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
         mOrderNumTextView.setText(String.valueOf(value));
     }
 
-    // NFCにタップされた時の処理
+    // 注文するためにNFCにタップされた時の処理
     @Override
     protected void onNewIntent(final Intent intent) {
         if(isScanning) {
@@ -242,6 +242,7 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
                     }
 
                     Intent intent = new Intent(ShopMenuActivity.this, OrderDoneActivity.class);
+                    intent.putExtra("shopName", mShopNameTextView.getText().toString());
                     startActivity(intent);
                     cancelScan();
                     finish();

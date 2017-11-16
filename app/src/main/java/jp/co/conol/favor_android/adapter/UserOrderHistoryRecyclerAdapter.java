@@ -119,7 +119,7 @@ public class UserOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<UserOr
         UsersAllOrder usersAllOrder = mUsersAllOrderList.get(position);
 
         int viewType = 0;
-        if(usersAllOrder.getEnterAt() != null) {
+        if(usersAllOrder != null) {
             viewType = 1;
         }
 

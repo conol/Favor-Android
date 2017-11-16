@@ -153,7 +153,7 @@ public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecycl
         Menu menu = mMenuList.get(position);
 
         int viewType = 0;
-        if(menu.getName() != null) {
+        if(menu != null) {
             viewType = 1;
         }
 

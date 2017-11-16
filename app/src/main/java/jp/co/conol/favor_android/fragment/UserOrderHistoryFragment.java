@@ -87,7 +87,7 @@ public class UserOrderHistoryFragment extends Fragment {
                         }
                     }
                     for(int i = 0; i < insertHeaderPosition.size(); i++) {
-                        usersAllOrderList.add(insertHeaderPosition.get(insertHeaderPosition.size() - 1 - i), new UsersAllOrder()); // 先頭
+                        usersAllOrderList.add(insertHeaderPosition.get(insertHeaderPosition.size() - 1 - i), null); // 先頭
                     }
                     if(1 <= usersAllOrderList.size()) usersAllOrderList.add(0, new UsersAllOrder()); // 先頭にヘッダー用要素を追加
 
