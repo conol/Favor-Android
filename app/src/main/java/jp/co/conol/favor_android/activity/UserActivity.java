@@ -42,6 +42,7 @@ import jp.co.conol.favorlib.favor.model.User;
 public class UserActivity extends AppCompatActivity {
 
     private UserFragmentStatePagerAdapter mUserFragmentStatePagerAdapter;
+    private User mUser;
     private boolean isShownAddFavorite = false;  // お気に入り追加画面を開いているか否か
     private boolean isShownEditUserSetting = false;  // ユーザー情報編集画面を開いているか否か
     @BindView(R.id.userNameTextView) TextView mUserNameTextView;
@@ -109,17 +110,17 @@ public class UserActivity extends AppCompatActivity {
 
         // ユーザー情報を取得
         Gson gson = new Gson();
-        final User user = gson.fromJson(MyUtil.SharedPref.get(this, "userSetting"), User.class);
+        mUser = gson.fromJson(MyUtil.SharedPref.get(this, "userSetting"), User.class);
 
         // ユーザー情報のセット
         String userGender = getString(R.string.user_gender_male);
-        if(!Objects.equals(user.getGender(), "male")) userGender = getString(R.string.user_gender_female);
-        mUserNameTextView.setText(user.getNickname());
-        mUserNameEditText.setText(user.getNickname());
+        if(!Objects.equals(mUser.getGender(), "male")) userGender = getString(R.string.user_gender_female);
+        mUserNameTextView.setText(mUser.getNickname());
+        mUserNameEditText.setText(mUser.getNickname());
         mUserGenderTextView.setText(userGender);
         mUserGenderEditText.setText(userGender);
-        mUserAgeTextView.setText(String.valueOf(user.getAge()) + "代");
-        mUserAgeEditText.setText(String.valueOf(user.getAge()));
+        mUserAgeTextView.setText(String.valueOf(mUser.getAge()) + "代");
+        mUserAgeEditText.setText(String.valueOf(mUser.getAge()));
 
         // FABを押した場合、お気に入り追加画面を表示
         mAddUserFavoriteFloatingActionButton.setOnTouchListener(new View.OnTouchListener() {
@@ -176,7 +177,7 @@ public class UserActivity extends AppCompatActivity {
                             public void onFailure(Exception e) {
                                 Log.e("onFailure", e.toString());
                             }
-                        }).setAppToken(user.getAppToken()).setFavorite(favorite).execute(Favor.Task.AddFavorite);
+                        }).setAppToken(mUser.getAppToken()).setFavorite(favorite).execute(Favor.Task.AddFavorite);
                     } else {
                         Toast.makeText(UserActivity.this, getString(R.string.add_favorite_error), Toast.LENGTH_SHORT).show();
                     }
@@ -311,7 +312,7 @@ public class UserActivity extends AppCompatActivity {
         // 登録するユーザー情報
         String gender = "male";
         if(mUserGenderEditText.getText().toString().equals("女性")) gender = "female";
-        User user = new User(
+        User editUser = new User(
                 mUserNameEditText.getText().toString(),
                 gender,
                 Integer.parseInt(mUserAgeEditText.getText().toString()),
@@ -320,10 +321,10 @@ public class UserActivity extends AppCompatActivity {
 
         // ユーザー情報のセット
         String userGender = getString(R.string.user_gender_male);
-        if(!Objects.equals(user.getGender(), "male")) userGender = getString(R.string.user_gender_female);
-        mUserNameTextView.setText(user.getNickname());
+        if(!Objects.equals(editUser.getGender(), "male")) userGender = getString(R.string.user_gender_female);
+        mUserNameTextView.setText(editUser.getNickname());
         mUserGenderTextView.setText(userGender);
-        mUserAgeTextView.setText(String.valueOf(user.getAge()) + "代");
+        mUserAgeTextView.setText(String.valueOf(editUser.getAge()) + "代");
 
         // ダイアログを閉じる
         closeEditUserDialog();
@@ -343,7 +344,7 @@ public class UserActivity extends AppCompatActivity {
             public void onFailure(Exception e) {
                 Log.d("onFailure", e.toString());
             }
-        }).setUser(user).execute(Favor.Task.ResisterUser);
+        }).setAppToken(mUser.getAppToken()).setUser(editUser).execute(Favor.Task.EditUser);
     }
 
     @Override

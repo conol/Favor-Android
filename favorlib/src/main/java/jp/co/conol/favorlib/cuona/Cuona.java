@@ -13,7 +13,6 @@ import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
-import android.nfc.tech.IsoDep;
 import android.nfc.tech.MifareUltralight;
 import android.nfc.tech.Ndef;
 import android.nfc.tech.NfcA;
@@ -44,9 +43,6 @@ import jp.co.conol.favorlib.Util;
 import jp.co.conol.favorlib.cuona.cuona_reader.CuonaReaderLegacyTag;
 import jp.co.conol.favorlib.cuona.cuona_reader.CuonaReaderSecureTag;
 import jp.co.conol.favorlib.cuona.cuona_reader.CuonaReaderTag;
-import jp.co.conol.favorlib.cuona.cuona_writer.CuonaWritableT2;
-import jp.co.conol.favorlib.cuona.cuona_writer.CuonaWritableT4;
-import jp.co.conol.favorlib.cuona.cuona_writer.CuonaWritableTag;
 
 /**
  * Created by Masafumi_Ito on 2017/10/11.
@@ -87,10 +83,10 @@ public class Cuona {
 
         techList = new String[][]{
                 // Typ2 2 Mifare UltraLight Seal, like NXP NTAG21x
-                new String[]{NfcA.class.getName(), MifareUltralight.class.getName(), Ndef.class.getName()},
+                new String[] { NfcA.class.getName(), MifareUltralight.class.getName(), Ndef.class.getName() },
 
                 // Type 4 Dynamic, like ST M24SRxx
-                new String[]{NfcA.class.getName(), IsoDep.class.getName(), Ndef.class.getName()}
+//                new String[] { NfcA.class.getName(), IsoDep.class.getName(), Ndef.class.getName() }
         };
 
         // 本体に登録されているログを取得（2次元配列）
@@ -99,7 +95,7 @@ public class Cuona {
         String savedLog[][] = gson.fromJson(pref.getString("savedLog", null), String[][].class);
 
         // ネットに繋がっていればログの送信
-        if (savedLog != null && (Util.Network.isEnable(context) || Util.Wifi.isEnable(context))) {
+        if(savedLog != null && (Util.Network.isEnable(context) || Util.Wifi.isEnable(context))) {
             new SendLog(new SendLog.AsyncCallback() {
                 @Override
                 public void onSuccess(JSONObject responseJson) {
@@ -126,7 +122,12 @@ public class Cuona {
     }
 
     public void disableForegroundDispatch(Activity activity) {
-        nfcAdapter.disableForegroundDispatch(activity);
+        try {
+            nfcAdapter.disableForegroundDispatch(activity);
+        } catch (IllegalStateException e) {
+            // Already disabled, ignore
+        }
+
     }
 
     public int readType(Intent intent) throws CuonaException {
@@ -137,7 +138,7 @@ public class Cuona {
             e.printStackTrace();
             throw new CuonaException(e);
         }
-        if (tag != null) {
+        if(tag != null) {
             return tag.getType();
         } else {
             return Cuona.TAG_TYPE_UNKNOWN;
@@ -147,13 +148,13 @@ public class Cuona {
     public String readDeviceId(Intent intent) throws CuonaException {
         CuonaReaderTag tag;
         try {
-            tag = getReadTagFromIntent(intent, true);
+            tag = getReadTagFromIntent(intent, false);
         } catch (CuonaException e) {
             e.printStackTrace();
             throw new CuonaException(e);
         }
-        if (tag != null) {
-            return tag.getDeviceIdString();
+        if(tag != null) {
+            return Util.Transform.deviceIdForServer(tag.getDeviceIdString());
         } else {
             return null;
         }
@@ -162,12 +163,12 @@ public class Cuona {
     public String readJson(Intent intent) throws CuonaException {
         CuonaReaderTag tag;
         try {
-            tag = getReadTagFromIntent(intent, false);
+            tag = getReadTagFromIntent(intent, true);
         } catch (CuonaException e) {
             e.printStackTrace();
             throw new CuonaException(e);
         }
-        if (tag != null) {
+        if(tag != null) {
             return tag.getJSONString();
         } else {
             return null;
@@ -183,21 +184,10 @@ public class Cuona {
             e.printStackTrace();
             throw new CuonaException(e);
         }
-        if (tag != null) {
+        if(tag != null) {
             return tag.getJSONString();
         } else {
             return null;
-        }
-    }
-
-    public void writeJson(Intent intent, String json) throws CuonaException {
-        CuonaWritableTag tag;
-        try {
-            tag = getWriteTagFromIntent(intent);
-            if (tag != null) tag.writeJSON(json);
-        } catch (CuonaException | IOException e) {
-            e.printStackTrace();
-            throw new CuonaException(e);
         }
     }
 
@@ -207,40 +197,6 @@ public class Cuona {
 
     public void setWriteLogMessage(String message) {
         mWriteLogMessage = message;
-    }
-
-    private CuonaWritableTag getWriteTagFromIntent(Intent intent) throws CuonaException {
-
-        // GPSの許可を確認（ログ送信用）
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (context.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                return null;
-            }
-        }
-
-        if (intent.getAction().equals(NfcAdapter.ACTION_NDEF_DISCOVERED)
-                || intent.getAction().equals(NfcAdapter.ACTION_TECH_DISCOVERED)) {
-            Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-            if (tag != null) {
-                MifareUltralight mul = MifareUltralight.get(tag);
-                if (mul != null) {
-
-                    // ログの送信
-                    sendWriteLog(tag);
-
-                    return new CuonaWritableT2(mul);
-                }
-                IsoDep isoDep = IsoDep.get(tag);
-                if (isoDep != null) {
-
-                    // ログの送信
-                    sendWriteLog(tag);
-
-                    return new CuonaWritableT4(isoDep);
-                }
-            }
-        }
-        return null;
     }
 
     private CuonaReaderTag getReadTagFromIntent(Intent intent, boolean sendLog) throws CuonaException {
@@ -282,7 +238,7 @@ public class Cuona {
                 e.printStackTrace();
             }
         }
-        if (msg == null) throw new CuonaException("Can not available!!");
+        if(msg == null) throw new CuonaException("Can not available!!");
 
         NdefRecord[] records = msg.getRecords();
         for (NdefRecord rec : records) {
@@ -384,7 +340,7 @@ public class Cuona {
                 e.printStackTrace();
             }
         }
-        if (msg == null) throw new CuonaException("Can not available!!");
+        if(msg == null) throw new CuonaException("Can not available!!");
 
         NdefRecord[] records = msg.getRecords();
         for (NdefRecord rec : records) {
@@ -405,7 +361,7 @@ public class Cuona {
                 // 位置情報の取得
                 GetLocation location = new GetLocation(context);
                 String locationInfo = "";
-                if (location.getCurrentLocation() != null) {
+                if(location.getCurrentLocation() != null) {
                     locationInfo = String.valueOf(location.getCurrentLocation().getLatitude()) + "," + String.valueOf(location.getCurrentLocation().getLongitude());
                 }
 
@@ -423,17 +379,17 @@ public class Cuona {
 
                 // サーバーに送信するためのログを作成
                 int toSendLogLength = 1;
-                if (savedLog != null) {
+                if(savedLog != null) {
                     toSendLogLength += savedLog.length;
                 }
                 String toSendLog[][] = new String[toSendLogLength][currentLog.length];
                 toSendLog[0] = currentLog;
-                if (savedLog != null) {
+                if(savedLog != null) {
                     System.arraycopy(savedLog, 0, toSendLog, 1, toSendLogLength - 1);
                 }
 
                 // ネットに繋がっていればログの送信
-                if (Util.Network.isEnable(context) || Util.Wifi.isEnable(context)) {
+                if(Util.Network.isEnable(context) || Util.Wifi.isEnable(context)) {
                     new SendLog(new SendLog.AsyncCallback() {
                         @Override
                         public void onSuccess(JSONObject responseJson) {
@@ -463,13 +419,12 @@ public class Cuona {
 
         private AsyncCallback mAsyncCallback = null;
 
-        public interface AsyncCallback {
+        public interface AsyncCallback{
             void onSuccess(JSONObject responseJson);
-
             void onFailure(Exception e);
         }
 
-        public SendLog(AsyncCallback asyncCallback) {
+        public SendLog(AsyncCallback asyncCallback){
             this.mAsyncCallback = asyncCallback;
         }
 
@@ -486,7 +441,7 @@ public class Cuona {
             JSONObject deviceLogsJson = new JSONObject();
             JSONArray deviceLogJsonArray = new JSONArray();
             try {
-                for (int i = 0; i < params[0].length; i++) {
+                for(int i = 0; i < params[0].length; i++) {
                     JSONObject jsonOneData;
                     jsonOneData = new JSONObject();
                     jsonOneData.put("device_id", params[0][i][0]);
@@ -506,7 +461,7 @@ public class Cuona {
             try {
                 String buffer = "";
                 HttpURLConnection con = null;
-                URL url = new URL("http://13.112.232.171/api/device_logs/UXbfYJ6SXm8G.json");
+                URL url = new URL("http://13.112.232.171/api/device_logs/H7Pa7pQaVxxG.json");
                 con = (HttpURLConnection) url.openConnection();
                 con.setRequestMethod("POST");
                 con.setInstanceFollowRedirects(false);

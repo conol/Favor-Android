@@ -138,7 +138,7 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
 
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 JSONObject jRec = jsonArray.getJSONObject(i);
-                                String deviceId = jRec.getString("device_id").replace(" ", "").toLowerCase();
+                                String deviceId = Util.Transform.deviceIdForServer(jRec.getString("device_id"));
                                 deviceIdList.add(deviceId);
                             }
 

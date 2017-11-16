@@ -10,6 +10,7 @@ public class User {
     private String gender = "male";
     private int age = 20;
     private String app_token = null;
+    private String image_url = null;
     private String push_token = null;
     private boolean notifiable = false;
     private String created_at = null;
@@ -40,6 +41,10 @@ public class User {
 
     public String getAppToken() {
         return app_token;
+    }
+
+    public String getImageUrl() {
+        return image_url;
     }
 
     public String getPushToken() {

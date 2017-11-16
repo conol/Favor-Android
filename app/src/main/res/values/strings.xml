@@ -60,7 +60,7 @@
 
     <!-- nfc -->
     <string name="nfc_scan_title">スキャンの準備ができました</string>
-    <string name="nfc_scan_message">CORONAへタッチしてください</string>
+    <string name="nfc_scan_message">CUONAへタッチしてください</string>
 
     <!-- ダイアログ -->
     <string name="nfc_dialog">NFCがオフになっています\nNFCをオンに設定してください</string>

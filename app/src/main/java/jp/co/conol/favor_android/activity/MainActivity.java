@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             mCuona = new Cuona(this);
         } catch (NfcNotAvailableException e) {
-            Log.d("Corona", e.toString());
+            Log.d("CUONA", e.toString());
             finish();
         }
 
