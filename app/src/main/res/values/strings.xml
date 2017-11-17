@@ -1,0 +1,88 @@
+<resources>
+    <string name="app_name">Favor</string>
+    <string name="app_name_sub">〜あなたのお店を集める〜</string>
+
+    <!-- ユーザー登録画面 -->
+    <string name="user_name"><font size="12">ユーザー名</font></string>
+    <string name="user_age"><font size="12">年代</font></string>
+    <string name="user_gender"><font size="12">性別</font></string>
+    <string name="registration_user">はじめる</string>
+
+    <!-- メイン画面 -->
+    <string name="touch_nfc">タッチして入店する</string>
+    <string name="touch_nfc_message">端末もしくはNFCシールを見つけたらタッチ！</string>
+    <string name="touch_cuona_or_seal">OR</string>
+    <string name="shop_history_title">入店履歴</string>
+    <string name="shop_history_none">入店履歴はありません</string>
+    <string name="user_setting_title"> の情報</string>
+
+    <!-- ユーザー画面 -->
+    <string name="user_favorite">お気に入り</string>
+    <string name="user_order_history">注文履歴</string>
+    <string name="user_gender_male">男性</string>
+    <string name="user_gender_female">女性</string>
+
+    <!-- お気に入り追加画面 -->
+    <string name="add_favorite_title">お気に入りを追加</string>
+    <string name="add_favorite_message">あなたの好きなものを追加してみましょう。\n食べ物や飲み物など何でも追加することで\nおもてなしを受けやすくなります。</string>
+    <string name="add_favorite_hint"><font size="12">例：ビーフカレー、ハイボールなど</font></string>
+    <string name="add_favorite_button">お気に入りを追加する</string>
+    <string name="add_favorite_error">好きなものの名前を入力してください</string>
+
+    <!-- ユーザー情報編集画面 -->
+    <string name="edit_user_title">ユーザー情報編集</string>
+    <string name="edit_user_message">ユーザー情報を変更することが出来ます。</string>
+    <string name="edit_user_button">ユーザー情報を変更する</string>
+
+    <!-- ショップ詳細画面 -->
+    <string name="shop_detail_order_stop">お会計する</string>
+    <string name="shop_detail_info">基本情報</string>
+    <string name="shop_detail_order_menu">注文履歴</string>
+    <string name="shop_menu_show">注文メニューを表示する</string>
+    <string name="shop_open_at">営業時間</string>
+    <string name="shop_closed_day">定休日</string>
+    <string name="shop_address">住所</string>
+    <string name="shop_phone_number">電話番号</string>
+    <string name="shop_charge">チャージ料金</string>
+    <string name="shop_card_brands">利用可能カード</string>
+
+    <!-- ショップメニュー画面 -->
+    <string name="shop_menu_title">MENU</string>
+    <string name="shop_menu_order_button">注文する</string>
+    <string name="shop_menu_order_dialog_title">注文数を選択してください</string>
+
+    <!-- 注文画面 -->
+    <string name="order_num_text">注文数：</string>
+
+    <!-- 注文完了画面 -->
+    <string name="order_done_message">注文が完了しました</string>
+    <string name="order_done_message_sub">注文が送信されました。\n届くまでの間しばらくお待ちください。</string>
+    <string name="order_done_back_button_text">この画面を閉じる</string>
+
+    <!-- お会計画面 -->
+    <string name="order_stop_message">ご利用ありがとうございました。会計を行います。\n今回のご注文内容は以下となっております。</string>
+    <string name="order_stop_button">会計する</string>
+
+    <!-- nfc -->
+    <string name="nfc_scan_title">スキャンの準備ができました</string>
+    <string name="nfc_scan_message">CUONAへタッチしてください</string>
+
+    <!-- ダイアログ -->
+    <string name="nfc_dialog">NFCがオフになっています\nNFCをオンに設定してください</string>
+    <string name="grant_permission">本アプリを使用するには、位置情報へのアクセスを許可する必要があります。</string>
+
+    <!-- エラー -->
+    <string name="error_network_disable">利用可能なデバイス情報一覧の取得に失敗しました。\nインターネットに接続してください。</string>
+    <string name="error_touch_cuona">必要なデータの取得に失敗しました。\n再度タッチしてください。</string>
+    <string name="error_fail_get_device_ids">一覧データの取得に失敗しました。\nアプリを再起動して再取得してください。</string>
+    <string name="load_devices_failed">デバイス一覧の取得に失敗しました</string>
+    <string name="error_read_service_failed">このNFCではFavorサービスがご利用できません。</string>
+    <string name="error_not_exist_in_devise_ids">利用されたNFCは本アプリに対応していません。</string>
+
+    <!-- 全体 -->
+    <string name="ok">OK</string>
+    <string name="select">選択する</string>
+    <string name="cancel">Cancel</string>
+    <string name="cancel_kana">キャンセル</string>
+
+</resources>

@@ -1,0 +1,1 @@
+include ':app', ':favorlib-dev_1.0.0'
