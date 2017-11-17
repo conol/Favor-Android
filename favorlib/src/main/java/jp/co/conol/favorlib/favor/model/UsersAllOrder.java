@@ -11,7 +11,8 @@ public class UsersAllOrder {
 
     private int id;
     private String name;
-    private int price;
+    private int price_cents;
+    private String price_format;
     private int quantity;
     private String created_at;
     private String updated_at;
@@ -60,8 +61,12 @@ public class UsersAllOrder {
         return name;
     }
 
-    public int getOrderedItemPrice() {
-        return price;
+    public int getOrderedItemPriceCents() {
+        return price_cents;
+    }
+
+    public String getOrderedItemPriceFormat() {
+        return price_format;
     }
 
     public int getOrderedItemQuantity() {

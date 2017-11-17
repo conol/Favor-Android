@@ -99,7 +99,7 @@ public class UserOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<UserOr
         // 内容を反映
         if(holder.mUserOrderMenuTextView != null && holder.mUserOrderMenuPriceTextView != null) {
             holder.mUserOrderMenuTextView.setText(usersAllOrder.getOrderedItemName());
-            holder.mUserOrderMenuPriceTextView.setText(String.valueOf(usersAllOrder.getOrderedItemPrice()) + "円");
+            holder.mUserOrderMenuPriceTextView.setText(usersAllOrder.getOrderedItemPriceFormat());
         } else if(holder.mUserOrderDateTextView != null && holder.mUserOrderShopNameTextView != null && 1 < mUsersAllOrderList.size()) {
             String dateString = mUsersAllOrderList.get(position + 1).getEnterAt();
             String[] dateStringTmp = dateString.split("T", 0);

@@ -316,6 +316,7 @@ public class UserActivity extends AppCompatActivity {
                 mUserNameEditText.getText().toString(),
                 gender,
                 Integer.parseInt(mUserAgeEditText.getText().toString()),
+                null,
                 null
         );
 

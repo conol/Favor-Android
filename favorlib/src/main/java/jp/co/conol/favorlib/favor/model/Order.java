@@ -35,7 +35,8 @@ public class Order {
     private class MenuItem {
         private int id;
         private String name;
-        private int price;
+        private int price_cents;
+        private String price_format;
         private String notes;
         private MenuImage[] images;
 
@@ -55,8 +56,12 @@ public class Order {
             return name;
         }
 
-        public int getPrice() {
-            return price;
+        public int getPriceCents() {
+            return price_cents;
+        }
+
+        public String getPriceFormat() {
+            return price_format;
         }
 
         public String getNotes() {
@@ -90,8 +95,12 @@ public class Order {
         return menu_item.getName();
     }
 
-    public int getOrderedItemPrice() {
-        return menu_item.getPrice();
+    public int getOrderedItemPriceCent() {
+        return menu_item.getPriceCents();
+    }
+
+    public String getOrderedItemPriceFormat() {
+        return menu_item.getPriceFormat();
     }
 
     public int getOrderedItemQuantity() {

@@ -87,6 +87,7 @@ public class RegistrationActivity extends AppCompatActivity {
                 mUserNameEditText.getText().toString(),
                 gender,
                 Integer.parseInt(mUserAgeEditText.getText().toString()),
+                null,
                 null
         );
 

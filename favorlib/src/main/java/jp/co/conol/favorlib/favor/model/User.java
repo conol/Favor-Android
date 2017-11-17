@@ -11,15 +11,17 @@ public class User {
     private int age = 20;
     private String app_token = null;
     private String image_url = null;
+    private String image = null;
     private String push_token = null;
     private boolean notifiable = false;
     private String created_at = null;
     private String updated_at = null;
 
-    public User(String nickname, String gender, int age, String pushToken) {
+    public User(String nickname, String gender, int age, String image, String pushToken) {
         this.nickname = nickname;
         this.gender = gender;
         this.age = age;
+        this.image = image;
         this.push_token = pushToken;
     }
 

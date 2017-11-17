@@ -51,6 +51,9 @@
     <string name="shop_menu_order_button">注文する</string>
     <string name="shop_menu_order_dialog_title">注文数を選択してください</string>
 
+    <!-- 注文画面 -->
+    <string name="order_num_text">注文数：</string>
+
     <!-- 注文完了画面 -->
     <string name="order_done_message">注文が完了しました</string>
     <string name="order_done_message_sub">注文が送信されました。\n届くまでの間しばらくお待ちください。</string>

@@ -76,6 +76,12 @@ public class ShopOrderHistoryFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_shop_order_history, container, false);
         ButterKnife.bind(this, view);
+        return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
 
         // ユーザー情報の取得
         User user = mGson.fromJson(MyUtil.SharedPref.get(mContext, "userSetting"), User.class);
@@ -103,7 +109,5 @@ public class ShopOrderHistoryFragment extends Fragment {
                 }
             }).setAppToken(user.getAppToken()).setVisitGroupId(mVisitGroupId).execute(Favor.Task.GetUserGroupsOrderInShop);
         }
-
-        return view;
     }
 }

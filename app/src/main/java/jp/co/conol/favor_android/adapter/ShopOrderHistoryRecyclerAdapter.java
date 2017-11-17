@@ -63,7 +63,7 @@ public class ShopOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<ShopOr
         // 内容を反映
 //        holder.mShopOrderUserNameTextView.setText(order.getOrderedUserNickname());
         holder.mShopOrderMenuNameTextView.setText(order.getOrderedItemName());
-        holder.mShopOrderMenuPriceTextView.setText(String.valueOf(order.getOrderedItemPrice()) + "円");
+        holder.mShopOrderMenuPriceTextView.setText(order.getOrderedItemPriceFormat());
     }
 
     @Override

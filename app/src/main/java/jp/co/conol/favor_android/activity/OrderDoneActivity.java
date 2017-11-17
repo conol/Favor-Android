@@ -15,8 +15,7 @@ import jp.co.conol.favor_android.R;
 
 public class OrderDoneActivity extends AppCompatActivity {
 
-    @BindView(R.id.shopNameTextView)
-    TextView mShopNameTextView;    // 店舗名表示
+    @BindView(R.id.shopNameTextView) TextView mShopNameTextView;    // 店舗名表示
     @BindView(R.id.orderDoneCloseButtonConstraintLayout) ConstraintLayout mOrderDoneCloseButtonConstraintLayout;    // 画面を閉じるボタン
 
     @Override

@@ -14,6 +14,8 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
@@ -49,13 +51,16 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
     private User mUser;
     private int mVisitHistoryId;
     private List<Order> mOrderList = new ArrayList<>(); // 注文するメニューのリスト
-    private boolean isShownOrderDialog = false;
+    private boolean isShownOrderDialog = false; // 注文ダイアログが開いているか否か
     private int mTappedPosition;    // メニューをタップした際のメニュー位置
     @BindView(R.id.shopNameTextView) TextView mShopNameTextView;    // タイトルバー部分の店舗名
-    @BindView(R.id.shopMenuRecyclerView) RecyclerView mShopMenuRecyclerView;
+    @BindView(R.id.shopMenuRecyclerView) RecyclerView mShopMenuRecyclerView;    // メニュー一覧
     @BindView(R.id.layoutOrderDialog) ConstraintLayout mLayoutOrderDialog;  // メニュータップ時の注文数選択ダイアログ
     @BindView(R.id.orderNumConstraintLayout) ConstraintLayout mOrderNumConstraintLayout;
-    @BindView(R.id.orderNumTextView) TextView mOrderNumTextView;
+    @BindView(R.id.menuNameTextView) TextView mMenuNameTextView;    // メニュー名
+    @BindView(R.id.menuPriceTextView) TextView mMenuPriceTextView;    // メニュー値段
+    @BindView(R.id.menuNoteTextView) TextView mMenuNoteTextView;    // メニュー説明
+    @BindView(R.id.orderNumTextView) TextView mOrderNumTextView;    // メニューオーダー数
     @BindView(R.id.cancelButtonConstraintLayout) ConstraintLayout mCancelButtonConstraintLayout;
     @BindView(R.id.selectButtonConstraintLayout) ConstraintLayout mSelectButtonConstraintLayout;
     @BindView(R.id.orderButtonConstraintLayout) ConstraintLayout mOrderButtonConstraintLayout;
@@ -119,13 +124,24 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
                     // アダプターをセット
                     final ShopMenuRecyclerAdapter shopMenuRecyclerAdapter
                             = new ShopMenuRecyclerAdapter(ShopMenuActivity.this, menuList, orderNumList) {
+
                         // メニュータップ時に注文ダイアログを表示
                         @Override
                         protected void showOrderDialog(int position, int orderNum) {
-                            mTappedPosition = position; // タップされたポジションを取得
+
+                            // タップされたポジション取得し、メニュー項目を取得
+                            mTappedPosition = position;
+                            Menu menu = menuList.get(position);
+
+                            // オーダー数をダイアログにセット
                             mOrderNumTextView.setText(String.valueOf(orderNum));
-                            mLayoutOrderDialog.setVisibility(View.VISIBLE);
-                            isShownOrderDialog = true;
+
+                            // ダイアログにメニュー内容をセット
+                            mMenuNameTextView.setText(menu.getName());
+                            mMenuPriceTextView.setText(menu.getPriceFormat());
+                            mMenuNoteTextView.setText(menu.getNotes());
+
+                            openOrderDialog();
                         }
                     };
                     mShopMenuRecyclerView.setAdapter(shopMenuRecyclerAdapter);
@@ -151,29 +167,27 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
                         }
                     });
 
-                    // 注文ダイアログのキャンセルボタンタップ時の処理
+                    // 注文ダイアログの「キャンセル」ボタンタップ時の処理
                     mCancelButtonConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
                         @Override
                         public boolean onTouch(View view, MotionEvent motionEvent) {
                             if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
                                 if (isShownOrderDialog) {
-                                    mLayoutOrderDialog.setVisibility(View.GONE);
-                                    isShownOrderDialog = false;
+                                    closeOrderDialog();
                                 }
                             }
                             return false;
                         }
                     });
 
-                    // 注文ダイアログの選択ボタンタップ時の処理
+                    // 注文ダイアログの「選択」ボタンタップ時の処理
                     mSelectButtonConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
                         @Override
                         public boolean onTouch(View view, MotionEvent motionEvent) {
                             if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
 
                                 // 注文ダイアログを非表示
-                                mLayoutOrderDialog.setVisibility(View.GONE);
-                                isShownOrderDialog = false;
+                                closeOrderDialog();
 
                                 // 注文数をメニューに表示
                                 int orderNum = Integer.parseInt(mOrderNumTextView.getText().toString());
@@ -202,14 +216,21 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
                 return isScanning;
             }
         });
+
+        // 注文ダイアログが開いているときは、背景のタップを出来ないように設定
+        mLayoutOrderDialog.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return isShownOrderDialog;
+            }
+        });
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event){
         if(keyCode == KeyEvent.KEYCODE_BACK) {
             if(isShownOrderDialog) {
-                mLayoutOrderDialog.setVisibility(View.GONE);
-                isShownOrderDialog = false;
+                closeOrderDialog();
             } else {
                 finish();
             }
@@ -240,6 +261,8 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
                     } catch (CuonaException e) {
                         e.printStackTrace();
                     }
+
+                    //
 
                     Intent intent = new Intent(ShopMenuActivity.this, OrderDoneActivity.class);
                     intent.putExtra("shopName", mShopNameTextView.getText().toString());
@@ -321,4 +344,36 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
         mScanDialogConstraintLayout.setAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_in_from_bottom));
         mScanBackgroundConstraintLayout.setAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in_slowly));
     }
+
+    // 注文ダイアログを表示
+    private void openOrderDialog() {
+        mLayoutOrderDialog.setVisibility(View.VISIBLE);
+        mLayoutOrderDialog.setAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in_slowly));
+        isShownOrderDialog = true;
+    }
+
+    // 注文ダイアログを非表示
+    private void closeOrderDialog() {
+
+        final AnimationSet animationSet = new AnimationSet(true);
+        animationSet.addAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_out_slowly));
+        animationSet.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) { }
+
+            // アニメーションを終了した後の処理
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                mLayoutOrderDialog.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) { }
+        });
+
+        mLayoutOrderDialog.setVisibility(View.INVISIBLE);
+        mLayoutOrderDialog.setAnimation(animationSet);
+        isShownOrderDialog = false;
+    }
+
 }
