@@ -1,12 +1,9 @@
 package jp.co.conol.favor_android.activity;
 
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Handler;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,9 +18,10 @@ import butterknife.ButterKnife;
 import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favor_android.adapter.ShopDetailFragmentStatePagerAdapter;
-import jp.co.conol.favorlib.favor.Favor;
-import jp.co.conol.favorlib.favor.model.Shop;
-import jp.co.conol.favorlib.favor.model.User;
+import jp.co.conol.favor_android.custom.SimpleAlertDialog;
+import jp.co.conol.favorlib.cuona.Favor;
+import jp.co.conol.favorlib.cuona.favor_model.Shop;
+import jp.co.conol.favorlib.cuona.favor_model.User;
 
 public class ShopDetailActivity extends AppCompatActivity {
 
@@ -49,20 +47,16 @@ public class ShopDetailActivity extends AppCompatActivity {
         mIntent = getIntent();
         String deviceId = mIntent.getStringExtra("deviceId");
         int shopId = mIntent.getIntExtra("shopId", 0);
-        User user = mGson.fromJson(MyUtil.SharedPref.get(this, "userSetting"), User.class);
+        User user = mGson.fromJson(MyUtil.SharedPref.getString(this, "userSetting"), User.class);
 
         // デバイスIDがnullなら、履歴から表示されていると判断
-        if(deviceId == null)
-            enterFlag = false;
-        else
-            enterFlag = true;
+        enterFlag = deviceId != null;
 
         // 入店処理（入店した際に店舗情報を表示）
         if(enterFlag) {
             // 入店している場合は「お会計する」ボタンを表示
             mOrderStopButtonConstraintLayout.setVisibility(View.VISIBLE);
 
-            final Handler handler = new Handler();
             new Favor(new Favor.AsyncCallback() {
                 @Override
                 public void onSuccess(Object object) {
@@ -71,28 +65,16 @@ public class ShopDetailActivity extends AppCompatActivity {
                     if (shop != null) {
                         setShopInfo(shop);
                     } else {
-                        showAlertDialog();
+                        new SimpleAlertDialog(ShopDetailActivity.this, getString(R.string.error_touch_cuona)).show();
                     }
                 }
 
                 @Override
                 public void onFailure(Exception e) {
                     Log.d("onFailure", e.toString());
-                    showAlertDialog();
-                }
-
-                private void showAlertDialog() {
-                    handler.post(new Runnable() {
+                    runOnUiThread(new Runnable() {
                         public void run() {
-                            new AlertDialog.Builder(ShopDetailActivity.this)
-                                    .setMessage(getString(R.string.error_touch_cuona))
-                                    .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            finish();
-                                        }
-                                    })
-                                    .show();
+                            new SimpleAlertDialog(ShopDetailActivity.this, getString(R.string.error_touch_cuona)).show();
                         }
                     });
                 }

@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -23,9 +22,9 @@ import butterknife.ButterKnife;
 import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favor_android.adapter.UserFavoriteRecyclerAdapter;
-import jp.co.conol.favorlib.favor.Favor;
-import jp.co.conol.favorlib.favor.model.Favorite;
-import jp.co.conol.favorlib.favor.model.User;
+import jp.co.conol.favorlib.cuona.Favor;
+import jp.co.conol.favorlib.cuona.favor_model.Favorite;
+import jp.co.conol.favorlib.cuona.favor_model.User;
 
 public class UserFavoriteFragment extends Fragment {
 
@@ -69,7 +68,7 @@ public class UserFavoriteFragment extends Fragment {
         ButterKnife.bind(this, view);
 
         // ユーザー情報の取得
-        final User user = mGson.fromJson(MyUtil.SharedPref.get(mContext, "userSetting"), User.class);
+        final User user = mGson.fromJson(MyUtil.SharedPref.getString(mContext, "userSetting"), User.class);
 
         new Favor(new Favor.AsyncCallback() {
             @Override

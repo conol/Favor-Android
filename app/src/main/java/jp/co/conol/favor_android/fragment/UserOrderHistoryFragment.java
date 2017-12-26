@@ -2,7 +2,6 @@ package jp.co.conol.favor_android.fragment;
 
 import android.app.Activity;
 import android.content.Context;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -23,11 +22,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
-import jp.co.conol.favor_android.adapter.UserFavoriteRecyclerAdapter;
 import jp.co.conol.favor_android.adapter.UserOrderHistoryRecyclerAdapter;
-import jp.co.conol.favorlib.favor.Favor;
-import jp.co.conol.favorlib.favor.model.User;
-import jp.co.conol.favorlib.favor.model.UsersAllOrder;
+import jp.co.conol.favorlib.cuona.Favor;
+import jp.co.conol.favorlib.cuona.favor_model.User;
+import jp.co.conol.favorlib.cuona.favor_model.UsersAllOrder;
 
 public class UserOrderHistoryFragment extends Fragment {
 
@@ -70,7 +68,7 @@ public class UserOrderHistoryFragment extends Fragment {
         ButterKnife.bind(this, view);
 
         // ユーザー情報の取得
-        User user = mGson.fromJson(MyUtil.SharedPref.get(mContext, "userSetting"), User.class);
+        User user = mGson.fromJson(MyUtil.SharedPref.getString(mContext, "userSetting"), User.class);
 
         new Favor(new Favor.AsyncCallback() {
             @Override

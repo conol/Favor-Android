@@ -15,10 +15,9 @@ import butterknife.ButterKnife;
 import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favor_android.adapter.ShopHistoryRecyclerAdapter;
-import jp.co.conol.favorlib.cuona.Cuona;
-import jp.co.conol.favorlib.favor.Favor;
-import jp.co.conol.favorlib.favor.model.Shop;
-import jp.co.conol.favorlib.favor.model.User;
+import jp.co.conol.favorlib.cuona.Favor;
+import jp.co.conol.favorlib.cuona.favor_model.Shop;
+import jp.co.conol.favorlib.cuona.favor_model.User;
 
 public class ShopHistoryActivity extends AppCompatActivity {
 
@@ -33,7 +32,7 @@ public class ShopHistoryActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         // ユーザー情報を取得
-        mUser = mGson.fromJson(MyUtil.SharedPref.get(this, "userSetting"), User.class);
+        mUser = mGson.fromJson(MyUtil.SharedPref.getString(this, "userSetting"), User.class);
 
         // 入店履歴を取得
         new Favor(new Favor.AsyncCallback() {

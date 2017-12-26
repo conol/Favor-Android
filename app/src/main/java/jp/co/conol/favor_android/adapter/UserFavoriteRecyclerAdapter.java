@@ -12,8 +12,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import jp.co.conol.favor_android.R;
-import jp.co.conol.favorlib.favor.model.Favorite;
-import jp.co.conol.favorlib.favor.model.UsersAllOrder;
+import jp.co.conol.favorlib.cuona.favor_model.Favorite;
 
 /**
  * Created by Masafumi_Ito on 2017/10/24.

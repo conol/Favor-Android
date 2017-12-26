@@ -2,7 +2,6 @@ package jp.co.conol.favor_android.activity;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Handler;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
@@ -21,8 +20,6 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -32,20 +29,20 @@ import butterknife.ButterKnife;
 import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favor_android.adapter.ShopMenuRecyclerAdapter;
+import jp.co.conol.favor_android.custom.CuonaUtil;
 import jp.co.conol.favor_android.custom.NumberPickerDialog;
+import jp.co.conol.favor_android.custom.ScanCuonaDialog;
 import jp.co.conol.favorlib.cuona.Cuona;
-import jp.co.conol.favorlib.cuona.CuonaException;
-import jp.co.conol.favorlib.cuona.NfcNotAvailableException;
-import jp.co.conol.favorlib.favor.Favor;
-import jp.co.conol.favorlib.favor.model.Menu;
-import jp.co.conol.favorlib.favor.model.Order;
-import jp.co.conol.favorlib.favor.model.User;
-import jp.co.conol.favorlib.favor.model.UsersAllOrder;
+import jp.co.conol.favorlib.cuona.NFCNotAvailableException;
+import jp.co.conol.favorlib.cuona.cuona_reader.CuonaReaderException;
+import jp.co.conol.favorlib.cuona.Favor;
+import jp.co.conol.favorlib.cuona.favor_model.Menu;
+import jp.co.conol.favorlib.cuona.favor_model.Order;
+import jp.co.conol.favorlib.cuona.favor_model.User;
 
 public class ShopMenuActivity extends AppCompatActivity implements NumberPickerDialog.OnPositiveButtonClickedListener {
 
-    private boolean isScanning = false;
-    private Handler mScanDialogAutoCloseHandler = new Handler();
+    private ScanCuonaDialog mScanCuonaDialog;
     private Cuona mCuona;
     private final Gson mGson = new Gson();
     private User mUser;
@@ -64,8 +61,6 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
     @BindView(R.id.cancelButtonConstraintLayout) ConstraintLayout mCancelButtonConstraintLayout;
     @BindView(R.id.selectButtonConstraintLayout) ConstraintLayout mSelectButtonConstraintLayout;
     @BindView(R.id.orderButtonConstraintLayout) ConstraintLayout mOrderButtonConstraintLayout;
-    @BindView(R.id.ScanBackgroundConstraintLayout) ConstraintLayout mScanBackgroundConstraintLayout;
-    @BindView(R.id.scanDialogConstraintLayout) ConstraintLayout mScanDialogConstraintLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,17 +70,20 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
 
         try {
             mCuona = new Cuona(this);
-        } catch (NfcNotAvailableException e) {
+        } catch (NFCNotAvailableException e) {
             Log.d("Corona", e.toString());
             finish();
         }
+
+        // CUONAスキャンダイアログのインスタンスを生成
+        mScanCuonaDialog = new ScanCuonaDialog(ShopMenuActivity.this, mCuona, 60000, false);
 
         // 遷移前の情報を取得
         Intent intent = getIntent();
         int shopId = intent.getIntExtra("shopId", 0);
         String shopName = intent.getStringExtra("shopName");
         mVisitHistoryId = intent.getIntExtra("visitHistoryId", 0);
-        mUser = mGson.fromJson(MyUtil.SharedPref.get(this, "userSetting"), User.class);
+        mUser = mGson.fromJson(MyUtil.SharedPref.getString(this, "userSetting"), User.class);
 
         // 店舗名を反映
         if(shopName != null) mShopNameTextView.setText(shopName);
@@ -209,14 +207,6 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
             }
         }).setAppToken(mUser.getAppToken()).setShopId(shopId).execute(Favor.Task.GetMenu);
 
-        // スキャン画面が開いているときは、背景のタップを出来ないように設定
-        mScanBackgroundConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return isScanning;
-            }
-        });
-
         // 注文ダイアログが開いているときは、背景のタップを出来ないように設定
         mLayoutOrderDialog.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -227,10 +217,24 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if(mCuona != null) mCuona.enableForegroundDispatch(ShopMenuActivity.this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(mCuona != null) mCuona.disableForegroundDispatch(ShopMenuActivity.this);
+    }
+
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event){
         if(keyCode == KeyEvent.KEYCODE_BACK) {
             if(isShownOrderDialog) {
                 closeOrderDialog();
+            } else if(mScanCuonaDialog != null && mScanCuonaDialog.isShowing()){
+                mScanCuonaDialog.dismiss();
             } else {
                 finish();
             }
@@ -247,7 +251,7 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
     // 注文するためにNFCにタップされた時の処理
     @Override
     protected void onNewIntent(final Intent intent) {
-        if(isScanning) {
+        if(mScanCuonaDialog.isShowing()) {
 
             // 注文処理
             new Favor(new Favor.AsyncCallback() {
@@ -258,7 +262,7 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
                     mCuona.setReadLogMessage("注文");
                     try {
                         mCuona.readDeviceId(intent);
-                    } catch (CuonaException e) {
+                    } catch (CuonaReaderException e) {
                         e.printStackTrace();
                     }
 
@@ -267,7 +271,7 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
                     Intent intent = new Intent(ShopMenuActivity.this, OrderDoneActivity.class);
                     intent.putExtra("shopName", mShopNameTextView.getText().toString());
                     startActivity(intent);
-                    cancelScan();
+                    mScanCuonaDialog.dismiss();
                     finish();
                 }
 
@@ -280,69 +284,14 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
     }
 
     public void onStartScanButtonClicked(View view) {
+
         // nfcがオフの場合はダイアログを表示
-        if(!mCuona.isEnable()) {
-            new AlertDialog.Builder(this)
-                    .setMessage(getString(R.string.nfc_dialog))
-                    .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            startActivity(new Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS));
-                        }
-                    })
-                    .setNegativeButton(getString(R.string.cancel), null)
-                    .show();
-        } else {
-            if (!isScanning) {
+        CuonaUtil.checkNfcSetting(this, mCuona);
 
-                // nfc読み込み待機
-                mCuona.enableForegroundDispatch(ShopMenuActivity.this);
-                isScanning = true;
-                openScanPage();
-
-                // 60秒後に自動で閉じる
-                mScanDialogAutoCloseHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (isScanning) {
-                            cancelScan();
-                        }
-                    }
-                }, 60000);
-            }
+        // BluetoothとNFCが許可されている場合処理を進める
+        if(mCuona.isNfcEnabled()) {
+            mScanCuonaDialog.show();
         }
-    }
-
-    public void onCancelScanButtonClicked(View view) {
-        if(isScanning) {
-            cancelScan();
-
-            // 60秒後に閉じる予約をキャンセル
-            mScanDialogAutoCloseHandler.removeCallbacksAndMessages(null);
-        }
-    }
-
-    private void cancelScan() {
-        // nfc読み込み待機を解除
-        mCuona.disableForegroundDispatch(ShopMenuActivity.this);
-        isScanning = false;
-        closeScanPage();
-    }
-
-    private void closeScanPage() {
-        mScanDialogConstraintLayout.setVisibility(View.GONE);
-        mScanBackgroundConstraintLayout.setVisibility(View.GONE);
-        mScanDialogConstraintLayout.setAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_out_to_bottom));
-        mScanBackgroundConstraintLayout.setAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_out_slowly));
-        mScanDialogAutoCloseHandler.removeCallbacksAndMessages(null);
-    }
-
-    // 読み込み画面を表示
-    private void openScanPage() {
-        mScanDialogConstraintLayout.setVisibility(View.VISIBLE);
-        mScanBackgroundConstraintLayout.setVisibility(View.VISIBLE);
-        mScanDialogConstraintLayout.setAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_in_from_bottom));
-        mScanBackgroundConstraintLayout.setAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in_slowly));
     }
 
     // 注文ダイアログを表示

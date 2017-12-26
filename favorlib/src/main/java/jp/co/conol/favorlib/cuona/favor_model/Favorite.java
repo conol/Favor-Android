@@ -1,4 +1,4 @@
-package jp.co.conol.favorlib.favor.model;
+package jp.co.conol.favorlib.cuona.favor_model;
 
 /**
  * Created by Masafumi_Ito on 2017/10/26.

@@ -15,7 +15,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favor_android.activity.ShopDetailActivity;
-import jp.co.conol.favorlib.favor.model.Shop;
+import jp.co.conol.favorlib.cuona.favor_model.Shop;
 
 /**
  * Created by Masafumi_Ito on 2017/09/04.

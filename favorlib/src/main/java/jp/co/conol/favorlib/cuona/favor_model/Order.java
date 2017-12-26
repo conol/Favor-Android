@@ -1,4 +1,4 @@
-package jp.co.conol.favorlib.favor.model;
+package jp.co.conol.favorlib.cuona.favor_model;
 
 import java.util.ArrayList;
 import java.util.List;

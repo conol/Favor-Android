@@ -7,17 +7,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import jp.co.conol.favor_android.R;
-import jp.co.conol.favorlib.favor.model.UsersAllOrder;
+import jp.co.conol.favorlib.cuona.favor_model.UsersAllOrder;
 
 /**
  * Created by Masafumi_Ito on 2017/10/24.

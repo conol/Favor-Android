@@ -16,8 +16,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
-import jp.co.conol.favorlib.favor.Favor;
-import jp.co.conol.favorlib.favor.model.User;
+import jp.co.conol.favorlib.cuona.Favor;
+import jp.co.conol.favorlib.cuona.favor_model.User;
 
 public class RegistrationActivity extends AppCompatActivity {
 
@@ -32,7 +32,7 @@ public class RegistrationActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         // ユーザー情報が保存されていれば、登録画面は表示しない
-        if(MyUtil.SharedPref.get(RegistrationActivity.this, "userSetting") != null) {
+        if(MyUtil.SharedPref.getString(RegistrationActivity.this, "userSetting") != null) {
             Intent intent = new Intent(RegistrationActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
@@ -99,7 +99,7 @@ public class RegistrationActivity extends AppCompatActivity {
 
                 // ユーザー情報を端末に保存
                 Gson gson = new Gson();
-                MyUtil.SharedPref.save(RegistrationActivity.this, "userSetting", gson.toJson(user));
+                MyUtil.SharedPref.saveString(RegistrationActivity.this, "userSetting", gson.toJson(user));
 
                 // ページ移動
                 Intent intent = new Intent(RegistrationActivity.this, MainActivity.class);

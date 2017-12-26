@@ -21,10 +21,9 @@ import butterknife.ButterKnife;
 import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favor_android.adapter.ShopOrderHistoryRecyclerAdapter;
-import jp.co.conol.favor_android.adapter.UserOrderHistoryRecyclerAdapter;
-import jp.co.conol.favorlib.favor.Favor;
-import jp.co.conol.favorlib.favor.model.Order;
-import jp.co.conol.favorlib.favor.model.User;
+import jp.co.conol.favorlib.cuona.Favor;
+import jp.co.conol.favorlib.cuona.favor_model.Order;
+import jp.co.conol.favorlib.cuona.favor_model.User;
 
 public class ShopOrderHistoryFragment extends Fragment {
 
@@ -84,7 +83,7 @@ public class ShopOrderHistoryFragment extends Fragment {
         super.onResume();
 
         // ユーザー情報の取得
-        User user = mGson.fromJson(MyUtil.SharedPref.get(mContext, "userSetting"), User.class);
+        User user = mGson.fromJson(MyUtil.SharedPref.getString(mContext, "userSetting"), User.class);
 
         if(mVisitGroupId != 0) {
             new Favor(new Favor.AsyncCallback() {

@@ -16,7 +16,7 @@ import com.google.gson.Gson;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import jp.co.conol.favor_android.R;
-import jp.co.conol.favorlib.favor.model.Shop;
+import jp.co.conol.favorlib.cuona.favor_model.Shop;
 
 public class ShopDetailInfoFragment extends Fragment {
 

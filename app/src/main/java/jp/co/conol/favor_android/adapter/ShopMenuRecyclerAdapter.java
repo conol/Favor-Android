@@ -11,12 +11,10 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
 import butterknife.ButterKnife;
+import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
-import jp.co.conol.favorlib.Util;
-import jp.co.conol.favorlib.favor.model.Menu;
-import jp.co.conol.favorlib.favor.model.UsersAllOrder;
+import jp.co.conol.favorlib.cuona.favor_model.Menu;
 
 /**
  * Created by Masafumi_Ito on 2017/10/25.
@@ -137,7 +135,7 @@ public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecycl
         // 要素がヘッダーの時
         else if(1 < mMenuList.size()) {
             String categoryName = mMenuList.get(position + 1).getCategoryName();
-            if(Util.Str.isBlank(categoryName)) categoryName = "未分類";
+            if(MyUtil.Str.isBlank(categoryName)) categoryName = "未分類";
             holder.mMenuCategoryTextView.setText(categoryName);
         }
     }

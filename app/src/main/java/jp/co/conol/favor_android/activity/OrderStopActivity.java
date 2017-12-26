@@ -20,9 +20,9 @@ import butterknife.ButterKnife;
 import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favor_android.adapter.ShopOrderHistoryRecyclerAdapter;
-import jp.co.conol.favorlib.favor.Favor;
-import jp.co.conol.favorlib.favor.model.Order;
-import jp.co.conol.favorlib.favor.model.User;
+import jp.co.conol.favorlib.cuona.Favor;
+import jp.co.conol.favorlib.cuona.favor_model.Order;
+import jp.co.conol.favorlib.cuona.favor_model.User;
 
 public class OrderStopActivity extends AppCompatActivity {
 
@@ -39,7 +39,7 @@ public class OrderStopActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         // ユーザー情報の取得
-        final User user = mGson.fromJson(MyUtil.SharedPref.get(this, "userSetting"), User.class);
+        final User user = mGson.fromJson(MyUtil.SharedPref.getString(this, "userSetting"), User.class);
         Intent intent = getIntent();
         final int visitHistoryId = intent.getIntExtra("visitHistoryId", 0);
         mVisitGroupId = intent.getIntExtra("visitGroupId", 0);

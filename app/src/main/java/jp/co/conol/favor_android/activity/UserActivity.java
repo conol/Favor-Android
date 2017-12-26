@@ -1,13 +1,10 @@
 package jp.co.conol.favor_android.activity;
 
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -34,10 +31,9 @@ import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favor_android.adapter.UserFragmentStatePagerAdapter;
 import jp.co.conol.favor_android.fragment.UserFavoriteFragment;
-import jp.co.conol.favorlib.Util;
-import jp.co.conol.favorlib.favor.Favor;
-import jp.co.conol.favorlib.favor.model.Favorite;
-import jp.co.conol.favorlib.favor.model.User;
+import jp.co.conol.favorlib.cuona.Favor;
+import jp.co.conol.favorlib.cuona.favor_model.Favorite;
+import jp.co.conol.favorlib.cuona.favor_model.User;
 
 public class UserActivity extends AppCompatActivity {
 
@@ -110,7 +106,7 @@ public class UserActivity extends AppCompatActivity {
 
         // ユーザー情報を取得
         Gson gson = new Gson();
-        mUser = gson.fromJson(MyUtil.SharedPref.get(this, "userSetting"), User.class);
+        mUser = gson.fromJson(MyUtil.SharedPref.getString(this, "userSetting"), User.class);
 
         // ユーザー情報のセット
         String userGender = getString(R.string.user_gender_male);
@@ -145,7 +141,7 @@ public class UserActivity extends AppCompatActivity {
             @Override
             public boolean onTouch(final View view, MotionEvent motionEvent) {
                 if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    if (!Util.Str.isBlank(mAddFavoriteEditText.getText().toString())) {
+                    if (!MyUtil.Str.isBlank(mAddFavoriteEditText.getText().toString())) {
                         // 登録するお気に入りの内容
                         Favorite favorite = new Favorite(
                                 mAddFavoriteEditText.getText().toString(),
@@ -338,7 +334,7 @@ public class UserActivity extends AppCompatActivity {
 
                 // ユーザー情報を端末に保存
                 Gson gson = new Gson();
-                MyUtil.SharedPref.save(UserActivity.this, "userSetting", gson.toJson(user));
+                MyUtil.SharedPref.saveString(UserActivity.this, "userSetting", gson.toJson(user));
             }
 
             @Override
