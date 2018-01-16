@@ -1,1 +1,1 @@
-include ':app', ':favorlib-debug'
+include ':app', ':favorlib'
