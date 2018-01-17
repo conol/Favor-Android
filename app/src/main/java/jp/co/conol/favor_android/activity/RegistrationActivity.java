@@ -35,12 +35,12 @@ public class RegistrationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_registration);
         ButterKnife.bind(this);
 
-//        // ユーザー情報が保存されていれば、登録画面は表示しない
-//        if(MyUtil.SharedPref.getString(RegistrationActivity.this, "userSetting") != null) {
-//            Intent intent = new Intent(RegistrationActivity.this, MainActivity.class);
-//            startActivity(intent);
-//            finish();
-//        }
+        // ユーザー情報が保存されていれば、登録画面は表示しない
+        if(MyUtil.SharedPref.getString(RegistrationActivity.this, "userSetting") != null) {
+            Intent intent = new Intent(RegistrationActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        }
 
         // 手動入力を禁止
         mUserAgeEditText.setKeyListener(null);
@@ -129,7 +129,7 @@ public class RegistrationActivity extends AppCompatActivity {
                         // ページ移動
                         Intent intent = new Intent(RegistrationActivity.this, MainActivity.class);
                         startActivity(intent);
-//                        finish();
+                        finish();
                     } else {
                         new SimpleAlertDialog(RegistrationActivity.this, getString(R.string.error_common)).show();
                     }

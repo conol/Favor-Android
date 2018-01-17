@@ -8,7 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,6 +22,7 @@ import butterknife.ButterKnife;
 import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favor_android.custom.CuonaUtil;
+import jp.co.conol.favor_android.custom.ProgressDialog;
 import jp.co.conol.favor_android.custom.ScanCuonaDialog;
 import jp.co.conol.favor_android.custom.SimpleAlertDialog;
 import jp.co.conol.favorlib.cuona.Cuona;
@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private final Gson mGson = new Gson();
     private Cuona mCuona;
     private User mUser;
-    List<String> mDeviceIds = new ArrayList<>();    // Favorのサービスに登録されているデバイスのID一覧
+    List<String> mAvailableDeviceIdList = new ArrayList<>();    // Favorのサービスに登録されているデバイスのID一覧
     @BindView(R.id.shopHistoryConstraintLayout) ConstraintLayout mShopHistoryConstraintLayout;
     @BindView(R.id.userSettingConstraintLayout) ConstraintLayout mUserSettingConstraintLayout;
     @BindView(R.id.userSettingTextView) TextView mUserSettingTextView;
@@ -72,58 +72,90 @@ public class MainActivity extends AppCompatActivity {
         mUser = mGson.fromJson(MyUtil.SharedPref.getString(this, "userSetting"), User.class);
 
         if(mUser != null) {
+            if(MyUtil.Network.isEnable(MainActivity.this)) {
 
-            // 入店履歴を取得
-            new Favor(new Favor.AsyncCallback() {
-                @Override
-                public void onSuccess(Object object) {
-                    @SuppressWarnings("unchecked")
-                    List<Shop> shopList = (List<Shop>) object;
+                // 読み込みダイアログを表示
+                final ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
+                progressDialog.setMessage(getString(R.string.registration_user_progress));
+                progressDialog.show();
 
-                    if (shopList != null && shopList.size() != 0) {
+                // 入店履歴を取得
+                new Favor(new Favor.AsyncCallback() {
+                    @Override
+                    public void onSuccess(Object object) {
+                        @SuppressWarnings("unchecked")
+                        List<Shop> shopList = (List<Shop>) object;
 
-                        // 最後に入店した店舗のオブジェクトを取得
-                        Shop shop = shopList.get(shopList.size() - 1);
+                        if (shopList != null && shopList.size() != 0) {
 
-                        mShopNameTextView.setText(shop.getShopName());
-                    } else {
-                        mShopNameTextView.setText(getString(R.string.shop_history_none));
+                            // 最後に入店した店舗のオブジェクトを取得
+                            Shop shop = shopList.get(shopList.size() - 1);
+
+                            // 最後に入店した店舗の情報を画面に反映
+                            mShopNameTextView.setText(shop.getShopName());
+                        } else {
+                            mShopNameTextView.setText(getString(R.string.shop_history_none));
+                        }
                     }
-                }
 
-                @Override
-                public void onFailure(Exception e) {
-                    Log.e("onFailure", e.toString());
-                }
-            }).setAppToken(mUser.getAppToken()).execute(Favor.Task.GetVisitedShopHistory);
+                    @Override
+                    public void onFailure(Exception e) {
+                        Log.e("onFailure", e.toString());
+                    }
+                }).setAppToken(mUser.getAppToken()).execute(Favor.Task.GetVisitedShopHistory);
 
-            // 入店履歴をタップした時の動作
-            mShopHistoryConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View view, MotionEvent motionEvent) {
-                    if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                // Favorのサービスに登録されているデバイスのID一覧
+                new Favor(new Favor.AsyncCallback() {
+                    @Override
+                    public void onSuccess(Object object) {
+                        mAvailableDeviceIdList = (List<String>) object;
+
+                        // 読み込みダイアログを非表示
+                        progressDialog.dismiss();
+
+                        // 接続成功してもデバイスID一覧が無ければエラー
+                        if(mAvailableDeviceIdList == null || mAvailableDeviceIdList.size() == 0) {
+                            new SimpleAlertDialog(MainActivity.this, getString(R.string.error_fail_get_device_ids)).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        runOnUiThread(new Runnable() {
+                            public void run() {
+                                // 読み込みダイアログを非表示
+                                progressDialog.dismiss();
+
+                                new SimpleAlertDialog(MainActivity.this, getString(R.string.error_common)).show();
+                            }
+                        });
+                    }
+                }).execute(Favor.Task.GetAvailableDevices);
+
+                // 入店履歴をタップした時の動作
+                mShopHistoryConstraintLayout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
                         Intent intent = new Intent(MainActivity.this, ShopHistoryActivity.class);
                         startActivity(intent);
                     }
-                    return false;
-                }
-            });
+                });
 
-            // ユーザー名を表示
-            String userSettingTitle = mUser.getNickname() + getResources().getString(R.string.user_setting_title);
-            mUserSettingTextView.setText(userSettingTitle);
+                // ユーザー名を表示
+                String userSettingTitle = mUser.getNickname() + getResources().getString(R.string.user_setting_title);
+                mUserSettingTextView.setText(userSettingTitle);
 
-            // ユーザー情報をタップした時の動作
-            mUserSettingConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View view, MotionEvent motionEvent) {
-                    if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                // ユーザー情報をタップした時の動作
+                mUserSettingConstraintLayout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
                         Intent intent = new Intent(MainActivity.this, UserActivity.class);
                         startActivity(intent);
                     }
-                    return false;
-                }
-            });
+                });
+            } else {
+                new SimpleAlertDialog(MainActivity.this, getString(R.string.error_network_disable_reboot)).show();
+            }
         }
     }
 
@@ -143,67 +175,27 @@ public class MainActivity extends AppCompatActivity {
     protected void onNewIntent(final Intent intent) {
         if(mScanCuonaDialog.isShowing()) {
 
-            // サーバーに登録されているデバイスIDを取得
-            if (MyUtil.Network.isEnable(this)) {
-                new Favor(new Favor.AsyncCallback() {
-                    @Override
-                    public void onSuccess(Object object) {
-                        @SuppressWarnings("unchecked")
-                        List<String> deviceIdList = (List<String>) object;
-
-                        // 接続成功してもデバイスID一覧が無ければエラー
-                        if(deviceIdList == null || deviceIdList.size() == 0) {
-                            new SimpleAlertDialog(MainActivity.this, getString(R.string.error_fail_get_device_ids)).show();
-                            return;
-                        } else {
-                            // デバイスIDのリストを作成
-                            mDeviceIds.addAll(deviceIdList);
-                        }
-
-                        // nfc読み込み処理実行
-                        String deviceId;
-                        try {
-                            mCuona.setReadLogMessage("入店");
-                            deviceId = mCuona.readDeviceId(intent);
-                        } catch (CuonaReaderException e) {
-                            Log.d("CuonaReader", e.toString());
-                            new SimpleAlertDialog(MainActivity.this, getString(R.string.error_not_exist_in_devise_ids)).show();
-                            return;
-                        }
-
-                        // サーバーに登録されているFavor利用可能なデバイスに、タッチされたNFCが含まれているか否か確認
-                        if(mDeviceIds != null && deviceId != null) {
-
-                            // デバイスIDを小文字にする
-                            deviceId = deviceId.toLowerCase();
-
-                            if (!mDeviceIds.contains(deviceId)) {
-                                new SimpleAlertDialog(MainActivity.this, getString(R.string.error_not_exist_in_devise_ids)).show();
-                            }
-                            // 含まれていれば処理を進める
-                            else {
-
-                                Intent shopDetailIntent = new Intent(MainActivity.this, ShopDetailActivity.class);
-                                shopDetailIntent.putExtra("deviceId", deviceId);
-                                startActivity(shopDetailIntent);
-                                mScanCuonaDialog.dismiss();
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Exception e) {
-                        runOnUiThread(new Runnable() {
-                            public void run() {
-                                new SimpleAlertDialog(MainActivity.this, getString(R.string.error_fail_get_device_ids)).show();
-                            }
-                        });
-                    }
-                }).execute(Favor.Task.GetAvailableDevices);
+            // nfc読み込み処理実行
+            String deviceId;
+            try {
+                mCuona.setReadLogMessage("入店");
+                deviceId = mCuona.readDeviceId(intent);
+            } catch (CuonaReaderException e) {
+                Log.d("CuonaReader", e.toString());
+                new SimpleAlertDialog(MainActivity.this, getString(R.string.error_not_exist_in_devise_ids)).show();
+                return;
             }
-            // ネットに未接続の場合はエラー
+
+            // サーバーに登録されているFavor利用可能なデバイスに、タッチされたNFCが含まれているか否か確認
+            if (!mAvailableDeviceIdList.contains(deviceId)) {
+                new SimpleAlertDialog(MainActivity.this, getString(R.string.error_not_exist_in_devise_ids)).show();
+            }
+            // 含まれていれば店舗詳細ページへ移動
             else {
-                new SimpleAlertDialog(MainActivity.this, getString(R.string.error_network_disable)).show();
+                Intent shopDetailIntent = new Intent(MainActivity.this, ShopDetailActivity.class);
+                shopDetailIntent.putExtra("deviceId", deviceId);
+                startActivity(shopDetailIntent);
+                mScanCuonaDialog.dismiss();
             }
         }
     }
@@ -216,9 +208,11 @@ public class MainActivity extends AppCompatActivity {
         // nfcがオフの場合はダイアログを表示
         CuonaUtil.checkNfcSetting(this, mCuona);
 
-        // BluetoothとNFCが許可されている場合処理を進める
+        // NFCが許可されている場合処理を進める
         if(mCuona.isNfcEnabled()) {
             mScanCuonaDialog.show();
+        } else {
+            CuonaUtil.checkNfcSetting(this, mCuona);
         }
     }
 
