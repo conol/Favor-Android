@@ -7,6 +7,8 @@
     <string name="user_age"><font size="12">年代</font></string>
     <string name="user_gender"><font size="12">性別</font></string>
     <string name="registration_user">はじめる</string>
+    <string name="registration_user_progress">登録中です</string>
+    <string name="validation_user_setting">ユーザー情報を入力してください</string>
 
     <!-- メイン画面 -->
     <string name="touch_nfc">タッチして入店する</string>
@@ -72,7 +74,8 @@
     <string name="grant_permission">本アプリを使用するには、位置情報へのアクセスを許可する必要があります。</string>
 
     <!-- エラー -->
-    <string name="error_network_disable">利用可能なデバイス情報一覧の取得に失敗しました。\nインターネットに接続してください。</string>
+    <string name="error_common">必要なデータの取得に失敗しました。\n再度お試しください。</string>
+    <string name="error_network_disable">インターネットに接続してください。</string>
     <string name="error_touch_cuona">必要なデータの取得に失敗しました。\n再度タッチしてください。</string>
     <string name="error_fail_get_device_ids">一覧データの取得に失敗しました。\nアプリを再起動して再取得してください。</string>
     <string name="load_devices_failed">デバイス一覧の取得に失敗しました</string>

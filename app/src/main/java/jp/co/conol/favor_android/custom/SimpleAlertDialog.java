@@ -15,7 +15,7 @@ public class SimpleAlertDialog {
         mAlertDialog = new AlertDialog.Builder(context)
                 .setMessage(message)
                 .setPositiveButton("OK", null)
-                .show();
+                .create();
     }
 
     public void show() {
