@@ -293,21 +293,18 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
                     break;
             }
 
-//            // APIレスポンスからdata部分を取得
-//            if(params[0] != Task.GetAvailableDevices) { // GetAvailableDevicesは別処理でjsonを作成
-//                jsonObject = new JSONObject(responseJsonString);
-//                responseJsonDataString = jsonObject.getString("data");
-//            }
+            // APIレスポンスからdata部分を取得
+            if(params[0] != Task.GetAvailableDevices) { // GetAvailableDevicesは別処理でjsonを作成
+                jsonObject = new JSONObject(responseJsonString);
+                responseJsonDataString = jsonObject.getString("data");
+            }
 
         } catch (Exception e) {
             Log.e("FavorError", "Please set Task in execute() argument");
             onFailure(e);
         }
 
-        if(params[0] == Task.GetAvailableDevices) {
-            return gson.fromJson(responseJsonDataString, type);
-        }
-        return gson.fromJson(responseJsonString, type);
+        return gson.fromJson(responseJsonDataString, type);
     }
 
     @Override

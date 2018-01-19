@@ -8,6 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.makeramen.roundedimageview.RoundedImageView;
+import com.squareup.picasso.Picasso;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +33,7 @@ public class ShopHistoryRecyclerAdapter extends RecyclerView.Adapter<ShopHistory
     class ViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.shopNameTextView) TextView mShopNameTextView;
+        @BindView(R.id.shopImageView) RoundedImageView mShopImageView;
 
         // ViewHolderのコンストラクタ
         private ViewHolder(View v) {
@@ -78,6 +82,7 @@ public class ShopHistoryRecyclerAdapter extends RecyclerView.Adapter<ShopHistory
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         holder.mShopNameTextView.setText(mShopList.get(position).getShopName());
+        Picasso.with(mContext).load(mShopList.get(position).getShopImages()[0]).into(holder.mShopImageView);
     }
 
     @Override

@@ -2,10 +2,13 @@ package jp.co.conol.favor_android.fragment;
 
 
 import android.app.Activity;
+
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +19,8 @@ import com.google.gson.Gson;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import jp.co.conol.favor_android.R;
+import jp.co.conol.favor_android.activity.ShopDetailActivity;
+import jp.co.conol.favor_android.adapter.ShopDetailRecyclerAdapter;
 import jp.co.conol.favorlib.cuona.favor_model.Shop;
 
 public class ShopDetailInfoFragment extends Fragment {
@@ -23,8 +28,7 @@ public class ShopDetailInfoFragment extends Fragment {
     private final Gson mGson = new Gson();
     private Context mContext;
     private Shop mShop;
-    @BindView(R.id.shopAddressTextView) TextView mShopAddressTextView;
-    @BindView(R.id.shopPhoneNumberTextView) TextView mShopPhoneNumberTextView;
+    @BindView(R.id.itemDetailRecyclerView) RecyclerView mItemDetailRecyclerView;
 
     public ShopDetailInfoFragment() {
     }
@@ -70,10 +74,14 @@ public class ShopDetailInfoFragment extends Fragment {
         ButterKnife.bind(this, view);
 
         if(mShop != null) {
-            mShopAddressTextView.setText(mShop.getShopAddress());
-            mShopPhoneNumberTextView.setText(mShop.getShopPhoneNumber());
-        }
 
+            // アダプターの設定
+            ShopDetailRecyclerAdapter shopDetailRecyclerAdapter = new ShopDetailRecyclerAdapter(mContext, mShop);
+
+            // RecyclerViewの設定
+            mItemDetailRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+            mItemDetailRecyclerView.setAdapter(shopDetailRecyclerAdapter);
+        }
 
         return view;
     }

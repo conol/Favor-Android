@@ -17,6 +17,7 @@
     <string name="shop_history_title">入店履歴</string>
     <string name="shop_history_none">入店履歴はありません</string>
     <string name="user_setting_title"> の情報</string>
+    <string name="main_progress_message">情報を取得中です</string>
 
     <!-- ユーザー画面 -->
     <string name="user_favorite">お気に入り</string>
@@ -41,12 +42,10 @@
     <string name="shop_detail_info">基本情報</string>
     <string name="shop_detail_order_menu">注文履歴</string>
     <string name="shop_menu_show">注文メニューを表示する</string>
-    <string name="shop_open_at">営業時間</string>
-    <string name="shop_closed_day">定休日</string>
     <string name="shop_address">住所</string>
     <string name="shop_phone_number">電話番号</string>
-    <string name="shop_charge">チャージ料金</string>
-    <string name="shop_card_brands">利用可能カード</string>
+    <string name="shop_come_text">来店</string>
+    <string name="shop_count_text">回目</string>
 
     <!-- ショップメニュー画面 -->
     <string name="shop_menu_title">MENU</string>

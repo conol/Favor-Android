@@ -1,6 +1,7 @@
 package jp.co.conol.favor_android.fragment;
 
 import android.app.Activity;
+
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;

@@ -4,15 +4,19 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.makeramen.roundedimageview.RoundedImageView;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,12 +42,13 @@ public class MainActivity extends AppCompatActivity {
     private final Gson mGson = new Gson();
     private Cuona mCuona;
     private User mUser;
+    private boolean isSuccessfulConnection = false;
     List<String> mAvailableDeviceIdList = new ArrayList<>();    // Favorのサービスに登録されているデバイスのID一覧
     @BindView(R.id.shopHistoryConstraintLayout) ConstraintLayout mShopHistoryConstraintLayout;
     @BindView(R.id.userSettingConstraintLayout) ConstraintLayout mUserSettingConstraintLayout;
     @BindView(R.id.userSettingTextView) TextView mUserSettingTextView;
-//    @BindView(R.id.shopHistoryTitleTextView) TextView mShopHistoryTitleTextView;
     @BindView(R.id.shopNameTextView) TextView mShopNameTextView;
+    @BindView(R.id.shopImageView) RoundedImageView mShopImageView;  // 入店履歴の背景画像
     private final int PERMISSION_REQUEST_CODE = 1000;
 
     @Override
@@ -76,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // 読み込みダイアログを表示
                 final ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
-                progressDialog.setMessage(getString(R.string.registration_user_progress));
+                progressDialog.setMessage(getString(R.string.main_progress_message));
                 progressDialog.show();
 
                 // 入店履歴を取得
@@ -92,7 +97,8 @@ public class MainActivity extends AppCompatActivity {
                             Shop shop = shopList.get(shopList.size() - 1);
 
                             // 最後に入店した店舗の情報を画面に反映
-                            mShopNameTextView.setText(shop.getShopName());
+                            mShopNameTextView.setText(shop.getShopName());  // 店舗名
+                            Picasso.with(MainActivity.this).load(shop.getShopImages()[0]).into(mShopImageView); // 画像
                         } else {
                             mShopNameTextView.setText(getString(R.string.shop_history_none));
                         }
@@ -114,7 +120,9 @@ public class MainActivity extends AppCompatActivity {
                         progressDialog.dismiss();
 
                         // 接続成功してもデバイスID一覧が無ければエラー
-                        if(mAvailableDeviceIdList == null || mAvailableDeviceIdList.size() == 0) {
+                        if(mAvailableDeviceIdList != null && mAvailableDeviceIdList.size() != 0) {
+                            isSuccessfulConnection = true;
+                        } else {
                             new SimpleAlertDialog(MainActivity.this, getString(R.string.error_fail_get_device_ids)).show();
                         }
                     }
@@ -173,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onNewIntent(final Intent intent) {
-        if(mScanCuonaDialog.isShowing()) {
+        if(mScanCuonaDialog.isShowing() && isSuccessfulConnection) {
 
             // nfc読み込み処理実行
             String deviceId;
