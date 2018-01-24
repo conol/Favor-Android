@@ -20,6 +20,8 @@ public class UserOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<UserOr
 
     private Context mContext;
     private List<UsersAllOrder> mUsersAllOrderList;
+    private final int HEADER = 0;
+    private final int MENU = 1;
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -34,13 +36,13 @@ public class UserOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<UserOr
             switch (viewType) {
 
                 // 要素がヘッダーの場合
-                case 0:
+                case HEADER:
                     mUserOrderDateTextView = (TextView) v.findViewById(R.id.userOrderDateTextView);
                     mUserOrderShopNameTextView = (TextView) v.findViewById(R.id.userOrderShopNameTextView);
                     break;
 
                 // 要素が注文した商品の場合
-                case 1:
+                case MENU:
                     mUserOrderMenuTextView = (TextView) v.findViewById(R.id.userOrderMenuTextView);
                     mUserOrderMenuPriceTextView = (TextView) v.findViewById(R.id.userOrderMenuPriceTextView);
                     break;
@@ -64,12 +66,12 @@ public class UserOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<UserOr
         switch (viewType) {
 
             // 要素がヘッダーの場合
-            case 0:
+            case HEADER:
                 view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user_order_history_header, parent, false);
                 break;
 
             // 要素が注文した商品の場合
-            case 1:
+            case MENU:
                 view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user_order_history, parent, false);
                 break;
 
@@ -111,9 +113,9 @@ public class UserOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<UserOr
 
         UsersAllOrder usersAllOrder = mUsersAllOrderList.get(position);
 
-        int viewType = 0;
+        int viewType = HEADER;
         if(usersAllOrder != null) {
-            viewType = 1;
+            viewType = MENU;
         }
 
         // ヘッダーの場合は0、それ以外の場合は1を返す

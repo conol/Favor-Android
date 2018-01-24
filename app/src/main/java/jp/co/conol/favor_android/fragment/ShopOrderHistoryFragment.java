@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -94,11 +95,19 @@ public class ShopOrderHistoryFragment extends Fragment {
 
                     if (orderList != null) {
 
+                        // 注文履歴の複数注文部分をひとつの項目に変更
+                        List<Order> orderListSeparate = new ArrayList<>();
+                        for(Order order : orderList) {
+                            for (int i = 0; i < order.getOrderedItemQuantity(); i++) {
+                                orderListSeparate.add(order);
+                            }
+                        }
+
                         // レイアウトマネージャーのセット
                         mShopOrderHistoryRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
 
                         // アダプターのセット
-                        mShopOrderHistoryRecyclerAdapter = new ShopOrderHistoryRecyclerAdapter(mContext, orderList);
+                        mShopOrderHistoryRecyclerAdapter = new ShopOrderHistoryRecyclerAdapter(mContext, orderListSeparate);
                         mShopOrderHistoryRecyclerView.setAdapter(mShopOrderHistoryRecyclerAdapter);
                     }
                 }

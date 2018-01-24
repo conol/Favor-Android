@@ -5,7 +5,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +29,7 @@ public class ShopOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<ShopOr
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
-//        @BindView(R.id.shopOrderUserNameTextView) TextView mShopOrderUserNameTextView;
+        @BindView(R.id.orderMenuImageView) ImageView mOrderMenuImageView;
         @BindView(R.id.shopOrderMenuNameTextView) TextView mShopOrderMenuNameTextView;
         @BindView(R.id.shopOrderMenuPriceTextView) TextView mShopOrderMenuPriceTextView;
 
@@ -60,9 +63,14 @@ public class ShopOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<ShopOr
         Order order = mOrderList.get(position);
 
         // 内容を反映
-//        holder.mShopOrderUserNameTextView.setText(order.getOrderedUserNickname());
-        holder.mShopOrderMenuNameTextView.setText(order.getOrderedItemName());
-        holder.mShopOrderMenuPriceTextView.setText(order.getOrderedItemPriceFormat());
+        if(order != null) {
+            if (order.getOrderedItemImages() != null && order.getOrderedItemImages().length != 0) {
+                holder.mOrderMenuImageView.setVisibility(View.VISIBLE);
+                Picasso.with(mContext).load(order.getOrderedItemImages()[0]).into(holder.mOrderMenuImageView);
+            }
+            holder.mShopOrderMenuNameTextView.setText(order.getOrderedItemName());
+            holder.mShopOrderMenuPriceTextView.setText(order.getOrderedItemPriceFormat());
+        }
     }
 
     @Override

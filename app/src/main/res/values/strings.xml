@@ -61,6 +61,8 @@
     <string name="order_done_message">注文が完了しました</string>
     <string name="order_done_message_sub">注文が送信されました。\n届くまでの間しばらくお待ちください。</string>
     <string name="order_done_back_button_text">この画面を閉じる</string>
+    <string name="order_done_price">合計金額</string>
+    <string name="order_done_price_other">※ お一人当たりの支払金額 </string>
 
     <!-- お会計画面 -->
     <string name="order_stop_message">ご利用ありがとうございました。会計を行います。\n今回のご注文内容は以下となっております。</string>

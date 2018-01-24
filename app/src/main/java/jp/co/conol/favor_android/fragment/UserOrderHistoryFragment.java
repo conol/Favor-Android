@@ -74,26 +74,15 @@ public class UserOrderHistoryFragment extends Fragment {
             @Override
             public void onSuccess(Object object) {
                 List<UsersAllOrder> usersAllOrderList = (List<UsersAllOrder>) object;
-                List<Integer> insertHeaderPosition = new ArrayList<>();
 
                 if(usersAllOrderList != null) {
-
-                    // 入店日時・店舗名を表示するためのヘッダー部分の要素を追加
-                    for(int i = 0; i < usersAllOrderList.size() - 1; i++) {
-                        if(!Objects.equals(usersAllOrderList.get(i).getEnterAt(), usersAllOrderList.get(i + 1).getEnterAt())) {
-                            insertHeaderPosition.add(i + 1);
-                        }
-                    }
-                    for(int i = 0; i < insertHeaderPosition.size(); i++) {
-                        usersAllOrderList.add(insertHeaderPosition.get(insertHeaderPosition.size() - 1 - i), null); // 先頭
-                    }
-                    if(1 <= usersAllOrderList.size()) usersAllOrderList.add(0, new UsersAllOrder()); // 先頭にヘッダー用要素を追加
 
                     // レイアウトマネージャーのセット
                     mUserOrderHistoryRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
 
                     // アダプターのセット
-                    mUserOrderHistoryRecyclerAdapter = new UserOrderHistoryRecyclerAdapter(mContext, usersAllOrderList);
+                    mUserOrderHistoryRecyclerAdapter
+                            = new UserOrderHistoryRecyclerAdapter(mContext, MyUtil.Transform.addHeader(usersAllOrderList,"getEnterAt"));
                     mUserOrderHistoryRecyclerView.setAdapter(mUserOrderHistoryRecyclerAdapter);
                 }
 

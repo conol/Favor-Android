@@ -18,13 +18,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.TimeZone;
@@ -318,8 +322,6 @@ public class MyUtil {
 
             return responseJsonString;
         }
-
-
     }
 
     public static class Transform {
@@ -336,6 +338,38 @@ public class MyUtil {
             } else {
                 return null;
             }
+        }
+
+        // リストにヘッダーを追加
+        public static <T> List<T> addHeader(List<T> list, String methodName)  {
+            List<Integer> insertHeaderPosition = new ArrayList<>();
+
+            // メソッドの取得
+            Method method = null;
+            try {
+                method = list.get(0).getClass().getMethod(methodName);
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+                return list;
+            }
+
+            // ヘッダー追加
+            for(int i = 0; i < list.size() - 1; i++) {
+                try {
+                    if(!Objects.equals(method.invoke(list.get(i)), method.invoke(list.get(i + 1)))) {
+                        insertHeaderPosition.add(i + 1);
+                    }
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    e.printStackTrace();
+                    return list;
+                }
+            }
+            for(int i = 0; i < insertHeaderPosition.size(); i++) {
+                list.add(insertHeaderPosition.get(insertHeaderPosition.size() - 1 - i), null); // 先頭
+            }
+            if(1 <= list.size()) list.add(0, null); // 先頭にヘッダー用要素を追加
+
+            return list;
         }
 
         /**

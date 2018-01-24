@@ -31,7 +31,7 @@ public class ShopDetailActivity extends AppCompatActivity {
     private final Gson mGson = new Gson();
     private Intent mIntent = null;
     private int mVisitGroupId;
-    private int mVisitHistoryId;
+    private Shop mShop;
     private boolean isEntering;  // 入店中か否か
     @BindView(R.id.shopImageView) ImageView mShopImageView; // 店舗画像
     @BindView(R.id.shopGenreTextView) TextView mShopGenreTextView; // 店舗のジャンル
@@ -69,31 +69,17 @@ public class ShopDetailActivity extends AppCompatActivity {
             progressDialog.show();
 
             if(isEntering) {
-                // 入店している場合は「お会計する」ボタンを表示
-                mOrderStopButtonConstraintLayout.setVisibility(View.VISIBLE);
-
-                // お会計するボタンが押された場合、お会計ページへ移動
-                mOrderStopButtonConstraintLayout.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent intent = new Intent(ShopDetailActivity.this, OrderStopActivity.class);
-                        intent.putExtra("visitHistoryId", mVisitHistoryId);
-                        intent.putExtra("visitGroupId", mVisitGroupId);
-                        startActivity(intent);
-                    }
-                });
-
                 // 店舗情報を取得
                 new Favor(new Favor.AsyncCallback() {
                     @Override
                     public void onSuccess(Object object) {
-                        Shop shop = (Shop) object;
+                        mShop = (Shop) object;
 
                         // 読み込みダイアログを非表示
                         progressDialog.dismiss();
 
-                        if (shop != null) {
-                            setShopInfo(shop);
+                        if (mShop != null) {
+                            setShopInfo(mShop);
                         } else {
                             new SimpleAlertDialog(ShopDetailActivity.this, getString(R.string.error_touch_cuona)).show();
                         }
@@ -112,6 +98,19 @@ public class ShopDetailActivity extends AppCompatActivity {
                         });
                     }
                 }).setAppToken(user.getAppToken()).setDeviceId(deviceId).execute(Favor.Task.EnterShop);
+
+                // 入店している場合は「お会計する」ボタンを表示
+                mOrderStopButtonConstraintLayout.setVisibility(View.VISIBLE);
+
+                // お会計するボタンが押された場合、お会計ページへ移動
+                mOrderStopButtonConstraintLayout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(ShopDetailActivity.this, OrderStopActivity.class);
+                        intent.putExtra("shop", mGson.toJson(mShop));
+                        startActivity(intent);
+                    }
+                });
             }
             // 店舗詳細表示（入店履歴から表示された場合）
             else {
@@ -129,6 +128,8 @@ public class ShopDetailActivity extends AppCompatActivity {
 
                         if (shop != null) {
                             setShopInfo(shop);
+                        } else {
+                            new SimpleAlertDialog(ShopDetailActivity.this, getString(R.string.error_common)).show();
                         }
                     }
 
@@ -166,9 +167,6 @@ public class ShopDetailActivity extends AppCompatActivity {
         else {
             mVisitGroupId = mIntent.getIntExtra("visitGroupId", 0);
         }
-
-        // visitHistoryIdを取得
-        mVisitHistoryId = shop.getVisitHistoryId();
 
         // 店舗情報をViewに反映
         Picasso.with(this).load(shop.getShopImages()[0]).into(mShopImageView); // 画像
