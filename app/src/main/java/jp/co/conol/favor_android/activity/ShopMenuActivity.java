@@ -10,12 +10,15 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,10 +50,12 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
     private List<Order> mOrderList = new ArrayList<>(); // 注文するメニューのリスト
     private boolean isShownOrderDialog = false; // 注文ダイアログが開いているか否か
     private int mTappedPosition;    // メニューをタップした際のメニュー位置
+    @BindView(R.id.innerOrderDialog) ConstraintLayout mInnerOrderDialog;    // メニューダイアログのダイアログ部分
     @BindView(R.id.shopNameTextView) TextView mShopNameTextView;    // タイトルバー部分の店舗名
     @BindView(R.id.shopMenuRecyclerView) RecyclerView mShopMenuRecyclerView;    // メニュー一覧
     @BindView(R.id.layoutOrderDialog) ConstraintLayout mLayoutOrderDialog;  // メニュータップ時の注文数選択ダイアログ
     @BindView(R.id.orderNumConstraintLayout) ConstraintLayout mOrderNumConstraintLayout;
+    @BindView(R.id.menuImageView) ImageView mMenuImageView;    // メニュー画像
     @BindView(R.id.menuNameTextView) TextView mMenuNameTextView;    // メニュー名
     @BindView(R.id.menuPriceTextView) TextView mMenuPriceTextView;    // メニュー値段
     @BindView(R.id.menuNoteTextView) TextView mMenuNoteTextView;    // メニュー説明
@@ -132,9 +137,13 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
                             mOrderNumTextView.setText(String.valueOf(orderNum));
 
                             // ダイアログにメニュー内容をセット
+                            if(menu.getImages() != null && menu.getImages().length != 0) {
+                                mMenuImageView.setVisibility(View.VISIBLE);
+                                Picasso.with(ShopMenuActivity.this).load(menu.getImages()[0]).into(mMenuImageView);
+                            }
                             mMenuNameTextView.setText(menu.getName());
                             mMenuPriceTextView.setText(menu.getPriceFormat());
-                            mMenuNoteTextView.setText(menu.getNotes());
+                            if(menu.getNotes() != null) mMenuNoteTextView.setText(menu.getNotes());
 
                             openOrderDialog();
                         }
@@ -263,8 +272,6 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
                         e.printStackTrace();
                     }
 
-                    //
-
                     Intent intent = new Intent(ShopMenuActivity.this, OrderDoneActivity.class);
                     intent.putExtra("shopName", mShopNameTextView.getText().toString());
                     startActivity(intent);
@@ -311,13 +318,15 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
             @Override
             public void onAnimationEnd(Animation animation) {
                 mLayoutOrderDialog.setVisibility(View.GONE);
+                mMenuImageView.setVisibility(View.GONE);
+                mMenuNoteTextView.setText("");
             }
 
             @Override
             public void onAnimationRepeat(Animation animation) { }
         });
 
-        mLayoutOrderDialog.setVisibility(View.INVISIBLE);
+        mLayoutOrderDialog.setVisibility(View.GONE);
         mLayoutOrderDialog.setAnimation(animationSet);
         isShownOrderDialog = false;
     }

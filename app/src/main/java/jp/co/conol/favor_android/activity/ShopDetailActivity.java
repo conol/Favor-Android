@@ -39,8 +39,9 @@ public class ShopDetailActivity extends AppCompatActivity {
     @BindView(R.id.shopDetailTabLayout) TabLayout mShopDetailTabLayout;
     @BindView(R.id.shopDetailViewPager) ViewPager mShopDetailViewPager;
     @BindView(R.id.showShopMenuConstraintLayout) ConstraintLayout mShowShopMenuConstraintLayout;
-    @BindView(R.id.shopNameTextView) TextView mShopNameTextView;
-    @BindView(R.id.shopIntroductionTextView) TextView mShopIntroductionTextView;
+    @BindView(R.id.shopNameTextView) TextView mShopNameTextView;    // 店舗名
+    @BindView(R.id.shopNameConstraintLayout) ConstraintLayout mShopNameConstraintLayout;    // 店舗の背景
+    @BindView(R.id.shopIntroductionTextView) TextView mShopIntroductionTextView;    // 店舗説明
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -154,6 +155,7 @@ public class ShopDetailActivity extends AppCompatActivity {
         // visitGroupIdを取得（入店時はAPIの店舗情報から、履歴から表示時はintentから）
         if(isEntering) {
             mVisitGroupId = shop.getVisitGroupId();
+            mShopNameConstraintLayout.setBackground(getDrawable(R.drawable.style_gradation_red));   // 店舗名背景
         } else {
             mVisitGroupId = mIntent.getIntExtra("visitGroupId", 0);
         }

@@ -130,7 +130,7 @@
                             android:id="@+id/shopNameConstraintLayout"
                             android:layout_width="0dp"
                             android:layout_height="50dp"
-                            android:background="@drawable/gradation_black"
+                            android:background="@drawable/style_gradation_black"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent">
