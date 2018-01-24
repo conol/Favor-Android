@@ -193,9 +193,7 @@ public class ShopDetailActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(ShopDetailActivity.this, ShopMenuActivity.class);
-                intent.putExtra("shopId", shop.getShopId());
-                intent.putExtra("shopName", shop.getShopName());
-                intent.putExtra("visitHistoryId", shop.getVisitHistoryId());
+                intent.putExtra("shop",mGson.toJson(shop));
                 startActivity(intent);
             }
         });

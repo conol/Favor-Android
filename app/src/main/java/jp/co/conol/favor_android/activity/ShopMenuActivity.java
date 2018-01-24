@@ -16,6 +16,7 @@ import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
@@ -31,13 +32,16 @@ import jp.co.conol.favor_android.R;
 import jp.co.conol.favor_android.adapter.ShopMenuRecyclerAdapter;
 import jp.co.conol.favor_android.custom.CuonaUtil;
 import jp.co.conol.favor_android.custom.NumberPickerDialog;
+import jp.co.conol.favor_android.custom.ProgressDialog;
 import jp.co.conol.favor_android.custom.ScanCuonaDialog;
+import jp.co.conol.favor_android.custom.SimpleAlertDialog;
 import jp.co.conol.favorlib.cuona.Cuona;
 import jp.co.conol.favorlib.cuona.NFCNotAvailableException;
 import jp.co.conol.favorlib.cuona.cuona_reader.CuonaReaderException;
 import jp.co.conol.favorlib.cuona.Favor;
 import jp.co.conol.favorlib.cuona.favor_model.Menu;
 import jp.co.conol.favorlib.cuona.favor_model.Order;
+import jp.co.conol.favorlib.cuona.favor_model.Shop;
 import jp.co.conol.favorlib.cuona.favor_model.User;
 
 public class ShopMenuActivity extends AppCompatActivity implements NumberPickerDialog.OnPositiveButtonClickedListener {
@@ -45,8 +49,8 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
     private ScanCuonaDialog mScanCuonaDialog;
     private Cuona mCuona;
     private final Gson mGson = new Gson();
+    private Shop mShop;
     private User mUser;
-    private int mVisitHistoryId;
     private List<Order> mOrderList = new ArrayList<>(); // 注文するメニューのリスト
     private boolean isShownOrderDialog = false; // 注文ダイアログが開いているか否か
     private int mTappedPosition;    // メニューをタップした際のメニュー位置
@@ -82,134 +86,154 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
 
         // 遷移前の情報を取得
         Intent intent = getIntent();
-        int shopId = intent.getIntExtra("shopId", 0);
-        String shopName = intent.getStringExtra("shopName");
-        mVisitHistoryId = intent.getIntExtra("visitHistoryId", 0);
+        mShop = mGson.fromJson(intent.getStringExtra("shop"), Shop.class);
         mUser = mGson.fromJson(MyUtil.SharedPref.getString(this, "userSetting"), User.class);
+        if(mShop == null || mUser == null) {
+            Toast.makeText(this,  getString(R.string.error_common), Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
 
-        // 店舗名を反映
-        if(shopName != null) mShopNameTextView.setText(shopName);
+        if(MyUtil.Network.isEnable(this)) {
 
-        new Favor(new Favor.AsyncCallback() {
-            @Override
-            public void onSuccess(Object object) {
-                @SuppressWarnings("unchecked")
-                final List<Menu> menuList = (List<Menu>) object;
-                List<Integer> insertHeaderPosition = new ArrayList<>();
+            // 読み込みダイアログを表示
+            final ProgressDialog progressDialog = new ProgressDialog(ShopMenuActivity.this);
+            progressDialog.setMessage(getString(R.string.main_progress_message));
+            progressDialog.show();
 
-                if(menuList != null && menuList.size() != 0) {
+            // 店舗名を反映
+            mShopNameTextView.setText(mShop.getShopName());
+            new Favor(new Favor.AsyncCallback() {
+                @Override
+                public void onSuccess(Object object) {
+                    @SuppressWarnings("unchecked") final List<Menu> menuList = (List<Menu>) object;
+                    List<Integer> insertHeaderPosition = new ArrayList<>();
+                    progressDialog.dismiss();
 
-                    // メニュー注文数のリスト
-                    final List<Integer> orderNumList = new ArrayList<>();
-                    for (int i = 0; i < menuList.size(); i++) {
-                        orderNumList.add(0);
-                    }
+                    if (menuList != null && menuList.size() != 0) {
 
-                    // メニューカテゴリーを表示するためのヘッダー部分の要素を追加
-                    for(int i = 0; i < menuList.size() - 1; i++) {
-                        if(!Objects.equals(menuList.get(i).getCategoryName(), menuList.get(i + 1).getCategoryName())) {
-                            insertHeaderPosition.add(i + 1);
+                        // メニュー注文数のリスト
+                        final List<Integer> orderNumList = new ArrayList<>();
+                        for (int i = 0; i < menuList.size(); i++) {
+                            orderNumList.add(0);
                         }
-                    }
-                    for(int i = 0; i < insertHeaderPosition.size(); i++) {
-                        menuList.add(insertHeaderPosition.get(insertHeaderPosition.size() - 1 - i), null);
-                        orderNumList.add(insertHeaderPosition.get(insertHeaderPosition.size() - 1 - i), 0);
-                    }
-                    if(1 <= menuList.size()) menuList.add(0, null); // 先頭にヘッダー用要素を追加
-                    if(1 <= orderNumList.size()) orderNumList.add(0, 0); // 注文用リストの先頭にヘッダー用要素を追加
 
-                    // レイアウトマネージャーのセット
-                    mShopMenuRecyclerView.setLayoutManager(new LinearLayoutManager(ShopMenuActivity.this));
-
-                    // アダプターをセット
-                    final ShopMenuRecyclerAdapter shopMenuRecyclerAdapter
-                            = new ShopMenuRecyclerAdapter(ShopMenuActivity.this, menuList, orderNumList) {
-
-                        // メニュータップ時に注文ダイアログを表示
-                        @Override
-                        protected void showOrderDialog(int position, int orderNum) {
-
-                            // タップされたポジション取得し、メニュー項目を取得
-                            mTappedPosition = position;
-                            Menu menu = menuList.get(position);
-
-                            // オーダー数をダイアログにセット
-                            mOrderNumTextView.setText(String.valueOf(orderNum));
-
-                            // ダイアログにメニュー内容をセット
-                            if(menu.getImages() != null && menu.getImages().length != 0) {
-                                mMenuImageView.setVisibility(View.VISIBLE);
-                                Picasso.with(ShopMenuActivity.this).load(menu.getImages()[0]).into(mMenuImageView);
-                            }
-                            mMenuNameTextView.setText(menu.getName());
-                            mMenuPriceTextView.setText(menu.getPriceFormat());
-                            if(menu.getNotes() != null) mMenuNoteTextView.setText(menu.getNotes());
-
-                            openOrderDialog();
-                        }
-                    };
-                    mShopMenuRecyclerView.setAdapter(shopMenuRecyclerAdapter);
-
-                    // 注文数タップ時の処理
-                    mOrderNumConstraintLayout.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            if (isShownOrderDialog) {
-                                NumberPickerDialog dialog = NumberPickerDialog.newInstance(
-                                        R.layout.layout_number_picker_dialog,
-                                        getString(R.string.shop_menu_order_dialog_title),
-                                        0,
-                                        9,
-                                        getString(R.string.ok),
-                                        getString(R.string.cancel_kana)
-                                );
-                                dialog.show(getSupportFragmentManager(), "numberPickerDialog");
+                        // メニューカテゴリーを表示するためのヘッダー部分の要素を追加
+                        for (int i = 0; i < menuList.size() - 1; i++) {
+                            if (!Objects.equals(menuList.get(i).getCategoryName(), menuList.get(i + 1).getCategoryName())) {
+                                insertHeaderPosition.add(i + 1);
                             }
                         }
-                    });
+                        for (int i = 0; i < insertHeaderPosition.size(); i++) {
+                            menuList.add(insertHeaderPosition.get(insertHeaderPosition.size() - 1 - i), null);
+                            orderNumList.add(insertHeaderPosition.get(insertHeaderPosition.size() - 1 - i), 0);
+                        }
+                        if (1 <= menuList.size()) menuList.add(0, null); // 先頭にヘッダー用要素を追加
+                        if (1 <= orderNumList.size())
+                            orderNumList.add(0, 0); // 注文用リストの先頭にヘッダー用要素を追加
 
-                    // 注文ダイアログの「キャンセル」ボタンタップ時の処理
-                    mCancelButtonConstraintLayout.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            if (isShownOrderDialog) {
+                        // レイアウトマネージャーのセット
+                        mShopMenuRecyclerView.setLayoutManager(new LinearLayoutManager(ShopMenuActivity.this));
+
+                        // アダプターをセット
+                        final ShopMenuRecyclerAdapter shopMenuRecyclerAdapter
+                                = new ShopMenuRecyclerAdapter(ShopMenuActivity.this, menuList, orderNumList) {
+
+                            // メニュータップ時に注文ダイアログを表示
+                            @Override
+                            protected void showOrderDialog(int position, int orderNum) {
+
+                                // タップされたポジション取得し、メニュー項目を取得
+                                mTappedPosition = position;
+                                Menu menu = menuList.get(position);
+
+                                // オーダー数をダイアログにセット
+                                mOrderNumTextView.setText(String.valueOf(orderNum));
+
+                                // ダイアログにメニュー内容をセット
+                                if (menu.getImages() != null && menu.getImages().length != 0) {
+                                    mMenuImageView.setVisibility(View.VISIBLE);
+                                    Picasso.with(ShopMenuActivity.this).load(menu.getImages()[0]).into(mMenuImageView);
+                                }
+                                mMenuNameTextView.setText(menu.getName());
+                                mMenuPriceTextView.setText(menu.getPriceFormat());
+                                if (menu.getNotes() != null)
+                                    mMenuNoteTextView.setText(menu.getNotes());
+
+                                openOrderDialog();
+                            }
+                        };
+                        mShopMenuRecyclerView.setAdapter(shopMenuRecyclerAdapter);
+
+                        // 注文数タップ時の処理
+                        mOrderNumConstraintLayout.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                if (isShownOrderDialog) {
+                                    NumberPickerDialog dialog = NumberPickerDialog.newInstance(
+                                            R.layout.layout_number_picker_dialog,
+                                            getString(R.string.shop_menu_order_dialog_title),
+                                            0,
+                                            9,
+                                            getString(R.string.ok),
+                                            getString(R.string.cancel_kana)
+                                    );
+                                    dialog.show(getSupportFragmentManager(), "numberPickerDialog");
+                                }
+                            }
+                        });
+
+                        // 注文ダイアログの「キャンセル」ボタンタップ時の処理
+                        mCancelButtonConstraintLayout.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                if (isShownOrderDialog) {
+                                    closeOrderDialog();
+                                }
+                            }
+                        });
+
+                        // 注文ダイアログの「選択」ボタンタップ時の処理
+                        mSelectButtonConstraintLayout.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                // 注文ダイアログを非表示
                                 closeOrderDialog();
+
+                                // 注文数をメニューに表示
+                                int orderNum = Integer.parseInt(mOrderNumTextView.getText().toString());
+                                orderNumList.set(mTappedPosition, orderNum);
+                                shopMenuRecyclerAdapter.notifyItemChanged(mTappedPosition);
+
+                                // 注文するメニューのオブジェクトを作成し、注文リストに追加
+                                mOrderList.add(new Order(menuList.get(mTappedPosition).getId(), orderNum));
                             }
-                        }
-                    });
+                        });
+                    } else {
+                        Toast.makeText(ShopMenuActivity.this, getString(R.string.error_common), Toast.LENGTH_LONG).show();
+                        finish();
+                    }
+                }
 
-                    // 注文ダイアログの「選択」ボタンタップ時の処理
-                    mSelectButtonConstraintLayout.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            // 注文ダイアログを非表示
-                            closeOrderDialog();
+                @Override
+                public void onFailure(Exception e) {
+                    Log.d("onFailure", e.toString());
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            // 読み込みダイアログを非表示
+                            progressDialog.dismiss();
 
-                            // 注文数をメニューに表示
-                            int orderNum = Integer.parseInt(mOrderNumTextView.getText().toString());
-                            orderNumList.set(mTappedPosition, orderNum);
-                            shopMenuRecyclerAdapter.notifyItemChanged(mTappedPosition);
-
-                            // 注文するメニューのオブジェクトを作成し、注文リストに追加
-                            mOrderList.add(new Order(menuList.get(mTappedPosition).getId(), orderNum));
+                            new SimpleAlertDialog(ShopMenuActivity.this, getString(R.string.error_common)).show();
                         }
                     });
                 }
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                Log.d("onFailure", e.toString());
-            }
-        }).setAppToken(mUser.getAppToken()).setShopId(shopId).execute(Favor.Task.GetMenu);
+            }).setAppToken(mUser.getAppToken()).setShopId(mShop.getShopId()).execute(Favor.Task.GetMenu);
+        } else {
+            new SimpleAlertDialog(ShopMenuActivity.this, getString(R.string.error_network_disable)).show();
+        }
 
         // 注文ダイアログが開いているときは、背景のタップを出来ないように設定
-        mLayoutOrderDialog.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return isShownOrderDialog;
-            }
-        });
+        MyUtil.App.enableTouchBackground(mLayoutOrderDialog, isShownOrderDialog);
     }
 
     @Override
@@ -263,7 +287,7 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
                     }
 
                     Intent intent = new Intent(ShopMenuActivity.this, OrderDoneActivity.class);
-                    intent.putExtra("shopName", mShopNameTextView.getText().toString());
+                    intent.putExtra("shop", mGson.toJson(mShop));
                     startActivity(intent);
                     mScanCuonaDialog.dismiss();
                     finish();
@@ -273,7 +297,7 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
                 public void onFailure(Exception e) {
                     Log.e("onFailure", e.toString());
                 }
-            }).setAppToken(mUser.getAppToken()).setVisitHistoryId(mVisitHistoryId).setOrder(mOrderList).execute(Favor.Task.Order);
+            }).setAppToken(mUser.getAppToken()).setVisitHistoryId(mShop.getVisitHistoryId()).setOrder(mOrderList).execute(Favor.Task.Order);
         }
     }
 
