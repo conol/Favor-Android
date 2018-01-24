@@ -46,11 +46,13 @@
     <string name="shop_phone_number">電話番号</string>
     <string name="shop_come_text">来店</string>
     <string name="shop_count_text">回目</string>
+    <string name="shop_entering_text">ありがとうございます。現在来店中です。</string>
 
     <!-- ショップメニュー画面 -->
     <string name="shop_menu_title">MENU</string>
     <string name="shop_menu_order_button">注文する</string>
     <string name="shop_menu_order_dialog_title">注文数を選択してください</string>
+    <string name="shop_menu_selected">選択中</string>
 
     <!-- 注文画面 -->
     <string name="order_num_text">注文数：</string>

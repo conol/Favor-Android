@@ -151,57 +151,47 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
                     mShopMenuRecyclerView.setAdapter(shopMenuRecyclerAdapter);
 
                     // 注文数タップ時の処理
-                    mOrderNumConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
+                    mOrderNumConstraintLayout.setOnClickListener(new View.OnClickListener() {
                         @Override
-                        public boolean onTouch(View view, MotionEvent motionEvent) {
-                            if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                                if (isShownOrderDialog) {
-                                    NumberPickerDialog dialog = NumberPickerDialog.newInstance(
-                                            R.layout.layout_number_picker_dialog,
-                                            getString(R.string.shop_menu_order_dialog_title),
-                                            0,
-                                            9,
-                                            getString(R.string.ok),
-                                            getString(R.string.cancel_kana)
-                                    );
-                                    dialog.show(getSupportFragmentManager(), "numberPickerDialog");
-                                }
+                        public void onClick(View view) {
+                            if (isShownOrderDialog) {
+                                NumberPickerDialog dialog = NumberPickerDialog.newInstance(
+                                        R.layout.layout_number_picker_dialog,
+                                        getString(R.string.shop_menu_order_dialog_title),
+                                        0,
+                                        9,
+                                        getString(R.string.ok),
+                                        getString(R.string.cancel_kana)
+                                );
+                                dialog.show(getSupportFragmentManager(), "numberPickerDialog");
                             }
-                            return false;
                         }
                     });
 
                     // 注文ダイアログの「キャンセル」ボタンタップ時の処理
-                    mCancelButtonConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
+                    mCancelButtonConstraintLayout.setOnClickListener(new View.OnClickListener() {
                         @Override
-                        public boolean onTouch(View view, MotionEvent motionEvent) {
-                            if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                                if (isShownOrderDialog) {
-                                    closeOrderDialog();
-                                }
+                        public void onClick(View view) {
+                            if (isShownOrderDialog) {
+                                closeOrderDialog();
                             }
-                            return false;
                         }
                     });
 
                     // 注文ダイアログの「選択」ボタンタップ時の処理
-                    mSelectButtonConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
+                    mSelectButtonConstraintLayout.setOnClickListener(new View.OnClickListener() {
                         @Override
-                        public boolean onTouch(View view, MotionEvent motionEvent) {
-                            if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                        public void onClick(View view) {
+                            // 注文ダイアログを非表示
+                            closeOrderDialog();
 
-                                // 注文ダイアログを非表示
-                                closeOrderDialog();
+                            // 注文数をメニューに表示
+                            int orderNum = Integer.parseInt(mOrderNumTextView.getText().toString());
+                            orderNumList.set(mTappedPosition, orderNum);
+                            shopMenuRecyclerAdapter.notifyItemChanged(mTappedPosition);
 
-                                // 注文数をメニューに表示
-                                int orderNum = Integer.parseInt(mOrderNumTextView.getText().toString());
-                                orderNumList.set(mTappedPosition, orderNum);
-                                shopMenuRecyclerAdapter.notifyItemChanged(mTappedPosition);
-
-                                // 注文するメニューのオブジェクトを作成し、注文リストに追加
-                                mOrderList.add(new Order(menuList.get(mTappedPosition).getId(), orderNum));
-                            }
-                            return false;
+                            // 注文するメニューのオブジェクトを作成し、注文リストに追加
+                            mOrderList.add(new Order(menuList.get(mTappedPosition).getId(), orderNum));
                         }
                     });
                 }

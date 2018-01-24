@@ -1,6 +1,7 @@
 package jp.co.conol.favor_android.activity;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -41,6 +42,7 @@ public class ShopDetailActivity extends AppCompatActivity {
     @BindView(R.id.showShopMenuConstraintLayout) ConstraintLayout mShowShopMenuConstraintLayout;
     @BindView(R.id.shopNameTextView) TextView mShopNameTextView;    // 店舗名
     @BindView(R.id.shopNameConstraintLayout) ConstraintLayout mShopNameConstraintLayout;    // 店舗の背景
+    @BindView(R.id.shopLastVisitAtTextView) TextView mShopLastVisitAtTextView;    // 前回来店日時表示箇所
     @BindView(R.id.shopIntroductionTextView) TextView mShopIntroductionTextView;    // 店舗説明
 
     @Override
@@ -153,10 +155,15 @@ public class ShopDetailActivity extends AppCompatActivity {
     private void setShopInfo(final Shop shop) {
 
         // visitGroupIdを取得（入店時はAPIの店舗情報から、履歴から表示時はintentから）
+        // 来店中
         if(isEntering) {
             mVisitGroupId = shop.getVisitGroupId();
             mShopNameConstraintLayout.setBackground(getDrawable(R.drawable.style_gradation_red));   // 店舗名背景
-        } else {
+            mShopLastVisitAtTextView.setText(getString(R.string.shop_entering_text));   // 入店中メッセージ
+            mShopLastVisitAtTextView.setTextColor(Color.RED);
+        }
+        // 履歴から表示
+        else {
             mVisitGroupId = mIntent.getIntExtra("visitGroupId", 0);
         }
 

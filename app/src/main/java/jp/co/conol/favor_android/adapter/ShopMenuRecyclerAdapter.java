@@ -41,7 +41,7 @@ public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecycl
         private TextView mMenuNameTextView;     // メニュー名
         private TextView mMenuPriceTextView;    // メニューの値段
         private ConstraintLayout mSelectedOrderNumConstraintLayout; // 注文数を表示するエリア
-        private TextView mSelectedOrderNumTextView; // 注文数
+        private TextView mOrderNumTextView; // 注文数
 
         // ViewHolderのコンストラクタ
         private ViewHolder(View v, int viewType) {
@@ -59,7 +59,7 @@ public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecycl
                     mMenuImageView = (ImageView) v.findViewById(R.id.menuImageView);
                     mMenuPriceTextView = (TextView) v.findViewById(R.id.menuPriceTextView);
                     mSelectedOrderNumConstraintLayout = (ConstraintLayout) v.findViewById(R.id.selectedOrderNumConstraintLayout);
-                    mSelectedOrderNumTextView = (TextView) v.findViewById(R.id.selectedOrderNumTextView);
+                    mOrderNumTextView = (TextView) v.findViewById(R.id.orderNumTextView);
                     break;
 
                 default:
@@ -135,6 +135,8 @@ public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecycl
             if(menu.getImages() != null && menu.getImages().length != 0) {
                 holder.mMenuImageView.setVisibility(View.VISIBLE);
                 Picasso.with(mContext).load(menu.getImages()[0]).into(holder.mMenuImageView);
+            } else {
+                holder.mMenuImageView.setVisibility(View.GONE);
             }
             holder.mMenuNameTextView.setText(menu.getName());    // メニュー名の設定
             holder.mMenuPriceTextView.setText(menu.getPriceFormat());    // メニュー値段の設定
@@ -143,7 +145,9 @@ public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecycl
             Integer orderNum = mOrderNumList.get(position);
             if (orderNum != null && orderNum != 0) {
                 holder.mSelectedOrderNumConstraintLayout.setVisibility(View.VISIBLE);
-                holder.mSelectedOrderNumTextView.setText(String.valueOf(orderNum));
+                holder.mOrderNumTextView.setText(String.valueOf(orderNum));
+            } else {
+                holder.mSelectedOrderNumConstraintLayout.setVisibility(View.GONE);
             }
         }
         // 要素がヘッダーの時
