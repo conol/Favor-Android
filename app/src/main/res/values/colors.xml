@@ -7,4 +7,6 @@
     <color name="blue">#132BAA</color>
     <color name="background_material_light">#ffffff</color>
     <color name="brown">#934326</color>
+    <color name="green">#5CC256</color>
+    <color name="gray">#7E7E7E</color>
 </resources>
