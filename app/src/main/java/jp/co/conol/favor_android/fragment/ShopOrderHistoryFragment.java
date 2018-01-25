@@ -95,19 +95,11 @@ public class ShopOrderHistoryFragment extends Fragment {
 
                     if (orderList != null) {
 
-                        // 注文履歴の複数注文部分をひとつの項目に変更
-                        List<Order> orderListSeparate = new ArrayList<>();
-                        for(Order order : orderList) {
-                            for (int i = 0; i < order.getOrderedItemQuantity(); i++) {
-                                orderListSeparate.add(order);
-                            }
-                        }
-
                         // レイアウトマネージャーのセット
                         mShopOrderHistoryRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
 
                         // アダプターのセット
-                        mShopOrderHistoryRecyclerAdapter = new ShopOrderHistoryRecyclerAdapter(mContext, orderListSeparate);
+                        mShopOrderHistoryRecyclerAdapter = new ShopOrderHistoryRecyclerAdapter(mContext, orderList);
                         mShopOrderHistoryRecyclerView.setAdapter(mShopOrderHistoryRecyclerAdapter);
                     }
                 }

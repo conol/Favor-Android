@@ -27,11 +27,11 @@
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"
             android:visibility="gone"
-            tools:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:srcCompat="@mipmap/ic_launcher" />
+            tools:srcCompat="@mipmap/ic_launcher"
+            tools:visibility="visible" />
 
         <com.makeramen.roundedimageview.RoundedImageView
             android:layout_width="26dp"
@@ -42,19 +42,43 @@
             app:layout_constraintTop_toTopOf="parent"
             android:src="@drawable/ic_user_prof" />
 
-        <TextView
-            android:id="@+id/shopOrderMenuNameTextView"
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/constraintLayout7"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
-            app:layout_goneMarginStart="36dp"
-            android:textAlignment="viewStart"
+            android:layout_height="0dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/shopOrderMenuPriceTextView"
             app:layout_constraintStart_toEndOf="@+id/orderMenuImageView"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="メニュー名" />
+            app:layout_goneMarginStart="38dp">
+
+            <TextView
+                android:id="@+id/shopOrderMenuNameTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textAlignment="viewStart"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/shopOrderMenuQuantityTextView"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.516"
+                tools:text="メニュー名" />
+
+            <TextView
+                android:id="@+id/shopOrderMenuQuantityTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/shopOrderMenuNameTextView"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="(x2)" />
+        </android.support.constraint.ConstraintLayout>
 
         <TextView
             android:id="@+id/shopOrderMenuPriceTextView"
@@ -64,6 +88,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="値段" />
+
     </android.support.constraint.ConstraintLayout>
 
 </android.support.constraint.ConstraintLayout>

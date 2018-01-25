@@ -1,5 +1,6 @@
 package jp.co.conol.favor_android.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -30,6 +31,7 @@ public class ShopOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<ShopOr
     class ViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.orderMenuImageView) ImageView mOrderMenuImageView;
+        @BindView(R.id.shopOrderMenuQuantityTextView) TextView mShopOrderMenuQuantityTextView;
         @BindView(R.id.shopOrderMenuNameTextView) TextView mShopOrderMenuNameTextView;
         @BindView(R.id.shopOrderMenuPriceTextView) TextView mShopOrderMenuPriceTextView;
 
@@ -56,6 +58,7 @@ public class ShopOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<ShopOr
         return holder;
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
 
@@ -64,12 +67,23 @@ public class ShopOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<ShopOr
 
         // 内容を反映
         if(order != null) {
+            // 画像
             if (order.getOrderedItemImages() != null && order.getOrderedItemImages().length != 0) {
                 holder.mOrderMenuImageView.setVisibility(View.VISIBLE);
                 Picasso.with(mContext).load(order.getOrderedItemImages()[0]).into(holder.mOrderMenuImageView);
             }
+
+            // 注文数
+            if(1 < order.getOrderedItemQuantity()) {
+                holder.mShopOrderMenuQuantityTextView.setText("(x" + order.getOrderedItemQuantity() + ")");
+            }
+
+            // 商品名
             holder.mShopOrderMenuNameTextView.setText(order.getOrderedItemName());
-            holder.mShopOrderMenuPriceTextView.setText(order.getOrderedItemPriceFormat());
+
+            // 値段
+            int price = order.getOrderedItemPriceCent() * order.getOrderedItemQuantity();
+            holder.mShopOrderMenuPriceTextView.setText(String.valueOf(price + order.getOrderedItemPriceUnit()));
         }
     }
 

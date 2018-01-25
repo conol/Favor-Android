@@ -103,6 +103,11 @@ public class Order {
         return menu_item.getPriceFormat();
     }
 
+    // 単位を取得
+    public String getOrderedItemPriceUnit() {
+        return menu_item.getPriceFormat().replaceAll("[0-9]","").replace(".", "").replace(",", "");
+    }
+
     public int getOrderedItemQuantity() {
         return quantity;
     }

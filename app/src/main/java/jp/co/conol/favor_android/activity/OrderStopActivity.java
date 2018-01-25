@@ -1,5 +1,6 @@
 package jp.co.conol.favor_android.activity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -37,6 +38,8 @@ public class OrderStopActivity extends AppCompatActivity {
     private ShopOrderHistoryRecyclerAdapter mShopOrderHistoryRecyclerAdapter;
     @BindView(R.id.shopImageView) ImageView mShopImageView; // 店舗画像
     @BindView(R.id.shopNameTextView) TextView mShopNameTextView; // 店舗名
+    @BindView(R.id.sumPriceTextView) TextView mSumPriceTextView; // 合計金額
+    @BindView(R.id.membersPriceTextView) TextView mMembersPriceTextView; // 一人当たりの金額
     @BindView(R.id.orderStopRecyclerView) RecyclerView mOrderStopRecyclerView;
     @BindView(R.id.orderStopButtonConstraintLayout) ConstraintLayout mOrderStopButtonConstraintLayout;
 
@@ -118,6 +121,7 @@ public class OrderStopActivity extends AppCompatActivity {
                 progressDialog.show();
 
                 new Favor(new Favor.AsyncCallback() {
+                    @SuppressLint("SetTextI18n")
                     @Override
                     public void onSuccess(Object object) {
                         List<Order> orderList = (List<Order>) object;
@@ -127,20 +131,29 @@ public class OrderStopActivity extends AppCompatActivity {
 
                         if (orderList != null) {
 
-                            // 注文履歴の複数注文部分をひとつの項目に変更
-                            List<Order> orderListSeparate = new ArrayList<>();
-                            for(Order order : orderList) {
-                                for (int i = 0; i < order.getOrderedItemQuantity(); i++) {
-                                    orderListSeparate.add(order);
-                                }
-                            }
-
                             // レイアウトマネージャーのセット
                             mOrderStopRecyclerView.setLayoutManager(new LinearLayoutManager(OrderStopActivity.this));
 
                             // アダプターのセット
-                            mShopOrderHistoryRecyclerAdapter = new ShopOrderHistoryRecyclerAdapter(OrderStopActivity.this, orderListSeparate);
+                            mShopOrderHistoryRecyclerAdapter = new ShopOrderHistoryRecyclerAdapter(OrderStopActivity.this, orderList);
                             mOrderStopRecyclerView.setAdapter(mShopOrderHistoryRecyclerAdapter);
+
+                            // 金額の取得
+                            int sumPrice = 0;
+                            int memberNum = 0;
+                            List<Integer> memberIdList = new ArrayList<>();
+                            for(Order order : orderList) {
+                                sumPrice += order.getOrderedItemPriceCent() * order.getOrderedItemQuantity();
+                                if(!memberIdList.contains(order.getOrderedUserId())) {
+                                    memberIdList.add(order.getOrderedUserId());
+                                    memberNum++;
+                                }
+                            }
+                            mSumPriceTextView.setText(String.valueOf(sumPrice) + "円");
+                            if(!Float.isNaN((float)sumPrice / memberNum)) {
+                                mMembersPriceTextView.setText(String.valueOf((float) sumPrice / memberNum) + "円");
+                            }
+
                         } else {
                             new SimpleAlertDialog(OrderStopActivity.this, getString(R.string.error_common)).show();
                         }

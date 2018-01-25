@@ -73,6 +73,16 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/shopNameTextView" />
+
+                    <ImageView
+                        android:id="@+id/imageView5"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/textView3"
+                        app:srcCompat="@drawable/ic_slash_line" />
                 </android.support.constraint.ConstraintLayout>
 
             </android.support.design.widget.CollapsingToolbarLayout>
@@ -116,9 +126,23 @@
             android:layout_marginStart="32dp"
             android:text="@string/order_done_price"
             android:textColor="@color/green"
+            android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/sumPriceTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="32dp"
+            android:textColor="@color/green"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="1000円" />
     </android.support.constraint.ConstraintLayout>
 
     <TextView
@@ -126,20 +150,35 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="4dp"
         android:layout_marginStart="8dp"
         android:text="@string/order_done_price_other"
         app:layout_constraintBottom_toTopOf="@+id/orderStopButtonConstraintLayout"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/membersPriceTextView"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/membersPriceTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="4dp"
+        android:text="0円"
+        app:layout_constraintBottom_toTopOf="@+id/orderStopButtonConstraintLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/textView16" />
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/orderStopButtonConstraintLayout"
         android:layout_width="match_parent"
         android:layout_height="50dp"
+        android:background="@color/blue"
         android:clickable="true"
         android:focusable="true"
-        android:background="@color/blue"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
