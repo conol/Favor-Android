@@ -18,6 +18,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favorlib.cuona.favor_model.Order;
+import jp.wasabeef.picasso.transformations.CropCircleTransformation;
 
 /**
  * Created by Masafumi_Ito on 2017/10/24.
@@ -31,6 +32,7 @@ public class ShopOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<ShopOr
     class ViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.orderMenuImageView) ImageView mOrderMenuImageView;
+        @BindView(R.id.userImageView) ImageView mUserImageView;
         @BindView(R.id.shopOrderMenuQuantityTextView) TextView mShopOrderMenuQuantityTextView;
         @BindView(R.id.shopOrderMenuNameTextView) TextView mShopOrderMenuNameTextView;
         @BindView(R.id.shopOrderMenuPriceTextView) TextView mShopOrderMenuPriceTextView;
@@ -67,7 +69,17 @@ public class ShopOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<ShopOr
 
         // 内容を反映
         if(order != null) {
-            // 画像
+            // ユーザー画像
+            if (order.getOrderedUserImageUrl() != null) {
+                Picasso.with(mContext).load(order.getOrderedUserImageUrl())
+                        .transform(new CropCircleTransformation())
+                        .into(holder.mUserImageView);
+            } else {
+                Picasso.with(mContext).load(R.drawable.ic_user_prof).into(holder.mUserImageView);
+            }
+
+
+            // 商品画像
             if (order.getOrderedItemImages() != null && order.getOrderedItemImages().length != 0) {
                 holder.mOrderMenuImageView.setVisibility(View.VISIBLE);
                 Picasso.with(mContext).load(order.getOrderedItemImages()[0]).into(holder.mOrderMenuImageView);

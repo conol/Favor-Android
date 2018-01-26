@@ -22,6 +22,7 @@ public class Order {
     private class UserInfo {
         private int id;
         private String nickname;
+        private String image_url;
 
         public int getId() {
             return id;
@@ -29,6 +30,10 @@ public class Order {
 
         public String getNickname() {
             return nickname;
+        }
+
+        public String getImageUrl() {
+            return image_url;
         }
     }
 
@@ -134,6 +139,10 @@ public class Order {
 
     public String getOrderedUserNickname() {
         return user.getNickname();
+    }
+
+    public String getOrderedUserImageUrl() {
+        return user.getImageUrl();
     }
 
     public String[] getOrderedItemImages() {
