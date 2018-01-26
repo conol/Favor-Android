@@ -192,7 +192,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:riv_corner_radius="6dp" />
 
-        <com.makeramen.roundedimageview.RoundedImageView
+        <ImageView
             android:id="@+id/userImageView"
             android:layout_width="70dp"
             android:layout_height="70dp"
@@ -206,7 +206,7 @@
             app:layout_constraintStart_toEndOf="@+id/backImageView"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:riv_corner_radius="35dp" />
+            />
 
         <TextView
             android:id="@+id/userSettingTextView"

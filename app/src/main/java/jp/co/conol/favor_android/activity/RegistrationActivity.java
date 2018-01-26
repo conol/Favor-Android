@@ -36,31 +36,27 @@ public class RegistrationActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         // ユーザー情報が保存されていれば、登録画面は表示しない
-        if(MyUtil.SharedPref.getString(RegistrationActivity.this, "userSetting") != null) {
+        if(MyUtil.SharedPref.getString(RegistrationActivity.this, "appToken") != null) {
             Intent intent = new Intent(RegistrationActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
         }
 
         // 手動入力を禁止
-        mUserAgeEditText.setKeyListener(null);
-        mUserGenderEditText.setKeyListener(null);
+        mUserAgeEditText.setKeyListener(null);      // 年代
+        mUserGenderEditText.setKeyListener(null);   // 性別
 
         // 年代がタップされた場合
         mUserAgeEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if(hasFocus){
-                    final String[] ages = {"20", "30", "40", "50", "60", "70"};
-                    new AlertDialog.Builder(RegistrationActivity.this)
-                            .setItems(ages, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    mUserAgeEditText.setText(ages[which]);
-                                }
-                            })
-                            .show();
-                }
+                if(hasFocus) showAgeEditDialog();
+            }
+        });
+        mUserAgeEditText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showAgeEditDialog();
             }
         });
 
@@ -68,17 +64,13 @@ public class RegistrationActivity extends AppCompatActivity {
         mUserGenderEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if(hasFocus){
-                    final String[] genders = {"男性", "女性"};
-                    new AlertDialog.Builder(RegistrationActivity.this)
-                            .setItems(genders, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    mUserGenderEditText.setText(genders[which]);
-                                }
-                            })
-                            .show();
-                }
+                if(hasFocus) showGenderEditDialog();
+            }
+        });
+        mUserGenderEditText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showGenderEditDialog();
             }
         });
     }
@@ -106,7 +98,7 @@ public class RegistrationActivity extends AppCompatActivity {
             User user = new User(
                     mUserNameEditText.getText().toString(),
                     gender,
-                    Integer.parseInt(mUserAgeEditText.getText().toString()),
+                    Integer.parseInt(mUserAgeEditText.getText().toString().replace("代", "")),
                     null,
                     null
             );
@@ -120,19 +112,13 @@ public class RegistrationActivity extends AppCompatActivity {
                     // 読み込みダイアログを非表示
                     progressDialog.dismiss();
 
-                    if (user != null) {
+                    // ユーザーのAppToken情報を端末に保存
+                    MyUtil.SharedPref.saveString(RegistrationActivity.this, "appToken", user.getAppToken());
 
-                        // ユーザー情報を端末に保存
-                        Gson gson = new Gson();
-                        MyUtil.SharedPref.saveString(RegistrationActivity.this, "userSetting", gson.toJson(user));
-
-                        // ページ移動
-                        Intent intent = new Intent(RegistrationActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
-                    } else {
-                        new SimpleAlertDialog(RegistrationActivity.this, getString(R.string.error_common)).show();
-                    }
+                    // ページ移動
+                    Intent intent = new Intent(RegistrationActivity.this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
                 }
 
                 @Override
@@ -151,5 +137,29 @@ public class RegistrationActivity extends AppCompatActivity {
         } else {
             new SimpleAlertDialog(RegistrationActivity.this, getString(R.string.error_network_disable)).show();
         }
+    }
+
+    private void showAgeEditDialog() {
+        final String[] ages = {"10代", "20代", "30代", "40代", "50代", "60代", "70代", "80代"};
+        new AlertDialog.Builder(RegistrationActivity.this)
+                .setItems(ages, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mUserAgeEditText.setText(ages[which]);
+                    }
+                })
+                .show();
+    }
+
+    private void showGenderEditDialog() {
+        final String[] genders = {"男性", "女性"};
+        new AlertDialog.Builder(RegistrationActivity.this)
+                .setItems(genders, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mUserGenderEditText.setText(genders[which]);
+                    }
+                })
+                .show();
     }
 }

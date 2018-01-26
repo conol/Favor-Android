@@ -36,6 +36,10 @@
     <string name="edit_user_title">ユーザー情報編集</string>
     <string name="edit_user_message">ユーザー情報を変更することが出来ます。</string>
     <string name="edit_user_button">ユーザー情報を変更する</string>
+    <string name="user_image_title">プロフィール画像を変更</string>
+    <string name="user_image_take_photo">写真を撮る</string>
+    <string name="user_image_select_photo">ライブラリから選択</string>
+    <string name="user_image_crop_hint">拡大縮小と回転と移動ができます</string>
 
     <!-- ショップ詳細画面 -->
     <string name="shop_detail_order_stop">お会計する</string>
@@ -47,6 +51,7 @@
     <string name="shop_come_text">来店</string>
     <string name="shop_count_text">回目</string>
     <string name="shop_entering_text">ありがとうございます。現在来店中です。</string>
+    <string name="shop_exit">アプリを終了します。よろしいですか？</string>
 
     <!-- ショップメニュー画面 -->
     <string name="shop_menu_title">MENU</string>
@@ -91,5 +96,6 @@
     <string name="select">選択する</string>
     <string name="cancel">Cancel</string>
     <string name="cancel_kana">キャンセル</string>
+    <string name="apply">設定する</string>
 
 </resources>

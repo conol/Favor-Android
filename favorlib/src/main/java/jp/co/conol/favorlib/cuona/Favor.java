@@ -49,6 +49,7 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
     public enum Task {
         GetAvailableDevices,        // Favorを利用可能なデバイスのデバイスID一覧取得
         ResisterUser,               // ユーザー情報登録
+        GetUser,                   // ユーザー情報取得
         EditUser,                   // ユーザー情報編集
         EnterShop,                  // 入店
         GetVisitedShopHistory,      // 入店履歴取得
@@ -183,6 +184,13 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
                     type = new TypeToken<User>(){}.getType();
                     break;
 
+                // ユーザー情報取得
+                case GetUser:
+                    apiUrl = "/api/users/setting.json";
+                    responseJsonString = get(favorEndPoint + apiUrl, mAppToken);
+                    type = new TypeToken<User>(){}.getType();
+                    break;
+
                 // ユーザー情報編集
                 case EditUser:
                     apiUrl = "/api/users/setting.json";
@@ -300,8 +308,7 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
             }
 
         } catch (Exception e) {
-            Log.e("FavorError", "Please set Task in execute() argument");
-            onFailure(e);
+            Log.e("Error", "Please set Task in execute() argument");
         }
 
         return gson.fromJson(responseJsonDataString, type);
@@ -310,7 +317,13 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
     @Override
     protected void onPostExecute(Object obj) {
         super.onPostExecute(obj);
-        onSuccess(obj);
+        if(obj != null) {
+            onSuccess(obj);
+        } else {
+            Log.e("Error", "Api response is null");
+            Exception e = new Exception();
+            onFailure(e);
+        }
     }
 
     // デバイスIDをサーバーに送信可能な形式に変換

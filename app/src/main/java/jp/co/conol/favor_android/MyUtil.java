@@ -4,16 +4,28 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.net.wifi.WifiManager;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Base64;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -344,32 +356,76 @@ public class MyUtil {
         public static <T> List<T> addHeader(List<T> list, String methodName)  {
             List<Integer> insertHeaderPosition = new ArrayList<>();
 
-            // メソッドの取得
-            Method method = null;
-            try {
-                method = list.get(0).getClass().getMethod(methodName);
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
-                return list;
-            }
-
-            // ヘッダー追加
-            for(int i = 0; i < list.size() - 1; i++) {
+            if(list != null && list.size() != 0) {
+                // メソッドの取得
+                Method method = null;
                 try {
-                    if(!Objects.equals(method.invoke(list.get(i)), method.invoke(list.get(i + 1)))) {
-                        insertHeaderPosition.add(i + 1);
-                    }
-                } catch (IllegalAccessException | InvocationTargetException e) {
+                    method = list.get(0).getClass().getMethod(methodName);
+                } catch (NoSuchMethodException e) {
                     e.printStackTrace();
                     return list;
                 }
+
+                // ヘッダー追加
+                for (int i = 0; i < list.size() - 1; i++) {
+                    try {
+                        if (!Objects.equals(method.invoke(list.get(i)), method.invoke(list.get(i + 1)))) {
+                            insertHeaderPosition.add(i + 1);
+                        }
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        e.printStackTrace();
+                        return list;
+                    }
+                }
+                for (int i = 0; i < insertHeaderPosition.size(); i++) {
+                    list.add(insertHeaderPosition.get(insertHeaderPosition.size() - 1 - i), null); // 先頭
+                }
+                if (1 <= list.size()) list.add(0, null); // 先頭にヘッダー用要素を追加
             }
-            for(int i = 0; i < insertHeaderPosition.size(); i++) {
-                list.add(insertHeaderPosition.get(insertHeaderPosition.size() - 1 - i), null); // 先頭
-            }
-            if(1 <= list.size()) list.add(0, null); // 先頭にヘッダー用要素を追加
 
             return list;
+        }
+        /**
+         * Bmp型 -> jpeg形式dataUriScheme
+         * @param bmp
+         * @param quality
+         * @return dataUriScheme
+         */
+        public static String bmpToDataUriScheme(Bitmap bmp, int quality) {
+            if(bmp != null) {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bmp.compress(Bitmap.CompressFormat.JPEG, quality, baos);
+                String base64str = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
+                StringBuilder sb = new StringBuilder();
+                sb.append("data:image/jpeg;base64,");
+                sb.append(base64str);
+                return sb.toString().replace("\n", "");
+            } else {
+                return null;
+            }
+        }
+
+        public static Bitmap resizeBitmap(Bitmap bmp, int outputWidth, int outputHeight) {
+            try {
+                int height = bmp.getHeight();
+                int width = bmp.getWidth();
+
+                Matrix matrix = new Matrix();
+                if (height > width) {
+                    float scaleWidth = outputHeight  / (float)width;
+                    float scaleHeight = outputWidth / (float)height;
+                    matrix.postScale(Math.min(scaleWidth, scaleHeight), Math.min(scaleWidth, scaleHeight));
+                } else {
+                    float scaleWidth = outputWidth / (float)width;
+                    float scaleHeight = outputHeight / (float)height;
+                    matrix.postScale(Math.min(scaleWidth, scaleHeight), Math.min(scaleWidth, scaleHeight));
+                }
+                Bitmap destBmp = Bitmap.createBitmap(bmp, 0, 0, width, height, matrix, true);
+                return destBmp;
+            } finally {
+                if(bmp != null) bmp.recycle();
+                bmp = null;
+            }
         }
 
         /**
@@ -459,5 +515,65 @@ public class MyUtil {
                 }
             });
         }
+
+        /**
+         * Bitmapを内部ストレージに保存（ギャラリーからは見れない）
+         * Uri.fromFile(getFileStreamPath(fileName))でUriを取得可能
+         * @param context
+         * @param bitmap
+         * @param fileName
+         * @param quality jpegで保存される時の画質
+         * @return 成功or失敗の真偽値
+         */
+        public static boolean saveBitmapToInternalStorage(Context context, Bitmap bitmap, String fileName, int quality) {
+            BufferedOutputStream bos = null;
+            Bitmap tmp = null;
+            context.deleteFile(fileName);
+            try {
+                try {
+                    bos = new BufferedOutputStream(context.openFileOutput(fileName, Context.MODE_PRIVATE)); //他アプリアクセス不可
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                tmp = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+                return tmp.compress(Bitmap.CompressFormat.JPEG, quality, bos);
+            } finally {
+                if (tmp != null) {
+                    tmp.recycle();
+                    tmp = null;
+                }
+                try {
+                    bos.close();
+                } catch (Exception e) {
+                    //IOException, NullPointerException
+                }
+            }
+        }
+
+        /**
+         * 内部ストレージの画像を取得
+         * @param context
+         * @param fileName
+         * @return Bitmap形式の画像
+         */
+        public static Bitmap loadBitmapFromInternalStorage(Context context, String fileName) {
+            BufferedInputStream bis = null;
+            try {
+                try {
+                    bis = new BufferedInputStream(context.openFileInput(fileName));
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+                return BitmapFactory.decodeStream(bis);
+            } finally {
+                try {
+                    bis.close();
+                } catch (Exception e) {
+                    //IOException, NullPointerException
+                }
+            }
+        }
+
     }
 }

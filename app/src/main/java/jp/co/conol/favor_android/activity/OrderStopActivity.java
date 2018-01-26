@@ -32,6 +32,8 @@ import jp.co.conol.favorlib.cuona.favor_model.Order;
 import jp.co.conol.favorlib.cuona.favor_model.Shop;
 import jp.co.conol.favorlib.cuona.favor_model.User;
 
+import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
+
 public class OrderStopActivity extends AppCompatActivity {
 
     private final Gson mGson = new Gson();
@@ -86,7 +88,10 @@ public class OrderStopActivity extends AppCompatActivity {
 
                             if(object != null) {
                                 Intent intent = new Intent(OrderStopActivity.this, MainActivity.class);
+                                MyUtil.SharedPref.saveBoolean(OrderStopActivity.this, "isEntering", false);   // 退店
+                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(intent);
+                                finish();
                             } else {
                                 new SimpleAlertDialog(OrderStopActivity.this, getString(R.string.error_common)).show();
                             }

@@ -1,10 +1,19 @@
 package jp.co.conol.favor_android.activity;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Build;
+import android.provider.MediaStore;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +31,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.makeramen.roundedimageview.RoundedImageView;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.Picasso;
 
 import java.util.Objects;
 
@@ -30,15 +43,22 @@ import butterknife.ButterKnife;
 import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favor_android.adapter.UserFragmentStatePagerAdapter;
+import jp.co.conol.favor_android.custom.ProgressDialog;
+import jp.co.conol.favor_android.custom.SimpleAlertDialog;
 import jp.co.conol.favor_android.fragment.UserFavoriteFragment;
 import jp.co.conol.favorlib.cuona.Favor;
 import jp.co.conol.favorlib.cuona.favor_model.Favorite;
 import jp.co.conol.favorlib.cuona.favor_model.User;
+import jp.wasabeef.picasso.transformations.CropCircleTransformation;
+
+import static android.content.Intent.FLAG_ACTIVITY_NO_HISTORY;
 
 public class UserActivity extends AppCompatActivity {
 
     private UserFragmentStatePagerAdapter mUserFragmentStatePagerAdapter;
     private User mUser;
+    private String mAppToken;
+    private boolean isBackCropUserImageActivity;  // ユーザー画像設定画面から戻ってきたか否か
     private boolean isShownAddFavorite = false;  // お気に入り追加画面を開いているか否か
     private boolean isShownEditUserSetting = false;  // ユーザー情報編集画面を開いているか否か
     @BindView(R.id.userNameTextView) TextView mUserNameTextView;
@@ -49,6 +69,8 @@ public class UserActivity extends AppCompatActivity {
     @BindView(R.id.addUserFavoriteFloatingActionButton) FloatingActionButton mAddUserFavoriteFloatingActionButton;
     @BindView(R.id.userProfConstraintLayout) ConstraintLayout mUserProfConstraintLayout; // ユーザー情報を表示している部分
     @BindView(R.id.editUserLayout) ConstraintLayout mEditUserLayout; // ユーザー情報編集画面
+    @BindView(R.id.userEditImageView) ImageView mUserEditImageView;   // ユーザー画像編集
+    @BindView(R.id.userImageView) ImageView mUserImageView;   // ユーザー画像
     @BindView(R.id.userNameEditText) EditText mUserNameEditText;     // ユーザー名編集
     @BindView(R.id.userGenderEditText) EditText mUserGenderEditText; // ユーザー性別編集
     @BindView(R.id.userAgeEditText) EditText mUserAgeEditText;       // ユーザー年代編集
@@ -62,6 +84,9 @@ public class UserActivity extends AppCompatActivity {
     @BindView(R.id.favoriteLecelTextView) TextView mFavoriteLevelTextView; // お気に入りのレベル
     @BindView(R.id.addFavoriteEditText) EditText mAddFavoriteEditText; // お気に入り入力欄
     @BindView(R.id.addFavoriteButtonConstraintLayout) ConstraintLayout mAddFavoriteButtonConstraintLayout; // お気に入り追加ボタン
+    private static final int PERMISSION_REQUEST_CODE = 2;
+    private static final int CAMERA_PERMISSION_REQUEST_CODE = 3;
+    private static final int FILE_PERMISSION_REQUEST_CODE = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,92 +129,194 @@ public class UserActivity extends AppCompatActivity {
             }
         });
 
-        // ユーザー情報を取得
-        Gson gson = new Gson();
-        mUser = gson.fromJson(MyUtil.SharedPref.getString(this, "userSetting"), User.class);
+        // ユーザーのAppToken情報を取得
+        mAppToken = MyUtil.SharedPref.getString(this, "appToken");
 
-        // ユーザー情報のセット
-        String userGender = getString(R.string.user_gender_male);
-        if(!Objects.equals(mUser.getGender(), "male")) userGender = getString(R.string.user_gender_female);
-        mUserNameTextView.setText(mUser.getNickname());
-        mUserNameEditText.setText(mUser.getNickname());
-        mUserGenderTextView.setText(userGender);
-        mUserGenderEditText.setText(userGender);
-        mUserAgeTextView.setText(String.valueOf(mUser.getAge()) + "代");
-        mUserAgeEditText.setText(String.valueOf(mUser.getAge()));
+        // 読み込みダイアログを表示
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage(getString(R.string.main_progress_message));
+        progressDialog.show();
+
+        // ユーザー情報を取得
+        new Favor(new Favor.AsyncCallback() {
+            @Override
+            public void onSuccess(Object object) {
+                mUser = (User) object;
+
+                // 読み込みダイアログを非表示
+                progressDialog.dismiss();
+
+                // ユーザー情報を表示
+                String userGender = getString(R.string.user_gender_male);
+                if (!Objects.equals(mUser.getGender(), "male")) userGender = getString(R.string.user_gender_female);
+                mUserNameTextView.setText(mUser.getNickname());
+                mUserNameEditText.setText(mUser.getNickname());
+                mUserGenderTextView.setText(userGender);
+                mUserGenderEditText.setText(userGender);
+                mUserAgeTextView.setText(String.valueOf(mUser.getAge()) + "代");
+                mUserAgeEditText.setText(String.valueOf(mUser.getAge()) + "代");
+                if(!isBackCropUserImageActivity) {
+                    if (mUser.getImageUrl() != null) {
+                        Picasso.with(UserActivity.this).load(mUser.getImageUrl())
+                                .transform(new CropCircleTransformation())
+                                .into(mUserEditImageView);
+                        Picasso.with(UserActivity.this).load(mUser.getImageUrl())
+                                .transform(new CropCircleTransformation())
+                                .into(mUserImageView);
+                    } else {
+                        Picasso.with(UserActivity.this).load(R.drawable.ic_user_prof).into(mUserEditImageView);
+                        Picasso.with(UserActivity.this).load(R.drawable.ic_user_prof).into(mUserImageView);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.e("onFailure", e.toString());
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        // 読み込みダイアログを非表示
+                        progressDialog.dismiss();
+
+                        new SimpleAlertDialog(UserActivity.this, getString(R.string.error_common)).show();
+                    }
+                });
+            }
+        }).setAppToken(mAppToken).execute(Favor.Task.GetUser);
+
+        // ユーザー画像設定から戻った場合はユーザー情報編集ダイアログを表示
+        isBackCropUserImageActivity = getIntent().getBooleanExtra("isBackCropUserImageActivity", false);
+        if(isBackCropUserImageActivity) {
+            Picasso.with(UserActivity.this).load(Uri.fromFile(getFileStreamPath("userImage")))
+                    .transform(new CropCircleTransformation())
+                    .into(mUserEditImageView);
+            openEditUserDialog();
+        }
 
         // FABを押した場合、お気に入り追加画面を表示
-        mAddUserFavoriteFloatingActionButton.setOnTouchListener(new View.OnTouchListener() {
+        mAddUserFavoriteFloatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    openFavoriteDialog();
-                }
-                return false;
+            public void onClick(View view) {
+                openFavoriteDialog();
             }
         });
 
         // お気に入りのハートのアイコンを押した時の処理
-        mFavIcon1.setOnTouchListener(tapFavIcon);
-        mFavIcon2.setOnTouchListener(tapFavIcon);
-        mFavIcon3.setOnTouchListener(tapFavIcon);
-        mFavIcon4.setOnTouchListener(tapFavIcon);
-        mFavIcon5.setOnTouchListener(tapFavIcon);
+        mFavIcon1.setOnClickListener(tapFavIcon);
+        mFavIcon2.setOnClickListener(tapFavIcon);
+        mFavIcon3.setOnClickListener(tapFavIcon);
+        mFavIcon4.setOnClickListener(tapFavIcon);
+        mFavIcon5.setOnClickListener(tapFavIcon);
 
         // 「お気に入りを追加する」ボタンをタップした場合
-        mAddFavoriteButtonConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
+        mAddFavoriteButtonConstraintLayout.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onTouch(final View view, MotionEvent motionEvent) {
-                if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    if (!MyUtil.Str.isBlank(mAddFavoriteEditText.getText().toString())) {
-                        // 登録するお気に入りの内容
-                        Favorite favorite = new Favorite(
-                                mAddFavoriteEditText.getText().toString(),
-                                Integer.parseInt(mFavoriteLevelTextView.getText().toString().replace(".0", ""))
-                        );
+            public void onClick(View view) {
+                if (!MyUtil.Str.isBlank(mAddFavoriteEditText.getText().toString())) {
+                    // 登録するお気に入りの内容
+                    Favorite favorite = new Favorite(
+                            mAddFavoriteEditText.getText().toString(),
+                            Integer.parseInt(mFavoriteLevelTextView.getText().toString().replace(".0", ""))
+                    );
 
-                        new Favor(new Favor.AsyncCallback() {
-                            @Override
-                            public void onSuccess(Object object) {
-                                Favorite favorite = (Favorite) object;
+                    new Favor(new Favor.AsyncCallback() {
+                        @Override
+                        public void onSuccess(Object object) {
+                            Favorite favorite = (Favorite) object;
 
-                                // お気に入り追加画面を初期化して非表示
-                                mFavIcon2.setImageResource(R.drawable.ic_heart_fill);
-                                mFavIcon3.setImageResource(R.drawable.ic_heart_fill);
-                                mFavIcon4.setImageResource(R.drawable.ic_heart_blank);
-                                mFavIcon5.setImageResource(R.drawable.ic_heart_blank);
-                                mFavoriteLevelTextView.setText("3.0");
-                                mAddFavoriteEditText.setText("");
-                                closeFavoriteDialog();
+                            // お気に入り追加画面を初期化して非表示
+                            mFavIcon2.setImageResource(R.drawable.ic_heart_fill);
+                            mFavIcon3.setImageResource(R.drawable.ic_heart_fill);
+                            mFavIcon4.setImageResource(R.drawable.ic_heart_blank);
+                            mFavIcon5.setImageResource(R.drawable.ic_heart_blank);
+                            mFavoriteLevelTextView.setText("3.0");
+                            mAddFavoriteEditText.setText("");
+                            closeFavoriteDialog();
 
-                                // お気に入り一覧のフラグメントを取得して、変更を伝える
-                                Fragment fragment = (Fragment) mUserFragmentStatePagerAdapter.instantiateItem(mUserViewPager, 0);
-                                if(fragment != null) {
-                                    ((UserFavoriteFragment) fragment).notifyDataChanged(favorite);
-                                }
+                            // お気に入り一覧のフラグメントを取得して、変更を伝える
+                            Fragment fragment = (Fragment) mUserFragmentStatePagerAdapter.instantiateItem(mUserViewPager, 0);
+                            if(fragment != null) {
+                                ((UserFavoriteFragment) fragment).notifyDataChanged(favorite);
                             }
+                        }
 
-                            @Override
-                            public void onFailure(Exception e) {
-                                Log.e("onFailure", e.toString());
-                            }
-                        }).setAppToken(mUser.getAppToken()).setFavorite(favorite).execute(Favor.Task.AddFavorite);
-                    } else {
-                        Toast.makeText(UserActivity.this, getString(R.string.add_favorite_error), Toast.LENGTH_SHORT).show();
-                    }
+                        @Override
+                        public void onFailure(Exception e) {
+                            Log.e("onFailure", e.toString());
+                        }
+                    }).setAppToken(mUser.getAppToken()).setFavorite(favorite).execute(Favor.Task.AddFavorite);
+                } else {
+                    Toast.makeText(UserActivity.this, getString(R.string.add_favorite_error), Toast.LENGTH_SHORT).show();
                 }
-                return false;
             }
         });
 
         // ユーザー情報タップでユーザー情報編集画面を表示
-        mUserProfConstraintLayout.setOnTouchListener(new View.OnTouchListener() {
+        mUserProfConstraintLayout.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    openEditUserDialog();
-                }
-                return false;
+            public void onClick(View view) {
+                openEditUserDialog();
+            }
+        });
+
+        // ユーザー画像クリック時の動作
+        mUserEditImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                // 選択肢の配列
+                final String[] items = {
+                        getResources().getString(R.string.user_image_take_photo),
+                        getResources().getString(R.string.user_image_select_photo)
+                };
+
+                // ダイアログの表示
+                new AlertDialog.Builder(UserActivity.this)
+                        .setTitle(getResources().getString(R.string.user_image_title))
+                        .setItems(items, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int position) {
+
+                                switch (position) {
+
+                                    // 「写真を撮る」を選択時
+                                    case 0:
+
+                                        // パーミッションが許可されていない場合
+                                        if (ContextCompat.checkSelfPermission(UserActivity.this,
+                                                Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+                                            // パーミッションの許可を行うダイアログを表示
+                                            // （許可 or 許可しない で onRequestPermissionsResultが呼ばれる）
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
+                                            }
+                                        }
+                                        // パーミッションが許可されている場合
+                                        else {
+                                            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                                            cameraIntent.setFlags(FLAG_ACTIVITY_NO_HISTORY); // スタックには追加しない
+                                            startActivityForResult(cameraIntent, CAMERA_PERMISSION_REQUEST_CODE);
+                                        }
+                                        break;
+
+                                    // 「ライブラリから選択」を選択時
+                                    case 1:
+                                        // 端末に保存されている画像を取得する
+                                        Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);   // 暗黙的インテントの作成
+                                        galleryIntent.setFlags(FLAG_ACTIVITY_NO_HISTORY); // スタックには追加しない
+                                        galleryIntent.setType("image/*");
+                                        startActivityForResult(
+                                                Intent.createChooser(galleryIntent, "画像を選択します"),
+                                                FILE_PERMISSION_REQUEST_CODE); // 起動したアクティビティを特定する定数
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                        })
+                        .setNegativeButton(getResources().getString(R.string.cancel), null)
+                        .show();
             }
         });
 
@@ -202,7 +329,7 @@ public class UserActivity extends AppCompatActivity {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if(hasFocus){
-                    final String[] ages = {"20", "30", "40", "50", "60", "70"};
+                    final String[] ages = {"10代", "20代", "30代", "40代", "50代", "60代", "70代", "80代"};
                     new AlertDialog.Builder(UserActivity.this)
                             .setItems(ages, new DialogInterface.OnClickListener() {
                                 @Override
@@ -251,97 +378,141 @@ public class UserActivity extends AppCompatActivity {
     }
 
     // お気に入りのハートのアイコンを押した時の処理の内容
-    private View.OnTouchListener tapFavIcon = new View.OnTouchListener() {
+    private View.OnClickListener tapFavIcon = new View.OnClickListener() {
         @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
-
-                if(isShownAddFavorite) {
-                    switch (view.getId()) {
-                        case R.id.favIcon1:
-                            mFavIcon2.setImageResource(R.drawable.ic_heart_blank);
-                            mFavIcon3.setImageResource(R.drawable.ic_heart_blank);
-                            mFavIcon4.setImageResource(R.drawable.ic_heart_blank);
-                            mFavIcon5.setImageResource(R.drawable.ic_heart_blank);
-                            mFavoriteLevelTextView.setText("1.0");
-                            break;
-                        case R.id.favIcon2:
-                            mFavIcon2.setImageResource(R.drawable.ic_heart_fill);
-                            mFavIcon3.setImageResource(R.drawable.ic_heart_blank);
-                            mFavIcon4.setImageResource(R.drawable.ic_heart_blank);
-                            mFavIcon5.setImageResource(R.drawable.ic_heart_blank);
-                            mFavoriteLevelTextView.setText("2.0");
-                            break;
-                        case R.id.favIcon3:
-                            mFavIcon2.setImageResource(R.drawable.ic_heart_fill);
-                            mFavIcon3.setImageResource(R.drawable.ic_heart_fill);
-                            mFavIcon4.setImageResource(R.drawable.ic_heart_blank);
-                            mFavIcon5.setImageResource(R.drawable.ic_heart_blank);
-                            mFavoriteLevelTextView.setText("3.0");
-                            break;
-                        case R.id.favIcon4:
-                            mFavIcon2.setImageResource(R.drawable.ic_heart_fill);
-                            mFavIcon3.setImageResource(R.drawable.ic_heart_fill);
-                            mFavIcon4.setImageResource(R.drawable.ic_heart_fill);
-                            mFavIcon5.setImageResource(R.drawable.ic_heart_blank);
-                            mFavoriteLevelTextView.setText("4.0");
-                            break;
-                        case R.id.favIcon5:
-                            mFavIcon2.setImageResource(R.drawable.ic_heart_fill);
-                            mFavIcon3.setImageResource(R.drawable.ic_heart_fill);
-                            mFavIcon4.setImageResource(R.drawable.ic_heart_fill);
-                            mFavIcon5.setImageResource(R.drawable.ic_heart_fill);
-                            mFavoriteLevelTextView.setText("5.0");
-                            break;
-                        default:
-                            break;
-                    }
+        public void onClick(View view) {
+            if(isShownAddFavorite) {
+                switch (view.getId()) {
+                    case R.id.favIcon1:
+                        mFavIcon2.setImageResource(R.drawable.ic_heart_blank);
+                        mFavIcon3.setImageResource(R.drawable.ic_heart_blank);
+                        mFavIcon4.setImageResource(R.drawable.ic_heart_blank);
+                        mFavIcon5.setImageResource(R.drawable.ic_heart_blank);
+                        mFavoriteLevelTextView.setText("1.0");
+                        break;
+                    case R.id.favIcon2:
+                        mFavIcon2.setImageResource(R.drawable.ic_heart_fill);
+                        mFavIcon3.setImageResource(R.drawable.ic_heart_blank);
+                        mFavIcon4.setImageResource(R.drawable.ic_heart_blank);
+                        mFavIcon5.setImageResource(R.drawable.ic_heart_blank);
+                        mFavoriteLevelTextView.setText("2.0");
+                        break;
+                    case R.id.favIcon3:
+                        mFavIcon2.setImageResource(R.drawable.ic_heart_fill);
+                        mFavIcon3.setImageResource(R.drawable.ic_heart_fill);
+                        mFavIcon4.setImageResource(R.drawable.ic_heart_blank);
+                        mFavIcon5.setImageResource(R.drawable.ic_heart_blank);
+                        mFavoriteLevelTextView.setText("3.0");
+                        break;
+                    case R.id.favIcon4:
+                        mFavIcon2.setImageResource(R.drawable.ic_heart_fill);
+                        mFavIcon3.setImageResource(R.drawable.ic_heart_fill);
+                        mFavIcon4.setImageResource(R.drawable.ic_heart_fill);
+                        mFavIcon5.setImageResource(R.drawable.ic_heart_blank);
+                        mFavoriteLevelTextView.setText("4.0");
+                        break;
+                    case R.id.favIcon5:
+                        mFavIcon2.setImageResource(R.drawable.ic_heart_fill);
+                        mFavIcon3.setImageResource(R.drawable.ic_heart_fill);
+                        mFavIcon4.setImageResource(R.drawable.ic_heart_fill);
+                        mFavIcon5.setImageResource(R.drawable.ic_heart_fill);
+                        mFavoriteLevelTextView.setText("5.0");
+                        break;
+                    default:
+                        break;
                 }
             }
-            return false;
         }
     };
 
     // ユーザー情報変更ボタンを押した場合の処理
     public void onUserEditButtonClicked(View view) {
+        if(MyUtil.Network.isEnable(this)) {
+            // 登録するユーザー情報
+            String gender = "male";
+            if (mUserGenderEditText.getText().toString().equals("女性")) gender = "female";
+            User editUser = new User(
+                    mUserNameEditText.getText().toString(),
+                    gender,
+                    Integer.parseInt(mUserAgeEditText.getText().toString().replace("代", "")),
+                    MyUtil.Transform.bmpToDataUriScheme(MyUtil.App.loadBitmapFromInternalStorage(this, "userImage"), 100),
+                    null
+            );
 
-        // 登録するユーザー情報
-        String gender = "male";
-        if(mUserGenderEditText.getText().toString().equals("女性")) gender = "female";
-        User editUser = new User(
-                mUserNameEditText.getText().toString(),
-                gender,
-                Integer.parseInt(mUserAgeEditText.getText().toString()),
-                null,
-                null
-        );
+            // ダイアログを閉じる
+            closeEditUserDialog();
 
-        // ユーザー情報のセット
-        String userGender = getString(R.string.user_gender_male);
-        if(!Objects.equals(editUser.getGender(), "male")) userGender = getString(R.string.user_gender_female);
-        mUserNameTextView.setText(editUser.getNickname());
-        mUserGenderTextView.setText(userGender);
-        mUserAgeTextView.setText(String.valueOf(editUser.getAge()) + "代");
+            // 読み込みダイアログを表示
+            final ProgressDialog progressDialog = new ProgressDialog(this);
+            progressDialog.setMessage(getString(R.string.main_progress_message));
+            progressDialog.show();
 
-        // ダイアログを閉じる
-        closeEditUserDialog();
+            // ユーザー情報を登録
+            new Favor(new Favor.AsyncCallback() {
+                @Override
+                public void onSuccess(Object object) {
+                    User user = (User) object;
 
-        // ユーザー情報を登録
-        new Favor(new Favor.AsyncCallback() {
-            @Override
-            public void onSuccess(Object object) {
-                User user = (User) object;
+                    // 読み込みダイアログを非表示
+                    progressDialog.dismiss();
 
-                // ユーザー情報を端末に保存
-                Gson gson = new Gson();
-                MyUtil.SharedPref.saveString(UserActivity.this, "userSetting", gson.toJson(user));
+                    // ユーザー情報のセット
+                    String userGender = getString(R.string.user_gender_male);
+                    if (!Objects.equals(user.getGender(), "male"))
+                        userGender = getString(R.string.user_gender_female);
+                    mUserNameTextView.setText(user.getNickname());
+                    mUserGenderTextView.setText(userGender);
+                    mUserAgeTextView.setText(String.valueOf(user.getAge()) + "代");
+                    if(user.getImageUrl() != null) {
+                        Picasso.with(UserActivity.this).load(user.getImageUrl())
+                                .transform(new CropCircleTransformation())
+                                .into(mUserEditImageView);
+                        Picasso.with(UserActivity.this).load(user.getImageUrl())
+                                .transform(new CropCircleTransformation())
+                                .into(mUserImageView);
+                    } else {
+                        Picasso.with(UserActivity.this).load(R.drawable.ic_user_prof).into(mUserEditImageView);
+                        Picasso.with(UserActivity.this).load(R.drawable.ic_user_prof).into(mUserImageView);
+                    }
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    Log.d("onFailure", e.toString());
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            // 読み込みダイアログを非表示
+                            progressDialog.dismiss();
+
+                            new SimpleAlertDialog(UserActivity.this, getString(R.string.error_common)).show();
+                        }
+                    });
+                }
+            }).setAppToken(mAppToken).setUser(editUser).execute(Favor.Task.EditUser);
+        } else {
+            new SimpleAlertDialog(this, getString(R.string.error_network_disable)).show();
+        }
+    }
+
+    // ユーザー画像選択から選択された画像を受け取り
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+
+        // 画像読み込みからの呼び出し または カメラからの呼び出し
+        if (( requestCode == FILE_PERMISSION_REQUEST_CODE || requestCode == CAMERA_PERMISSION_REQUEST_CODE )
+                && resultCode == Activity.RESULT_OK) {
+
+            Uri uri = null;
+            if (resultData != null) {
+                uri = resultData.getData();
+
+                // 画像リサイズ用の画面へ移動
+                Intent intent = new Intent(UserActivity.this, CropUserImageActivity.class);
+                intent.setFlags(FLAG_ACTIVITY_NO_HISTORY);  // スタックには追加しない
+                intent.putExtra("imageUri", uri);           // 画像データを渡す
+                startActivity(intent);
             }
-
-            @Override
-            public void onFailure(Exception e) {
-                Log.d("onFailure", e.toString());
-            }
-        }).setAppToken(mUser.getAppToken()).setUser(editUser).execute(Favor.Task.EditUser);
+        }
     }
 
     @Override
@@ -352,6 +523,8 @@ public class UserActivity extends AppCompatActivity {
             } else if(isShownEditUserSetting) {
                 closeEditUserDialog();
             } else {
+                Intent intent = new Intent(UserActivity.this, MainActivity.class);
+                startActivity(intent);
                 finish();
             }
         }
@@ -409,6 +582,12 @@ public class UserActivity extends AppCompatActivity {
             @Override
             public void onAnimationEnd(Animation animation) {
                 mAddFavoriteLayout.setVisibility(View.GONE);
+                MyUtil.SharedPref.saveString(UserActivity.this, "userImage", null);
+                if(mUser.getImageUrl() != null) {
+                    Picasso.with(UserActivity.this).load(mUser.getImageUrl()).into(mUserEditImageView);
+                } else {
+                    Picasso.with(UserActivity.this).load(R.drawable.ic_user_prof).into(mUserEditImageView);
+                }
             }
 
             @Override

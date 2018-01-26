@@ -35,18 +35,19 @@ import jp.co.conol.favorlib.cuona.cuona_reader.CuonaReaderException;
 import jp.co.conol.favorlib.cuona.Favor;
 import jp.co.conol.favorlib.cuona.favor_model.Shop;
 import jp.co.conol.favorlib.cuona.favor_model.User;
+import jp.wasabeef.picasso.transformations.CropCircleTransformation;
 
 public class MainActivity extends AppCompatActivity {
 
     private ScanCuonaDialog mScanCuonaDialog;
     private final Gson mGson = new Gson();
     private Cuona mCuona;
-    private User mUser;
     private boolean isSuccessfulConnection = false;
     List<String> mAvailableDeviceIdList = new ArrayList<>();    // Favorのサービスに登録されているデバイスのID一覧
     @BindView(R.id.shopHistoryConstraintLayout) ConstraintLayout mShopHistoryConstraintLayout;
     @BindView(R.id.userSettingConstraintLayout) ConstraintLayout mUserSettingConstraintLayout;
     @BindView(R.id.userSettingTextView) TextView mUserSettingTextView;
+    @BindView(R.id.userImageView) ImageView mUserImageView;
     @BindView(R.id.shopNameTextView) TextView mShopNameTextView;
     @BindView(R.id.shopImageView) RoundedImageView mShopImageView;  // 入店履歴の背景画像
     private final int PERMISSION_REQUEST_CODE = 1000;
@@ -57,10 +58,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        // shop情報が保存されている場合は入店後画面へ（入店中にアプリ再起動への対応）
+        if(MyUtil.SharedPref.getString(this, "shop") != null) {
+            Intent shopDetailIntent = new Intent(MainActivity.this, ShopDetailActivity.class);
+            startActivity(shopDetailIntent);
+            finish();
+        }
+
         try {
             mCuona = new Cuona(this);
         } catch (NFCNotAvailableException e) {
-            Log.d("CUONA", e.toString());
+            Log.d("CuonaError", e.toString());
             finish();
         }
 
@@ -73,16 +81,42 @@ public class MainActivity extends AppCompatActivity {
         // nfcがオフの場合はダイアログを表示
         CuonaUtil.checkNfcSetting(this, mCuona);
 
-        // ユーザー情報を取得
-        mUser = mGson.fromJson(MyUtil.SharedPref.getString(this, "userSetting"), User.class);
+        // ユーザーのAppTokenを取得
+        String appToken = MyUtil.SharedPref.getString(this, "appToken");
 
-        if(mUser != null) {
+        if(appToken != null) {
             if(MyUtil.Network.isEnable(MainActivity.this)) {
 
                 // 読み込みダイアログを表示
                 final ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
                 progressDialog.setMessage(getString(R.string.main_progress_message));
                 progressDialog.show();
+
+                // ユーザー情報を取得
+                new Favor(new Favor.AsyncCallback() {
+                    @Override
+                    public void onSuccess(Object object) {
+                        @SuppressWarnings("unchecked")
+                        User user = (User) object;
+
+                        // ユーザー情報を表示
+                        String userSettingTitle = user.getNickname() + getResources().getString(R.string.user_setting_title);
+                        mUserSettingTextView.setText(userSettingTitle);
+                        if(user.getImageUrl() != null) {
+                            Picasso.with(MainActivity.this)
+                                    .load(user.getImageUrl())
+                                    .transform(new CropCircleTransformation())
+                                    .into(mUserImageView);
+                        } else {
+                            Picasso.with(MainActivity.this).load(R.drawable.ic_user_prof).into(mUserImageView);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        Log.e("onFailure", e.toString());
+                    }
+                }).setAppToken(appToken).execute(Favor.Task.GetUser);
 
                 // 入店履歴を取得
                 new Favor(new Favor.AsyncCallback() {
@@ -91,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
                         @SuppressWarnings("unchecked")
                         List<Shop> shopList = (List<Shop>) object;
 
-                        if (shopList != null && shopList.size() != 0) {
+                        if (shopList.size() != 0) {
 
                             // 最後に入店した店舗のオブジェクトを取得
                             Shop shop = shopList.get(shopList.size() - 1);
@@ -108,9 +142,9 @@ public class MainActivity extends AppCompatActivity {
                     public void onFailure(Exception e) {
                         Log.e("onFailure", e.toString());
                     }
-                }).setAppToken(mUser.getAppToken()).execute(Favor.Task.GetVisitedShopHistory);
+                }).setAppToken(appToken).execute(Favor.Task.GetVisitedShopHistory);
 
-                // Favorのサービスに登録されているデバイスのID一覧
+                // Favorのサービスに登録されているデバイスID一覧を取得
                 new Favor(new Favor.AsyncCallback() {
                     @Override
                     public void onSuccess(Object object) {
@@ -119,12 +153,7 @@ public class MainActivity extends AppCompatActivity {
                         // 読み込みダイアログを非表示
                         progressDialog.dismiss();
 
-                        // 接続成功してもデバイスID一覧が無ければエラー
-                        if(mAvailableDeviceIdList != null && mAvailableDeviceIdList.size() != 0) {
-                            isSuccessfulConnection = true;
-                        } else {
-                            new SimpleAlertDialog(MainActivity.this, getString(R.string.error_fail_get_device_ids)).show();
-                        }
+                        isSuccessfulConnection = true;
                     }
 
                     @Override
@@ -148,10 +177,6 @@ public class MainActivity extends AppCompatActivity {
                         startActivity(intent);
                     }
                 });
-
-                // ユーザー名を表示
-                String userSettingTitle = mUser.getNickname() + getResources().getString(R.string.user_setting_title);
-                mUserSettingTextView.setText(userSettingTitle);
 
                 // ユーザー情報をタップした時の動作
                 mUserSettingConstraintLayout.setOnClickListener(new View.OnClickListener() {
@@ -202,7 +227,9 @@ public class MainActivity extends AppCompatActivity {
             else {
                 Intent shopDetailIntent = new Intent(MainActivity.this, ShopDetailActivity.class);
                 shopDetailIntent.putExtra("deviceId", deviceId);
+                MyUtil.SharedPref.saveBoolean(MainActivity.this, "isEntering", true);
                 startActivity(shopDetailIntent);
+                finish();
                 mScanCuonaDialog.dismiss();
             }
         }
