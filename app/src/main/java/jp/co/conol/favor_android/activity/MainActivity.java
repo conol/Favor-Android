@@ -36,6 +36,7 @@ import jp.co.conol.favorlib.cuona.Favor;
 import jp.co.conol.favorlib.cuona.favor_model.Shop;
 import jp.co.conol.favorlib.cuona.favor_model.User;
 import jp.wasabeef.picasso.transformations.CropCircleTransformation;
+import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -49,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.userSettingTextView) TextView mUserSettingTextView;
     @BindView(R.id.userImageView) ImageView mUserImageView;
     @BindView(R.id.shopNameTextView) TextView mShopNameTextView;
-    @BindView(R.id.shopImageView) RoundedImageView mShopImageView;  // 入店履歴の背景画像
+    @BindView(R.id.shopImageView) ImageView mShopImageView;  // 入店履歴の背景画像
     private final int PERMISSION_REQUEST_CODE = 1000;
 
     @Override
@@ -132,7 +133,10 @@ public class MainActivity extends AppCompatActivity {
 
                             // 最後に入店した店舗の情報を画面に反映
                             mShopNameTextView.setText(shop.getShopName());  // 店舗名
-                            Picasso.with(MainActivity.this).load(shop.getShopImages()[0]).into(mShopImageView); // 画像
+                            Picasso.with(MainActivity.this).load(shop.getShopImages()[0])   // 画像
+                                    .fit()
+                                    .transform(new RoundedCornersTransformation(12, 0))
+                                    .into(mShopImageView);
                         } else {
                             mShopNameTextView.setText(getString(R.string.shop_history_none));
                         }
