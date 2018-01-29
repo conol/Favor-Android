@@ -158,13 +158,16 @@ public class UserActivity extends AppCompatActivity {
                 if(!isBackCropUserImageActivity) {
                     if (mUser.getImageUrl() != null) {
                         Picasso.with(UserActivity.this).load(mUser.getImageUrl())
+                                .memoryPolicy(MemoryPolicy.NO_CACHE)
                                 .transform(new CropCircleTransformation())
                                 .into(mUserEditImageView);
                         Picasso.with(UserActivity.this).load(mUser.getImageUrl())
                                 .transform(new CropCircleTransformation())
                                 .into(mUserImageView);
                     } else {
-                        Picasso.with(UserActivity.this).load(R.drawable.ic_user_prof).into(mUserEditImageView);
+                        Picasso.with(UserActivity.this).load(R.drawable.ic_user_prof)
+                                .memoryPolicy(MemoryPolicy.NO_CACHE)
+                                .into(mUserEditImageView);
                         Picasso.with(UserActivity.this).load(R.drawable.ic_user_prof).into(mUserImageView);
                     }
                 }
@@ -189,6 +192,7 @@ public class UserActivity extends AppCompatActivity {
         if(isBackCropUserImageActivity) {
             Picasso.with(UserActivity.this).load(Uri.fromFile(getFileStreamPath("userImage")))
                     .transform(new CropCircleTransformation())
+                    .memoryPolicy(MemoryPolicy.NO_CACHE)
                     .into(mUserEditImageView);
             openEditUserDialog();
         }
@@ -235,9 +239,7 @@ public class UserActivity extends AppCompatActivity {
 
                             // お気に入り一覧のフラグメントを取得して、変更を伝える
                             Fragment fragment = (Fragment) mUserFragmentStatePagerAdapter.instantiateItem(mUserViewPager, 0);
-                            if(fragment != null) {
-                                ((UserFavoriteFragment) fragment).notifyDataChanged(favorite);
-                            }
+                            ((UserFavoriteFragment) fragment).notifyDataChanged(favorite);
                         }
 
                         @Override
@@ -295,7 +297,6 @@ public class UserActivity extends AppCompatActivity {
                                         // パーミッションが許可されている場合
                                         else {
                                             Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                                            cameraIntent.setFlags(FLAG_ACTIVITY_NO_HISTORY); // スタックには追加しない
                                             startActivityForResult(cameraIntent, CAMERA_PERMISSION_REQUEST_CODE);
                                         }
                                         break;
@@ -304,7 +305,6 @@ public class UserActivity extends AppCompatActivity {
                                     case 1:
                                         // 端末に保存されている画像を取得する
                                         Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);   // 暗黙的インテントの作成
-                                        galleryIntent.setFlags(FLAG_ACTIVITY_NO_HISTORY); // スタックには追加しない
                                         galleryIntent.setType("image/*");
                                         startActivityForResult(
                                                 Intent.createChooser(galleryIntent, "画像を選択します"),
@@ -466,12 +466,15 @@ public class UserActivity extends AppCompatActivity {
                     if(user.getImageUrl() != null) {
                         Picasso.with(UserActivity.this).load(user.getImageUrl())
                                 .transform(new CropCircleTransformation())
+                                .memoryPolicy(MemoryPolicy.NO_CACHE)
                                 .into(mUserEditImageView);
                         Picasso.with(UserActivity.this).load(user.getImageUrl())
                                 .transform(new CropCircleTransformation())
                                 .into(mUserImageView);
                     } else {
-                        Picasso.with(UserActivity.this).load(R.drawable.ic_user_prof).into(mUserEditImageView);
+                        Picasso.with(UserActivity.this).load(R.drawable.ic_user_prof)
+                                .memoryPolicy(MemoryPolicy.NO_CACHE)
+                                .into(mUserEditImageView);
                         Picasso.with(UserActivity.this).load(R.drawable.ic_user_prof).into(mUserImageView);
                     }
                 }
@@ -584,9 +587,14 @@ public class UserActivity extends AppCompatActivity {
                 mAddFavoriteLayout.setVisibility(View.GONE);
                 MyUtil.SharedPref.saveString(UserActivity.this, "userImage", null);
                 if(mUser.getImageUrl() != null) {
-                    Picasso.with(UserActivity.this).load(mUser.getImageUrl()).into(mUserEditImageView);
+                    Picasso.with(UserActivity.this).load(mUser.getImageUrl())
+                            .memoryPolicy(MemoryPolicy.NO_CACHE)
+                            .transform(new CropCircleTransformation())
+                            .into(mUserEditImageView);
                 } else {
-                    Picasso.with(UserActivity.this).load(R.drawable.ic_user_prof).into(mUserEditImageView);
+                    Picasso.with(UserActivity.this).load(R.drawable.ic_user_prof)
+                            .memoryPolicy(MemoryPolicy.NO_CACHE)
+                            .into(mUserEditImageView);
                 }
             }
 
