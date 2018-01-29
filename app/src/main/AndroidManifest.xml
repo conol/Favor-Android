@@ -41,7 +41,9 @@
         <activity
             android:name=".activity.OrderStopActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".activity.CropUserImageActivity"></activity>
+        <activity
+            android:name=".activity.CropUserImageActivity"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

@@ -29,6 +29,7 @@ public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecycl
     private Context mContext;
     private List<Menu> mMenuList = new ArrayList<>();
     private List<Integer> mOrderNumList = new ArrayList<>();
+    private boolean isEntering = false;
     protected void showOrderDialog(int position, int orderNum) {}
     private final int HEADER = 0;
     private final int MENU = 1;
@@ -75,6 +76,9 @@ public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecycl
         mContext = context;
         mMenuList = menuList;
         mOrderNumList = orderNumList;
+
+        // 入店か履歴から表示か
+        isEntering = MyUtil.SharedPref.getBoolean(context, "isEntering", false);
     }
 
     // ViewHolder作成
@@ -96,25 +100,27 @@ public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecycl
                 view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_shop_menu, parent, false);
                 holder = new ViewHolder(view, viewType);
 
-                // クリック時の処理
-                final ViewHolder finalHolder = holder;
-                view.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
+                // クリック時の処理（入店時のみ）
+                if(isEntering) {
+                    final ViewHolder finalHolder = holder;
+                    view.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
 
-                        // positionを取得
-                        final int position = finalHolder.getAdapterPosition();
+                            // positionを取得
+                            final int position = finalHolder.getAdapterPosition();
 
-                        // 注文ダイアログを表示
-                        int orderNum;
-                        if(mOrderNumList.get(position) != null && mOrderNumList.get(position) != 0) {
-                            orderNum = Integer.parseInt(mOrderNumList.get(position).toString());
-                        } else {
-                            orderNum = 1; // 注文数の初期値
+                            // 注文ダイアログを表示
+                            int orderNum;
+                            if (mOrderNumList.get(position) != null && mOrderNumList.get(position) != 0) {
+                                orderNum = Integer.parseInt(mOrderNumList.get(position).toString());
+                            } else {
+                                orderNum = 1; // 注文数の初期値
+                            }
+                            showOrderDialog(position, orderNum);
                         }
-                        showOrderDialog(position, orderNum);
-                    }
-                });
+                    });
+                }
 
                 break;
 

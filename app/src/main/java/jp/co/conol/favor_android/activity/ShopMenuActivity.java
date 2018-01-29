@@ -50,7 +50,7 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
     private Cuona mCuona;
     private final Gson mGson = new Gson();
     private Shop mShop;
-    private User mUser;
+    private String mAppToken;
     private List<Order> mOrderList = new ArrayList<>(); // 注文するメニューのリスト
     private boolean isShownOrderDialog = false; // 注文ダイアログが開いているか否か
     private int mTappedPosition;    // メニューをタップした際のメニュー位置
@@ -87,11 +87,21 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
         // 遷移前の情報を取得
         Intent intent = getIntent();
         mShop = mGson.fromJson(intent.getStringExtra("shop"), Shop.class);
-        mUser = mGson.fromJson(MyUtil.SharedPref.getString(this, "userSetting"), User.class);
-        if(mShop == null || mUser == null) {
+        if(mShop == null) {
             Toast.makeText(this,  getString(R.string.error_common), Toast.LENGTH_LONG).show();
             finish();
             return;
+        }
+
+        // ユーザーのAppTokenを取得
+        mAppToken = MyUtil.SharedPref.getString(this, "appToken");
+
+        // 入店か履歴から表示か
+        final boolean isEntering = MyUtil.SharedPref.getBoolean(this, "isEntering", false);
+
+        // 履歴から表示の場合は「注文する」ボタンを非表示
+        if(!isEntering) {
+            mOrderButtonConstraintLayout.setVisibility(View.GONE);
         }
 
         if(MyUtil.Network.isEnable(this)) {
@@ -165,50 +175,54 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
                         };
                         mShopMenuRecyclerView.setAdapter(shopMenuRecyclerAdapter);
 
-                        // 注文数タップ時の処理
-                        mOrderNumConstraintLayout.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                if (isShownOrderDialog) {
-                                    NumberPickerDialog dialog = NumberPickerDialog.newInstance(
-                                            R.layout.layout_number_picker_dialog,
-                                            getString(R.string.shop_menu_order_dialog_title),
-                                            0,
-                                            9,
-                                            getString(R.string.ok),
-                                            getString(R.string.cancel_kana)
-                                    );
-                                    dialog.show(getSupportFragmentManager(), "numberPickerDialog");
-                                }
-                            }
-                        });
+                        // 入店時のみ注文可能
+                        if(isEntering) {
 
-                        // 注文ダイアログの「キャンセル」ボタンタップ時の処理
-                        mCancelButtonConstraintLayout.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                if (isShownOrderDialog) {
+                            // 注文数タップ時の処理
+                            mOrderNumConstraintLayout.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    if (isShownOrderDialog) {
+                                        NumberPickerDialog dialog = NumberPickerDialog.newInstance(
+                                                R.layout.layout_number_picker_dialog,
+                                                getString(R.string.shop_menu_order_dialog_title),
+                                                0,
+                                                9,
+                                                getString(R.string.ok),
+                                                getString(R.string.cancel_kana)
+                                        );
+                                        dialog.show(getSupportFragmentManager(), "numberPickerDialog");
+                                    }
+                                }
+                            });
+
+                            // 注文ダイアログの「キャンセル」ボタンタップ時の処理
+                            mCancelButtonConstraintLayout.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    if (isShownOrderDialog) {
+                                        closeOrderDialog();
+                                    }
+                                }
+                            });
+
+                            // 注文ダイアログの「選択」ボタンタップ時の処理
+                            mSelectButtonConstraintLayout.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    // 注文ダイアログを非表示
                                     closeOrderDialog();
+
+                                    // 注文数をメニューに表示
+                                    int orderNum = Integer.parseInt(mOrderNumTextView.getText().toString());
+                                    orderNumList.set(mTappedPosition, orderNum);
+                                    shopMenuRecyclerAdapter.notifyItemChanged(mTappedPosition);
+
+                                    // 注文するメニューのオブジェクトを作成し、注文リストに追加
+                                    mOrderList.add(new Order(menuList.get(mTappedPosition).getId(), orderNum));
                                 }
-                            }
-                        });
-
-                        // 注文ダイアログの「選択」ボタンタップ時の処理
-                        mSelectButtonConstraintLayout.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                // 注文ダイアログを非表示
-                                closeOrderDialog();
-
-                                // 注文数をメニューに表示
-                                int orderNum = Integer.parseInt(mOrderNumTextView.getText().toString());
-                                orderNumList.set(mTappedPosition, orderNum);
-                                shopMenuRecyclerAdapter.notifyItemChanged(mTappedPosition);
-
-                                // 注文するメニューのオブジェクトを作成し、注文リストに追加
-                                mOrderList.add(new Order(menuList.get(mTappedPosition).getId(), orderNum));
-                            }
-                        });
+                            });
+                        }
                     } else {
                         Toast.makeText(ShopMenuActivity.this, getString(R.string.error_common), Toast.LENGTH_LONG).show();
                         finish();
@@ -227,7 +241,7 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
                         }
                     });
                 }
-            }).setAppToken(mUser.getAppToken()).setShopId(mShop.getShopId()).execute(Favor.Task.GetMenu);
+            }).setAppToken(mAppToken).setShopId(mShop.getShopId()).execute(Favor.Task.GetMenu);
         } else {
             new SimpleAlertDialog(ShopMenuActivity.this, getString(R.string.error_network_disable)).show();
         }
@@ -297,7 +311,7 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
                 public void onFailure(Exception e) {
                     Log.e("onFailure", e.toString());
                 }
-            }).setAppToken(mUser.getAppToken()).setVisitHistoryId(mShop.getVisitHistoryId()).setOrder(mOrderList).execute(Favor.Task.Order);
+            }).setAppToken(mAppToken).setVisitHistoryId(mShop.getVisitHistoryId()).setOrder(mOrderList).execute(Favor.Task.Order);
         }
     }
 

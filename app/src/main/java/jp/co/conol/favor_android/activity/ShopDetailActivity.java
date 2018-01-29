@@ -1,5 +1,6 @@
 package jp.co.conol.favor_android.activity;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -9,6 +10,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -19,11 +21,19 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
+import java.util.Collections;
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favor_android.adapter.ShopDetailFragmentStatePagerAdapter;
+import jp.co.conol.favor_android.adapter.ShopHistoryRecyclerAdapter;
 import jp.co.conol.favor_android.custom.ProgressDialog;
 import jp.co.conol.favor_android.custom.SimpleAlertDialog;
 import jp.co.conol.favorlib.cuona.Favor;
@@ -33,13 +43,13 @@ import jp.co.conol.favorlib.cuona.favor_model.User;
 public class ShopDetailActivity extends AppCompatActivity {
 
     private final Gson mGson = new Gson();
-    private Intent mIntent = null;
-    private int mVisitGroupId;
-    private Shop mShop;
     private boolean isEntering;  // 入店中か否か
     @BindView(R.id.shopImageView) ImageView mShopImageView; // 店舗画像
     @BindView(R.id.shopGenreTextView) TextView mShopGenreTextView; // 店舗のジャンル
     @BindView(R.id.shopNumVisitTextView) TextView mShopNumVisitTextView; // 来店回数表示部分
+    @BindView(R.id.shopVisitTextView) TextView mShopVisitTextView; // 「来店」
+    @BindView(R.id.shopCountTextView) TextView mShopCountTextView; // 「回目」
+    @BindView(R.id.shopNumVIsitConstraintLayout) ConstraintLayout mShopNumVisitConstraintLayout; // 来店回数表示部分の囲み部分
     @BindView(R.id.orderStopButtonConstraintLayout) ConstraintLayout mOrderStopButtonConstraintLayout; // 「お会計する」ボタン
     @BindView(R.id.shopDetailTabLayout) TabLayout mShopDetailTabLayout;
     @BindView(R.id.shopDetailViewPager) ViewPager mShopDetailViewPager;
@@ -56,70 +66,37 @@ public class ShopDetailActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         // 遷移前の情報を取得
-        mIntent = getIntent();
-        String deviceId = mIntent.getStringExtra("deviceId");
-        int shopId = mIntent.getIntExtra("shopId", 0);  // 履歴から表示時に取得可能
-        User user = mGson.fromJson(MyUtil.SharedPref.getString(this, "userSetting"), User.class);
+        final Shop shop = new Gson().fromJson(getIntent().getStringExtra("shop"), Shop.class);    // 店舗情報を取得
 
-        // デバイスIDとshop情報がnullなら、履歴から表示されていると判断
+        // 入店か履歴から表示か
         isEntering = MyUtil.SharedPref.getBoolean(this, "isEntering", false);
 
-        // 入店処理（入店した際に店舗情報を表示）
-        if(MyUtil.Network.isEnable(this)) {
+        // 入店中にアプリを再起動した場合は店舗情報を再取得
+        if(getIntent().getBooleanExtra("isReboot", false)) {
 
-            // 読み込みダイアログを表示
-            final ProgressDialog progressDialog = new ProgressDialog(this);
-            progressDialog.setMessage(getString(R.string.main_progress_message));
-            progressDialog.show();
+            // 入店履歴を取得
+            if(MyUtil.Network.isEnable(this)) {
 
-            // 入店時
-            if(isEntering) {
-                // 店舗情報を取得
-                new Favor(new Favor.AsyncCallback() {
-                    @Override
-                    public void onSuccess(Object object) {
-                        mShop = (Shop) object;
+                // ユーザーのAppTokenを取得
+                String appToken = MyUtil.SharedPref.getString(this, "appToken");
 
-                        // 読み込みダイアログを非表示
-                        progressDialog.dismiss();
+                // ショップIDを取得
+                int ShopId = MyUtil.SharedPref.getInt(this, "shopId", 0);
 
-                        if (mShop != null) {
-                            setShopInfo(mShop);
-                        }
-                    }
+                // 読み込みダイアログを表示
+                final ProgressDialog progressDialog = new ProgressDialog(ShopDetailActivity.this);
+                progressDialog.setMessage(getString(R.string.main_progress_message));
+                progressDialog.show();
 
-                    @Override
-                    public void onFailure(Exception e) {
-                        Log.d("onFailure", e.toString());
-                        runOnUiThread(new Runnable() {
-                            public void run() {
-                                // 読み込みダイアログを非表示
-                                progressDialog.dismiss();
-
-                                Toast.makeText(ShopDetailActivity.this, getString(R.string.error_touch_cuona), Toast.LENGTH_LONG).show();
-                                Intent intent = new Intent(ShopDetailActivity.this, MainActivity.class);
-                                startActivity(intent);
-                                finish();
-                            }
-                        });
-                    }
-                }).setAppToken(user.getAppToken()).setDeviceId(deviceId).execute(Favor.Task.EnterShop);
-            }
-            // 入店履歴から表示
-            else {
-
-                // 店舗情報を取得
                 new Favor(new Favor.AsyncCallback() {
                     @Override
                     public void onSuccess(Object object) {
                         Shop shop = (Shop) object;
 
+                        setShopInfo(shop);
+
                         // 読み込みダイアログを非表示
                         progressDialog.dismiss();
-
-                        if (shop != null) {
-                            setShopInfo(shop);
-                        }
                     }
 
                     @Override
@@ -130,28 +107,23 @@ public class ShopDetailActivity extends AppCompatActivity {
                                 // 読み込みダイアログを非表示
                                 progressDialog.dismiss();
 
-                                Toast.makeText(ShopDetailActivity.this, getString(R.string.error_common), Toast.LENGTH_LONG).show();
-                                finish();
+                                new SimpleAlertDialog(ShopDetailActivity.this, getString(R.string.error_common)).show();
                             }
                         });
                     }
-                }).setAppToken(user.getAppToken()).setShopId(shopId).execute(Favor.Task.GetShopDetail);
+                }).setAppToken(appToken).setShopId(ShopId).execute(Favor.Task.GetShopDetail);
+            } else {
+                new SimpleAlertDialog(ShopDetailActivity.this, getString(R.string.error_network_disable)).show();
             }
         } else {
-            Toast.makeText(ShopDetailActivity.this, getString(R.string.error_network_disable), Toast.LENGTH_LONG).show();
-            Intent intent = new Intent(ShopDetailActivity.this, MainActivity.class);
-            startActivity(intent);
-            finish();
+            setShopInfo(shop);
         }
     }
 
-    // 店舗情報をセット（入店・履歴からの表示共通部分）
+    @SuppressLint("SetTextI18n")
     private void setShopInfo(final Shop shop) {
-
-        // visitGroupIdを取得（入店時はAPIの店舗情報から、履歴から表示時はintentから）
         // 来店中
         if(isEntering) {
-            mVisitGroupId = shop.getVisitGroupId();
             mShopNameConstraintLayout.setBackground(getDrawable(R.drawable.style_gradation_red));   // 店舗名背景
             mShopLastVisitAtTextView.setText(getString(R.string.shop_entering_text));   // 入店中メッセージ
             mShopLastVisitAtTextView.setTextColor(Color.RED);
@@ -164,17 +136,28 @@ public class ShopDetailActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(ShopDetailActivity.this, OrderStopActivity.class);
-                    intent.putExtra("shop", mGson.toJson(mShop));
+                    intent.putExtra("shop", mGson.toJson(shop));
                     startActivity(intent);
                 }
             });
         }
         // 履歴から表示
         else {
-            mVisitGroupId = mIntent.getIntExtra("visitGroupId", 0);
+
+            // 入店時間
+            DateTimeFormatter DEF_FMT = DateTimeFormat.forPattern("yyyy/MM/dd (E) HH:mm");
+            if(shop.getEnterShopAt() != null) {
+                mShopLastVisitAtTextView.setText(DEF_FMT.print(DateTime.parse(shop.getEnterShopAt())) + " に来店しました");
+            }
 
             // 入店していない場合は「お会計する」ボタンを非表示
             mOrderStopButtonConstraintLayout.setVisibility(View.GONE);
+
+            // 来店回数の背景・文字色を変更
+            mShopNumVisitConstraintLayout.setBackground(getDrawable(R.drawable.style_round_box_darkgray_back));
+            mShopNumVisitTextView.setTextColor(Color.WHITE);
+            mShopVisitTextView.setTextColor(Color.WHITE);
+            mShopCountTextView.setTextColor(Color.WHITE);
         }
 
         // 店舗情報をViewに反映
@@ -187,10 +170,10 @@ public class ShopDetailActivity extends AppCompatActivity {
         // 基本情報と注文履歴のViewPagerにアダプターをセット
         ShopDetailFragmentStatePagerAdapter shopDetailFragmentStatePagerAdapter
                 = new ShopDetailFragmentStatePagerAdapter(
-                    ShopDetailActivity.this,
-                    getSupportFragmentManager(),
-                    mVisitGroupId,
-                    mGson.toJson(shop)
+                ShopDetailActivity.this,
+                getSupportFragmentManager(),
+                shop.getVisitGroupId(),
+                mGson.toJson(shop)
         );
         mShopDetailViewPager.setAdapter(shopDetailFragmentStatePagerAdapter);
         mShopDetailTabLayout.setupWithViewPager(mShopDetailViewPager);
@@ -209,20 +192,20 @@ public class ShopDetailActivity extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event){
         if(keyCode == KeyEvent.KEYCODE_BACK ) {
-//            if(isEntering) {
-//                new AlertDialog.Builder(this)
-//                        .setMessage(getString(R.string.shop_exit))
-//                        .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialog, int which) {
-//                                finish();
-//                            }
-//                        })
-//                        .setNegativeButton(getString(R.string.cancel_kana), null)
-//                        .show();
-//            } else {
-//                finish();
-//            }
+            if(isEntering) {
+                new AlertDialog.Builder(this)
+                        .setMessage(getString(R.string.shop_exit))
+                        .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                finish();
+                            }
+                        })
+                        .setNegativeButton(getString(R.string.cancel_kana), null)
+                        .show();
+            } else {
+                finish();
+            }
         }
         return false;
     }

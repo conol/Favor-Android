@@ -18,6 +18,10 @@ import com.google.gson.Gson;
 import com.makeramen.roundedimageview.RoundedImageView;
 import com.squareup.picasso.Picasso;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,15 +45,16 @@ import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
 public class MainActivity extends AppCompatActivity {
 
     private ScanCuonaDialog mScanCuonaDialog;
-    private final Gson mGson = new Gson();
     private Cuona mCuona;
+    private String mAppToken = null;
     private boolean isSuccessfulConnection = false;
     List<String> mAvailableDeviceIdList = new ArrayList<>();    // Favorのサービスに登録されているデバイスのID一覧
     @BindView(R.id.shopHistoryConstraintLayout) ConstraintLayout mShopHistoryConstraintLayout;
     @BindView(R.id.userSettingConstraintLayout) ConstraintLayout mUserSettingConstraintLayout;
     @BindView(R.id.userSettingTextView) TextView mUserSettingTextView;
     @BindView(R.id.userImageView) ImageView mUserImageView;
-    @BindView(R.id.shopNameTextView) TextView mShopNameTextView;
+    @BindView(R.id.shopNameTextView) TextView mShopNameTextView;    // 入店履歴の店舗名
+    @BindView(R.id.shopLastVisitAtTextView) TextView mShopLastVisitAtTextView;  // 入店履歴の入店日時
     @BindView(R.id.shopImageView) ImageView mShopImageView;  // 入店履歴の背景画像
     private final int PERMISSION_REQUEST_CODE = 1000;
 
@@ -59,9 +64,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        // shop情報が保存されている場合は入店後画面へ（入店中にアプリ再起動への対応）
-        if(MyUtil.SharedPref.getString(this, "shop") != null) {
+        // 入店中の場合は入店後画面へ（入店中にアプリ再起動への対応）
+        if(MyUtil.SharedPref.getBoolean(MainActivity.this, "isEntering", false)) {
             Intent shopDetailIntent = new Intent(MainActivity.this, ShopDetailActivity.class);
+            shopDetailIntent.putExtra("isReboot", true);
             startActivity(shopDetailIntent);
             finish();
         }
@@ -83,9 +89,9 @@ public class MainActivity extends AppCompatActivity {
         CuonaUtil.checkNfcSetting(this, mCuona);
 
         // ユーザーのAppTokenを取得
-        String appToken = MyUtil.SharedPref.getString(this, "appToken");
+        mAppToken = MyUtil.SharedPref.getString(this, "appToken");
 
-        if(appToken != null) {
+        if(mAppToken != null) {
             if(MyUtil.Network.isEnable(MainActivity.this)) {
 
                 // 読み込みダイアログを表示
@@ -117,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onFailure(Exception e) {
                         Log.e("onFailure", e.toString());
                     }
-                }).setAppToken(appToken).execute(Favor.Task.GetUser);
+                }).setAppToken(mAppToken).execute(Favor.Task.GetUser);
 
                 // 入店履歴を取得
                 new Favor(new Favor.AsyncCallback() {
@@ -133,6 +139,8 @@ public class MainActivity extends AppCompatActivity {
 
                             // 最後に入店した店舗の情報を画面に反映
                             mShopNameTextView.setText(shop.getShopName());  // 店舗名
+                            DateTimeFormatter DEF_FMT = DateTimeFormat.forPattern("yyyy/MM/dd (E) HH:mm~"); // 入店時間
+                            mShopLastVisitAtTextView.setText(DEF_FMT.print(DateTime.parse(shop.getEnterShopAt())));
                             Picasso.with(MainActivity.this).load(shop.getShopImages()[0])   // 画像
                                     .fit()
                                     .transform(new RoundedCornersTransformation(12, 0))
@@ -146,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onFailure(Exception e) {
                         Log.e("onFailure", e.toString());
                     }
-                }).setAppToken(appToken).execute(Favor.Task.GetVisitedShopHistory);
+                }).setAppToken(mAppToken).execute(Favor.Task.GetVisitedShopHistory);
 
                 // Favorのサービスに登録されているデバイスID一覧を取得
                 new Favor(new Favor.AsyncCallback() {
@@ -227,14 +235,48 @@ public class MainActivity extends AppCompatActivity {
             if (!mAvailableDeviceIdList.contains(deviceId)) {
                 new SimpleAlertDialog(MainActivity.this, getString(R.string.error_not_exist_in_devise_ids)).show();
             }
-            // 含まれていれば店舗詳細ページへ移動
+            // 含まれていれば店舗詳情報を取得
             else {
-                Intent shopDetailIntent = new Intent(MainActivity.this, ShopDetailActivity.class);
-                shopDetailIntent.putExtra("deviceId", deviceId);
-                MyUtil.SharedPref.saveBoolean(MainActivity.this, "isEntering", true);
-                startActivity(shopDetailIntent);
-                finish();
-                mScanCuonaDialog.dismiss();
+
+                // 読み込みダイアログを表示
+                final ProgressDialog progressDialog = new ProgressDialog(this);
+                progressDialog.setMessage(getString(R.string.main_progress_message));
+                progressDialog.show();
+
+                // 店舗情報を取得
+                new Favor(new Favor.AsyncCallback() {
+                    @Override
+                    public void onSuccess(Object object) {
+                        Shop shop = (Shop) object;
+
+                        // 読み込みダイアログを非表示
+                        progressDialog.dismiss();
+
+                        // 店舗詳細ページへ移動
+                        Intent shopDetailIntent = new Intent(MainActivity.this, ShopDetailActivity.class);
+                        shopDetailIntent.putExtra("shop", new Gson().toJson(shop));
+                        MyUtil.SharedPref.saveBoolean(MainActivity.this, "isEntering", true);
+                        MyUtil.SharedPref.saveInt(MainActivity.this, "shopId", shop.getShopId());
+                        shopDetailIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(shopDetailIntent);
+                        finish();
+                        mScanCuonaDialog.dismiss();
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        Log.d("onFailure", e.toString());
+                        runOnUiThread(new Runnable() {
+                            public void run() {
+                                // 読み込みダイアログを非表示
+                                progressDialog.dismiss();
+
+                                new SimpleAlertDialog(MainActivity.this, getString(R.string.error_common)).show();
+                            }
+                        });
+                    }
+                }).setAppToken(mAppToken).setDeviceId(deviceId).execute(Favor.Task.EnterShop);
+
             }
         }
     }

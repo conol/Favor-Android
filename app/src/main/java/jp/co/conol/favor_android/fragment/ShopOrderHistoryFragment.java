@@ -30,7 +30,6 @@ import jp.co.conol.favorlib.cuona.favor_model.User;
 public class ShopOrderHistoryFragment extends Fragment {
 
     private Context mContext;
-    private final Gson mGson = new Gson();
     private int mVisitGroupId;
     private ShopOrderHistoryRecyclerAdapter mShopOrderHistoryRecyclerAdapter;
     @BindView(R.id.shopOrderHistoryRecyclerView) RecyclerView mShopOrderHistoryRecyclerView;
@@ -84,31 +83,34 @@ public class ShopOrderHistoryFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        // ユーザー情報の取得
-        User user = mGson.fromJson(MyUtil.SharedPref.getString(mContext, "userSetting"), User.class);
+        if(MyUtil.Network.isEnable(mContext)) {
 
-        if(mVisitGroupId != 0) {
-            new Favor(new Favor.AsyncCallback() {
-                @Override
-                public void onSuccess(Object object) {
-                    List<Order> orderList = (List<Order>) object;
+            // ユーザーのAppTokenを取得
+            String appToken = MyUtil.SharedPref.getString(mContext, "appToken");
 
-                    if (orderList != null) {
+            if (mVisitGroupId != 0) {
+                new Favor(new Favor.AsyncCallback() {
+                    @Override
+                    public void onSuccess(Object object) {
+                        List<Order> orderList = (List<Order>) object;
 
-                        // レイアウトマネージャーのセット
-                        mShopOrderHistoryRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+                        if (orderList != null) {
 
-                        // アダプターのセット
-                        mShopOrderHistoryRecyclerAdapter = new ShopOrderHistoryRecyclerAdapter(mContext, orderList);
-                        mShopOrderHistoryRecyclerView.setAdapter(mShopOrderHistoryRecyclerAdapter);
+                            // レイアウトマネージャーのセット
+                            mShopOrderHistoryRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+
+                            // アダプターのセット
+                            mShopOrderHistoryRecyclerAdapter = new ShopOrderHistoryRecyclerAdapter(mContext, orderList);
+                            mShopOrderHistoryRecyclerView.setAdapter(mShopOrderHistoryRecyclerAdapter);
+                        }
                     }
-                }
 
-                @Override
-                public void onFailure(Exception e) {
-                    Log.e("onFailure", e.toString());
-                }
-            }).setAppToken(user.getAppToken()).setVisitGroupId(mVisitGroupId).execute(Favor.Task.GetUserGroupsOrderInShop);
+                    @Override
+                    public void onFailure(Exception e) {
+                        Log.e("onFailure", e.toString());
+                    }
+                }).setAppToken(appToken).setVisitGroupId(mVisitGroupId).execute(Favor.Task.GetUserGroupsOrderInShop);
+            }
         }
     }
 }

@@ -11,8 +11,6 @@ public class UsersAllOrder {
 
     private int id;
     private String name;
-    private int price_cents;
-    private String price_format;
     private int quantity;
     private String created_at;
     private String updated_at;
@@ -24,11 +22,12 @@ public class UsersAllOrder {
     private class MenuItem {
         private int id;
         private String name;
-        private int price;
+        private int price_cents;
+        private String price_format;
         private String notes;
-        private Image[] images;
+        private MenuImage[] images;
 
-        private class Image {
+        private class MenuImage {
             private String image_url;
 
             public String getImage_url() {
@@ -40,11 +39,23 @@ public class UsersAllOrder {
             return id;
         }
 
+        public String getName() {
+            return name;
+        }
+
+        public int getPriceCents() {
+            return price_cents;
+        }
+
+        public String getPriceFormat() {
+            return price_format;
+        }
+
         public String getNotes() {
             return notes;
         }
 
-        public Image[] getImages() {
+        public MenuImage[] getImages() {
             return images;
         }
     }
@@ -62,11 +73,16 @@ public class UsersAllOrder {
     }
 
     public int getOrderedItemPriceCents() {
-        return price_cents;
+        return menu_item.getPriceCents();
     }
 
     public String getOrderedItemPriceFormat() {
-        return price_format;
+        return menu_item.getPriceFormat();
+    }
+
+    // 単位を取得
+    public String getOrderedItemPriceUnit() {
+        return menu_item.getPriceFormat().replaceAll("[0-9]","").replace(".", "").replace(",", "");
     }
 
     public int getOrderedItemQuantity() {
@@ -87,7 +103,7 @@ public class UsersAllOrder {
 
     public String[] getOrderedItemImages() {
         List<String> itemImage = new ArrayList<>();
-        for(MenuItem.Image imageObj : menu_item.getImages()) {
+        for(MenuItem.MenuImage imageObj : menu_item.getImages()) {
             itemImage.add(imageObj.getImage_url());
         }
         return itemImage.toArray(new String[0]);
