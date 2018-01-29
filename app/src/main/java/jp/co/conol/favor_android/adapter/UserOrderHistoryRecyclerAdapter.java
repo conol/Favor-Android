@@ -11,6 +11,10 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import java.util.List;
 
 import jp.co.conol.favor_android.R;
@@ -114,9 +118,8 @@ public class UserOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<UserOr
                 holder.mUserOrderMenuQuantityTextView.setText("(x" + String.valueOf(usersAllOrder.getOrderedItemQuantity()) + ")");
             }
         } else if(holder.mUserOrderDateTextView != null && holder.mUserOrderShopNameTextView != null && 1 < mUsersAllOrderList.size()) {
-            String dateString = mUsersAllOrderList.get(position + 1).getEnterAt();
-            String[] dateStringTmp = dateString.split("T", 0);
-            holder.mUserOrderDateTextView.setText(dateStringTmp[0].replace("-", "/"));
+            DateTimeFormatter DEF_FMT = DateTimeFormat.forPattern("yyyy/MM/dd (E) HH:mm~"); // 入店時間
+            holder.mUserOrderDateTextView.setText(DEF_FMT.print(DateTime.parse(mUsersAllOrderList.get(position + 1).getEnterAt())));
             holder.mUserOrderShopNameTextView.setText(mUsersAllOrderList.get(position + 1).getShopName());
         }
     }
