@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.userSettingTextView) TextView mUserSettingTextView;
     @BindView(R.id.userImageView) ImageView mUserImageView;
     @BindView(R.id.shopNameTextView) TextView mShopNameTextView;    // 入店履歴の店舗名
-    @BindView(R.id.shopLastVisitAtTextView) TextView mShopLastVisitAtTextView;  // 入店履歴の入店日時
+    @BindView(R.id.shopEnterAtTextView) TextView mShopEnterAtTextView;  // 入店履歴の入店日時
     @BindView(R.id.shopImageView) ImageView mShopImageView;  // 入店履歴の背景画像
     private final int PERMISSION_REQUEST_CODE = 1000;
 
@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
                             // 最後に入店した店舗の情報を画面に反映
                             mShopNameTextView.setText(shop.getShopName());  // 店舗名
                             DateTimeFormatter DEF_FMT = DateTimeFormat.forPattern("yyyy/MM/dd (E) HH:mm~"); // 入店時間
-                            mShopLastVisitAtTextView.setText(DEF_FMT.print(DateTime.parse(shop.getEnterShopAt())));
+                            mShopEnterAtTextView.setText(DEF_FMT.print(DateTime.parse(shop.getEnterShopAt())));
                             Picasso.with(MainActivity.this).load(shop.getShopImages()[0])   // 画像
                                     .fit()
                                     .transform(new RoundedCornersTransformation(12, 0))

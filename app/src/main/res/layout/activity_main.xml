@@ -156,12 +156,12 @@
                 android:layout_marginEnd="8dp"
                 android:textColor="@android:color/white"
                 android:textSize="18sp"
-                app:layout_constraintBottom_toTopOf="@+id/shopLastVisitAtTextView"
+                app:layout_constraintBottom_toTopOf="@+id/shopEnterAtTextView"
                 app:layout_constraintEnd_toEndOf="parent"
                 tools:text="店舗名" />
 
             <TextView
-                android:id="@+id/shopLastVisitAtTextView"
+                android:id="@+id/shopEnterAtTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"

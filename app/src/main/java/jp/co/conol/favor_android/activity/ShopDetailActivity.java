@@ -56,7 +56,7 @@ public class ShopDetailActivity extends AppCompatActivity {
     @BindView(R.id.showShopMenuConstraintLayout) ConstraintLayout mShowShopMenuConstraintLayout;
     @BindView(R.id.shopNameTextView) TextView mShopNameTextView;    // 店舗名
     @BindView(R.id.shopNameConstraintLayout) ConstraintLayout mShopNameConstraintLayout;    // 店舗の背景
-    @BindView(R.id.shopLastVisitAtTextView) TextView mShopLastVisitAtTextView;    // 前回来店日時表示箇所
+    @BindView(R.id.shopEnterAtTextView) TextView mShopEnterAtTextView;    // 前回来店日時表示箇所
     @BindView(R.id.shopIntroductionTextView) TextView mShopIntroductionTextView;    // 店舗説明
 
     @Override
@@ -125,8 +125,8 @@ public class ShopDetailActivity extends AppCompatActivity {
         // 来店中
         if(isEntering) {
             mShopNameConstraintLayout.setBackground(getDrawable(R.drawable.style_gradation_red));   // 店舗名背景
-            mShopLastVisitAtTextView.setText(getString(R.string.shop_entering_text));   // 入店中メッセージ
-            mShopLastVisitAtTextView.setTextColor(Color.RED);
+            mShopEnterAtTextView.setText(getString(R.string.shop_entering_text));   // 入店中メッセージ
+            mShopEnterAtTextView.setTextColor(Color.RED);
 
             // 入店している場合は「お会計する」ボタンを表示
             mOrderStopButtonConstraintLayout.setVisibility(View.VISIBLE);
@@ -147,7 +147,7 @@ public class ShopDetailActivity extends AppCompatActivity {
             // 入店時間
             DateTimeFormatter DEF_FMT = DateTimeFormat.forPattern("yyyy/MM/dd (E) HH:mm");
             if(shop.getEnterShopAt() != null) {
-                mShopLastVisitAtTextView.setText(DEF_FMT.print(DateTime.parse(shop.getEnterShopAt())) + " に来店しました");
+                mShopEnterAtTextView.setText(DEF_FMT.print(DateTime.parse(shop.getEnterShopAt())) + " に来店しました");
             }
 
             // 入店していない場合は「お会計する」ボタンを非表示
