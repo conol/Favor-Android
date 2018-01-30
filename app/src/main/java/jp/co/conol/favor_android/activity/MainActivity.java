@@ -58,8 +58,6 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.shopEnterAtTextView) TextView mShopEnterAtTextView;  // 入店履歴の入店日時
     @BindView(R.id.shopImageView) ImageView mShopImageView;  // 入店履歴の背景画像
     private final int PERMISSION_REQUEST_CODE = 1000;
-    private final int ALREADY_ENTERED = 403;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -274,7 +272,7 @@ public class MainActivity extends AppCompatActivity {
                                 // 読み込みダイアログを非表示
                                 progressDialog.dismiss();
 
-                                if(e.getCode() == ALREADY_ENTERED) {
+                                if(e.getCode() == FavorException.FORBIDDEN) {
                                     new SimpleAlertDialog(MainActivity.this, getString(R.string.error_already_entered)).show();
                                 } else {
                                     new SimpleAlertDialog(MainActivity.this, getString(R.string.error_common)).show();
