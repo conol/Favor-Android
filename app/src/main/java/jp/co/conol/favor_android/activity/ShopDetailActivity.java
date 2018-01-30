@@ -37,6 +37,7 @@ import jp.co.conol.favor_android.adapter.ShopHistoryRecyclerAdapter;
 import jp.co.conol.favor_android.custom.ProgressDialog;
 import jp.co.conol.favor_android.custom.SimpleAlertDialog;
 import jp.co.conol.favorlib.cuona.Favor;
+import jp.co.conol.favorlib.cuona.FavorException;
 import jp.co.conol.favorlib.cuona.favor_model.Shop;
 import jp.co.conol.favorlib.cuona.favor_model.User;
 
@@ -100,7 +101,7 @@ public class ShopDetailActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onFailure(Exception e) {
+                    public void onFailure(FavorException e) {
                         Log.e("onFailure", e.toString());
                         runOnUiThread(new Runnable() {
                             public void run() {

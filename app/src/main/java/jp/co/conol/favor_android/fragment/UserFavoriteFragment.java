@@ -23,6 +23,7 @@ import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favor_android.adapter.UserFavoriteRecyclerAdapter;
 import jp.co.conol.favorlib.cuona.Favor;
+import jp.co.conol.favorlib.cuona.FavorException;
 import jp.co.conol.favorlib.cuona.favor_model.Favorite;
 import jp.co.conol.favorlib.cuona.favor_model.User;
 
@@ -105,7 +106,7 @@ public class UserFavoriteFragment extends Fragment {
                                     }
 
                                     @Override
-                                    public void onFailure(Exception e) {
+                                    public void onFailure(FavorException e) {
                                         Log.e("onFailure", e.toString());
                                     }
                                 }).setAppToken(appToken).setFavoriteId(mFavoriteList.get(swipedPosition).getId()).execute(Favor.Task.DeleteFavorite);
@@ -116,7 +117,7 @@ public class UserFavoriteFragment extends Fragment {
                 }
 
                 @Override
-                public void onFailure(Exception e) {
+                public void onFailure(FavorException e) {
                     Log.e("onFailure", e.toString());
                 }
             }).setAppToken(appToken).execute(Favor.Task.GetFavorites);

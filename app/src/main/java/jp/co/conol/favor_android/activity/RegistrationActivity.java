@@ -21,6 +21,7 @@ import jp.co.conol.favor_android.R;
 import jp.co.conol.favor_android.custom.ProgressDialog;
 import jp.co.conol.favor_android.custom.SimpleAlertDialog;
 import jp.co.conol.favorlib.cuona.Favor;
+import jp.co.conol.favorlib.cuona.FavorException;
 import jp.co.conol.favorlib.cuona.favor_model.User;
 
 public class RegistrationActivity extends AppCompatActivity {
@@ -122,7 +123,7 @@ public class RegistrationActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onFailure(Exception e) {
+                public void onFailure(FavorException e) {
                     Log.d("onFailure", e.toString());
                     runOnUiThread(new Runnable() {
                         public void run() {

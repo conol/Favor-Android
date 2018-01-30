@@ -45,6 +45,7 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
     private Favorite mFavorite = null;
     private String mFavoriteId = null;
     private List<Order> mOrderList = new ArrayList<>();
+    private String mResponseJsonMetaString = null;
 
     public enum Task {
         GetAvailableDevices,        // Favorを利用可能なデバイスのデバイスID一覧取得
@@ -68,7 +69,7 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
 
     public interface AsyncCallback {
         void onSuccess(Object obj);
-        void onFailure(Exception e);
+        void onFailure(FavorException e);
     }
 
     public Favor(AsyncCallback asyncCallback){
@@ -301,9 +302,10 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
                     break;
             }
 
-            // APIレスポンスからdata部分を取得
+            // APIレスポンスからmeta部分とdata部分を取得
             if(params[0] != Task.GetAvailableDevices) { // GetAvailableDevicesは別処理でjsonを作成
                 jsonObject = new JSONObject(responseJsonString);
+                mResponseJsonMetaString = jsonObject.getString("meta");
                 responseJsonDataString = jsonObject.getString("data");
             }
 
@@ -321,7 +323,8 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
             onSuccess(obj);
         } else {
             Log.e("Error", "Api response is null");
-            Exception e = new Exception();
+//            Exception e = new Exception();
+            FavorException e = new FavorException(mResponseJsonMetaString);
             onFailure(e);
         }
     }
@@ -344,7 +347,7 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
         this.mAsyncCallback.onSuccess(obj);
     }
 
-    private void onFailure(Exception e) {
+    private void onFailure(FavorException e) {
         this.mAsyncCallback.onFailure(e);
     }
 
@@ -367,7 +370,12 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
             ps.close();
 
             // レスポンスを取得
-            BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+            BufferedReader reader;
+            if(con.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                reader = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+            } else {
+                reader = new BufferedReader(new InputStreamReader(con.getErrorStream(), "UTF-8"));
+            }
             responseJsonString = reader.readLine();
 
             con.disconnect();
@@ -391,7 +399,11 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
             urlCon.connect();
 
             String str_json;
-            in = urlCon.getInputStream();
+            if(urlCon.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                in = urlCon.getInputStream();
+            } else {
+                in = urlCon.getErrorStream();
+            }
             InputStreamReader objReader = new InputStreamReader(in);
             BufferedReader objBuf = new BufferedReader(objReader);
             StringBuilder strBuilder = new StringBuilder();
@@ -433,7 +445,12 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
             ps.close();
 
             // レスポンスを取得
-            BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+            BufferedReader reader;
+            if(con.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                reader = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+            } else {
+                reader = new BufferedReader(new InputStreamReader(con.getErrorStream(), "UTF-8"));
+            }
             responseJsonString = reader.readLine();
 
             con.disconnect();
@@ -466,7 +483,12 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
             ps.close();
 
             // レスポンスを取得
-            BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+            BufferedReader reader;
+            if(con.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                reader = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+            } else {
+                reader = new BufferedReader(new InputStreamReader(con.getErrorStream(), "UTF-8"));
+            }
             responseJsonString = reader.readLine();
 
             con.disconnect();
@@ -495,7 +517,12 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
             con.getResponseCode();
 
             // レスポンスを取得
-            BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+            BufferedReader reader;
+            if(con.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                reader = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+            } else {
+                reader = new BufferedReader(new InputStreamReader(con.getErrorStream(), "UTF-8"));
+            }
             responseJsonString = reader.readLine();
 
             con.disconnect();

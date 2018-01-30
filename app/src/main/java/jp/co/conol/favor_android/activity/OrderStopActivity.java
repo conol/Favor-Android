@@ -28,6 +28,7 @@ import jp.co.conol.favor_android.adapter.ShopOrderHistoryRecyclerAdapter;
 import jp.co.conol.favor_android.custom.ProgressDialog;
 import jp.co.conol.favor_android.custom.SimpleAlertDialog;
 import jp.co.conol.favorlib.cuona.Favor;
+import jp.co.conol.favorlib.cuona.FavorException;
 import jp.co.conol.favorlib.cuona.favor_model.Order;
 import jp.co.conol.favorlib.cuona.favor_model.Shop;
 import jp.co.conol.favorlib.cuona.favor_model.User;
@@ -91,14 +92,13 @@ public class OrderStopActivity extends AppCompatActivity {
                                 MyUtil.SharedPref.saveBoolean(OrderStopActivity.this, "isEntering", false);   // 退店
                                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(intent);
-                                finish();
                             } else {
                                 new SimpleAlertDialog(OrderStopActivity.this, getString(R.string.error_common)).show();
                             }
                         }
 
                         @Override
-                        public void onFailure(Exception e) {
+                        public void onFailure(FavorException e) {
                             Log.e("onFailure", e.toString());
                             runOnUiThread(new Runnable() {
                                 public void run() {
@@ -165,7 +165,7 @@ public class OrderStopActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onFailure(Exception e) {
+                    public void onFailure(FavorException e) {
                         Log.e("onFailure", e.toString());
                         runOnUiThread(new Runnable() {
                             public void run() {

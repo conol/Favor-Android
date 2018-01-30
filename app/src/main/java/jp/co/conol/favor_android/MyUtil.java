@@ -191,7 +191,11 @@ public class MyUtil {
                 urlCon.connect();
 
                 String str_json;
-                in = urlCon.getInputStream();
+                if(urlCon.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    in = urlCon.getInputStream();
+                } else {
+                    in = urlCon.getErrorStream();
+                }
                 InputStreamReader objReader = new InputStreamReader(in);
                 BufferedReader objBuf = new BufferedReader(objReader);
                 StringBuilder strBuilder = new StringBuilder();
@@ -230,7 +234,12 @@ public class MyUtil {
                 ps.close();
 
                 // レスポンスを取得
-                BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+                BufferedReader reader;
+                if(con.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    reader = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+                } else {
+                    reader = new BufferedReader(new InputStreamReader(con.getErrorStream(), "UTF-8"));
+                }
                 responseJsonString = reader.readLine();
 
                 con.disconnect();
@@ -264,7 +273,12 @@ public class MyUtil {
                 ps.close();
 
                 // レスポンスを取得
-                BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+                BufferedReader reader;
+                if(con.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    reader = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+                } else {
+                    reader = new BufferedReader(new InputStreamReader(con.getErrorStream(), "UTF-8"));
+                }
                 responseJsonString = reader.readLine();
 
                 con.disconnect();
@@ -297,7 +311,12 @@ public class MyUtil {
                 ps.close();
 
                 // レスポンスを取得
-                BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+                BufferedReader reader;
+                if(con.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    reader = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+                } else {
+                    reader = new BufferedReader(new InputStreamReader(con.getErrorStream(), "UTF-8"));
+                }
                 responseJsonString = reader.readLine();
 
                 con.disconnect();
@@ -326,7 +345,12 @@ public class MyUtil {
                 con.getResponseCode();
 
                 // レスポンスを取得
-                BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+                BufferedReader reader;
+                if(con.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    reader = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+                } else {
+                    reader = new BufferedReader(new InputStreamReader(con.getErrorStream(), "UTF-8"));
+                }
                 responseJsonString = reader.readLine();
 
                 con.disconnect();

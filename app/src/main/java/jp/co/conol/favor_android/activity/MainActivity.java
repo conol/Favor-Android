@@ -34,6 +34,7 @@ import jp.co.conol.favor_android.custom.ProgressDialog;
 import jp.co.conol.favor_android.custom.ScanCuonaDialog;
 import jp.co.conol.favor_android.custom.SimpleAlertDialog;
 import jp.co.conol.favorlib.cuona.Cuona;
+import jp.co.conol.favorlib.cuona.FavorException;
 import jp.co.conol.favorlib.cuona.NFCNotAvailableException;
 import jp.co.conol.favorlib.cuona.cuona_reader.CuonaReaderException;
 import jp.co.conol.favorlib.cuona.Favor;
@@ -57,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.shopEnterAtTextView) TextView mShopEnterAtTextView;  // 入店履歴の入店日時
     @BindView(R.id.shopImageView) ImageView mShopImageView;  // 入店履歴の背景画像
     private final int PERMISSION_REQUEST_CODE = 1000;
+    private final int ALREADY_ENTERED = 403;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onFailure(Exception e) {
+                    public void onFailure(FavorException e) {
                         Log.e("onFailure", e.toString());
                     }
                 }).setAppToken(mAppToken).execute(Favor.Task.GetUser);
@@ -151,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onFailure(Exception e) {
+                    public void onFailure(FavorException e) {
                         Log.e("onFailure", e.toString());
                     }
                 }).setAppToken(mAppToken).execute(Favor.Task.GetVisitedShopHistory);
@@ -169,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onFailure(Exception e) {
+                    public void onFailure(FavorException e) {
                         runOnUiThread(new Runnable() {
                             public void run() {
                                 // 読み込みダイアログを非表示
@@ -264,14 +267,18 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onFailure(Exception e) {
+                    public void onFailure(final FavorException e) {
                         Log.d("onFailure", e.toString());
                         runOnUiThread(new Runnable() {
                             public void run() {
                                 // 読み込みダイアログを非表示
                                 progressDialog.dismiss();
 
-                                new SimpleAlertDialog(MainActivity.this, getString(R.string.error_common)).show();
+                                if(e.getCode() == ALREADY_ENTERED) {
+                                    new SimpleAlertDialog(MainActivity.this, getString(R.string.error_already_entered)).show();
+                                } else {
+                                    new SimpleAlertDialog(MainActivity.this, getString(R.string.error_common)).show();
+                                }
                             }
                         });
                     }

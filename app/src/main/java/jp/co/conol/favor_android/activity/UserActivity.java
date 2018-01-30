@@ -47,6 +47,7 @@ import jp.co.conol.favor_android.custom.ProgressDialog;
 import jp.co.conol.favor_android.custom.SimpleAlertDialog;
 import jp.co.conol.favor_android.fragment.UserFavoriteFragment;
 import jp.co.conol.favorlib.cuona.Favor;
+import jp.co.conol.favorlib.cuona.FavorException;
 import jp.co.conol.favorlib.cuona.favor_model.Favorite;
 import jp.co.conol.favorlib.cuona.favor_model.User;
 import jp.wasabeef.picasso.transformations.CropCircleTransformation;
@@ -174,7 +175,7 @@ public class UserActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Exception e) {
+            public void onFailure(FavorException e) {
                 Log.e("onFailure", e.toString());
                 runOnUiThread(new Runnable() {
                     public void run() {
@@ -243,7 +244,7 @@ public class UserActivity extends AppCompatActivity {
                         }
 
                         @Override
-                        public void onFailure(Exception e) {
+                        public void onFailure(FavorException e) {
                             Log.e("onFailure", e.toString());
                         }
                     }).setAppToken(mUser.getAppToken()).setFavorite(favorite).execute(Favor.Task.AddFavorite);
@@ -480,7 +481,7 @@ public class UserActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onFailure(Exception e) {
+                public void onFailure(FavorException e) {
                     Log.d("onFailure", e.toString());
                     runOnUiThread(new Runnable() {
                         public void run() {

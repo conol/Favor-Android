@@ -27,6 +27,7 @@ import jp.co.conol.favor_android.activity.ShopHistoryActivity;
 import jp.co.conol.favor_android.adapter.UserOrderHistoryRecyclerAdapter;
 import jp.co.conol.favor_android.custom.SimpleAlertDialog;
 import jp.co.conol.favorlib.cuona.Favor;
+import jp.co.conol.favorlib.cuona.FavorException;
 import jp.co.conol.favorlib.cuona.favor_model.User;
 import jp.co.conol.favorlib.cuona.favor_model.UsersAllOrder;
 
@@ -91,7 +92,7 @@ public class UserOrderHistoryFragment extends Fragment {
                 }
 
                 @Override
-                public void onFailure(Exception e) {
+                public void onFailure(FavorException e) {
                     Log.e("onFailure", e.toString());
                 }
             }).setAppToken(appToken).execute(Favor.Task.GetUsersAllOrder);

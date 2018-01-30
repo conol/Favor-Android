@@ -24,6 +24,7 @@ import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favor_android.adapter.ShopOrderHistoryRecyclerAdapter;
 import jp.co.conol.favorlib.cuona.Favor;
+import jp.co.conol.favorlib.cuona.FavorException;
 import jp.co.conol.favorlib.cuona.favor_model.Order;
 import jp.co.conol.favorlib.cuona.favor_model.User;
 
@@ -106,7 +107,7 @@ public class ShopOrderHistoryFragment extends Fragment {
                     }
 
                     @Override
-                    public void onFailure(Exception e) {
+                    public void onFailure(FavorException e) {
                         Log.e("onFailure", e.toString());
                     }
                 }).setAppToken(appToken).setVisitGroupId(mVisitGroupId).execute(Favor.Task.GetUserGroupsOrderInShop);

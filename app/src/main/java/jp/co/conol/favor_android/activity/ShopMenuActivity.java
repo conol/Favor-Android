@@ -36,6 +36,7 @@ import jp.co.conol.favor_android.custom.ProgressDialog;
 import jp.co.conol.favor_android.custom.ScanCuonaDialog;
 import jp.co.conol.favor_android.custom.SimpleAlertDialog;
 import jp.co.conol.favorlib.cuona.Cuona;
+import jp.co.conol.favorlib.cuona.FavorException;
 import jp.co.conol.favorlib.cuona.NFCNotAvailableException;
 import jp.co.conol.favorlib.cuona.cuona_reader.CuonaReaderException;
 import jp.co.conol.favorlib.cuona.Favor;
@@ -230,8 +231,7 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
                 }
 
                 @Override
-                public void onFailure(Exception e) {
-                    Log.d("onFailure", e.toString());
+                public void onFailure(FavorException e) {
                     runOnUiThread(new Runnable() {
                         public void run() {
                             // 読み込みダイアログを非表示
@@ -308,7 +308,7 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
                 }
 
                 @Override
-                public void onFailure(Exception e) {
+                public void onFailure(FavorException e) {
                     Log.e("onFailure", e.toString());
                 }
             }).setAppToken(mAppToken).setVisitHistoryId(mShop.getVisitHistoryId()).setOrder(mOrderList).execute(Favor.Task.Order);
