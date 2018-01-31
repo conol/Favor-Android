@@ -12,7 +12,7 @@ public class FavorException extends Exception {
     private int mCode = 0;
     private String mType;
     private String mMessage;
-    public static final int CONTINUE= 100;
+    public static final int CONTINUE = 100;
     public static final int SWITCHING_PROTOCOLS = 101;
     public static final int PROCESSING = 102;
     public static final int OK = 200;
@@ -22,13 +22,13 @@ public class FavorException extends Exception {
     public static final int NO_CONTENT = 204;
     public static final int RESET_CONTENT = 205;
     public static final int PARTIAL_CONTENT = 206;
-    public static final int MulTI_STATUS = 207;
+    public static final int MUlTI_STATUS = 207;
     public static final int ALREADY_REPORTED = 208;
     public static final int IM_USED = 226;
-    public static final int Multiple_Choices = 300;
-    public static final int Moved_Permanently = 301;
+    public static final int MULTIPLE_CHOICES = 300;
+    public static final int MOVED_PERMANENTLY = 301;
     public static final int FOUND = 302;
-    public static final int SEE_OTHER= 303;
+    public static final int SEE_OTHER = 303;
     public static final int NOT_MODIFIED = 304;
     public static final int USE_PROXY = 305;
     public static final int TEMPORARY_REDIRECT = 307;
