@@ -1,6 +1,7 @@
 package jp.co.conol.favor_android.activity;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -66,14 +67,11 @@ public class ShopDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_shop_detail);
         ButterKnife.bind(this);
 
-        // 遷移前の情報を取得
-        final Shop shop = new Gson().fromJson(getIntent().getStringExtra("shop"), Shop.class);    // 店舗情報を取得
-
         // 入店か履歴から表示か
         isEntering = MyUtil.SharedPref.getBoolean(this, "isEntering", false);
 
-        // 入店中にアプリを再起動した場合は店舗情報を再取得
-        if(getIntent().getBooleanExtra("isReboot", false)) {
+        // 入店中した場合は店舗情報を再取得
+        if(isEntering) {
 
             // 入店履歴を取得
             if(MyUtil.Network.isEnable(this)) {
@@ -117,6 +115,9 @@ public class ShopDetailActivity extends AppCompatActivity {
                 new SimpleAlertDialog(ShopDetailActivity.this, getString(R.string.error_network_disable)).show();
             }
         } else {
+            // 遷移前の情報を取得
+            Shop shop = new Gson().fromJson(getIntent().getStringExtra("shop"), Shop.class);    // 店舗情報を取得
+
             setShopInfo(shop);
         }
     }
@@ -199,6 +200,7 @@ public class ShopDetailActivity extends AppCompatActivity {
                         .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                MyUtil.SharedPref.saveBoolean(ShopDetailActivity.this, "isBack", true);
                                 finish();
                             }
                         })

@@ -1,5 +1,6 @@
 package jp.co.conol.favor_android.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
@@ -67,10 +68,13 @@ public class MainActivity extends AppCompatActivity {
 
         // 入店中の場合は入店後画面へ（入店中にアプリ再起動への対応）
         if(MyUtil.SharedPref.getBoolean(MainActivity.this, "isEntering", false)) {
-            Intent shopDetailIntent = new Intent(MainActivity.this, ShopDetailActivity.class);
-            shopDetailIntent.putExtra("isReboot", true);
-            startActivity(shopDetailIntent);
-            finish();
+            if(MyUtil.SharedPref.getBoolean(MainActivity.this, "isBack", false)) {
+                MyUtil.SharedPref.saveBoolean(MainActivity.this, "isBack", false);
+                finish();
+            } else {
+                Intent shopDetailIntent = new Intent(MainActivity.this, ShopDetailActivity.class);
+                startActivity(shopDetailIntent);
+            }
         }
 
         try {
@@ -255,12 +259,10 @@ public class MainActivity extends AppCompatActivity {
 
                         // 店舗詳細ページへ移動
                         Intent shopDetailIntent = new Intent(MainActivity.this, ShopDetailActivity.class);
-                        shopDetailIntent.putExtra("shop", new Gson().toJson(shop));
                         MyUtil.SharedPref.saveBoolean(MainActivity.this, "isEntering", true);
                         MyUtil.SharedPref.saveInt(MainActivity.this, "shopId", shop.getShopId());
                         shopDetailIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(shopDetailIntent);
-                        finish();
                         mScanCuonaDialog.dismiss();
                     }
 
