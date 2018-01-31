@@ -41,8 +41,10 @@ import jp.co.conol.favorlib.cuona.cuona_reader.CuonaReaderException;
 import jp.co.conol.favorlib.cuona.Favor;
 import jp.co.conol.favorlib.cuona.favor_model.Shop;
 import jp.co.conol.favorlib.cuona.favor_model.User;
+import jp.wasabeef.picasso.transformations.BlurTransformation;
 import jp.wasabeef.picasso.transformations.CropCircleTransformation;
 import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
+import jp.wasabeef.picasso.transformations.gpu.BrightnessFilterTransformation;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -54,7 +56,8 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.shopHistoryConstraintLayout) ConstraintLayout mShopHistoryConstraintLayout;
     @BindView(R.id.userSettingConstraintLayout) ConstraintLayout mUserSettingConstraintLayout;
     @BindView(R.id.userSettingTextView) TextView mUserSettingTextView;
-    @BindView(R.id.userImageView) ImageView mUserImageView;
+    @BindView(R.id.userImageView) ImageView mUserImageView;     // ユーザー画像
+    @BindView(R.id.backImageView) RoundedImageView mBackImageView;     // ユーザー画像の背景
     @BindView(R.id.shopNameTextView) TextView mShopNameTextView;    // 入店履歴の店舗名
     @BindView(R.id.shopEnterAtTextView) TextView mShopEnterAtTextView;  // 入店履歴の入店日時
     @BindView(R.id.shopImageView) ImageView mShopImageView;  // 入店履歴の背景画像
@@ -149,6 +152,7 @@ public class MainActivity extends AppCompatActivity {
                             Picasso.with(MainActivity.this).load(shop.getShopImages()[0])   // 画像
                                     .fit()
                                     .transform(new RoundedCornersTransformation(12, 0))
+                                    .transform(new BrightnessFilterTransformation(MainActivity.this, -0.2f))
                                     .into(mShopImageView);
                         } else {
                             mShopNameTextView.setText(getString(R.string.shop_history_none));

@@ -28,6 +28,7 @@ import jp.co.conol.favor_android.activity.MainActivity;
 import jp.co.conol.favor_android.activity.ShopDetailActivity;
 import jp.co.conol.favorlib.cuona.favor_model.Shop;
 import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
+import jp.wasabeef.picasso.transformations.gpu.BrightnessFilterTransformation;
 
 /**
  * Created by Masafumi_Ito on 2017/09/04.
@@ -102,6 +103,7 @@ public class ShopHistoryRecyclerAdapter extends RecyclerView.Adapter<ShopHistory
             Picasso.with(mContext).load(shop.getShopImages()[0])
                     .fit()
                     .transform(new RoundedCornersTransformation(12, 0))
+                    .transform(new BrightnessFilterTransformation(mContext, -0.2f))
                     .into(holder.mShopImageView);
         }
     }
