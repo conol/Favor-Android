@@ -323,7 +323,6 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
             onSuccess(obj);
         } else {
             Log.e("Error", "Api response is null");
-//            Exception e = new Exception();
             FavorException e = new FavorException(mResponseJsonMetaString);
             onFailure(e);
         }
