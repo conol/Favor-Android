@@ -52,9 +52,6 @@ public class OrderStopActivity extends AppCompatActivity {
         setContentView(R.layout.activity_order_stop);
         ButterKnife.bind(this);
 
-        // ユーザーのAppTokenを取得
-        final String appToken = MyUtil.SharedPref.getString(this, "appToken");
-
         // 店舗情報の取得
         Intent intent = getIntent();
         final Shop shop = mGson.fromJson(intent.getStringExtra("shop"), Shop.class);
@@ -109,7 +106,7 @@ public class OrderStopActivity extends AppCompatActivity {
                                 }
                             });
                         }
-                    }).setAppToken(appToken).setVisitHistoryId(shop.getVisitHistoryId()).execute(Favor.Task.OrderStop);
+                    }).setContext(OrderStopActivity.this).setVisitHistoryId(shop.getVisitHistoryId()).execute(Favor.Task.OrderStop);
                 } else {
                     new SimpleAlertDialog(OrderStopActivity.this, getString(R.string.error_network_disable)).show();
                 }
@@ -176,7 +173,7 @@ public class OrderStopActivity extends AppCompatActivity {
                             }
                         });
                     }
-                }).setAppToken(appToken).setVisitGroupId(shop.getVisitGroupId()).execute(Favor.Task.GetUserGroupsOrderInShop);
+                }).setContext(OrderStopActivity.this).setVisitGroupId(shop.getVisitGroupId()).execute(Favor.Task.GetUserGroupsOrderInShop);
             } else {
                 new SimpleAlertDialog(OrderStopActivity.this, getString(R.string.error_network_disable)).show();
             }

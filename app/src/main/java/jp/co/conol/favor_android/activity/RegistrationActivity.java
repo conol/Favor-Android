@@ -37,7 +37,7 @@ public class RegistrationActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         // ユーザー情報が保存されていれば、登録画面は表示しない
-        if(MyUtil.SharedPref.getString(RegistrationActivity.this, "appToken") != null) {
+        if(Favor.hasToken(this)) {
             Intent intent = new Intent(RegistrationActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
@@ -108,13 +108,9 @@ public class RegistrationActivity extends AppCompatActivity {
             new Favor(new Favor.AsyncCallback() {
                 @Override
                 public void onSuccess(Object object) {
-                    User user = (User) object;
 
                     // 読み込みダイアログを非表示
                     progressDialog.dismiss();
-
-                    // ユーザーのAppToken情報を端末に保存
-                    MyUtil.SharedPref.saveString(RegistrationActivity.this, "appToken", user.getAppToken());
 
                     // ページ移動
                     Intent intent = new Intent(RegistrationActivity.this, MainActivity.class);
@@ -134,7 +130,7 @@ public class RegistrationActivity extends AppCompatActivity {
                         }
                     });
                 }
-            }).setUser(user).execute(Favor.Task.ResisterUser);
+            }).setContext(this).setUser(user).execute(Favor.Task.ResisterUser);
         } else {
             new SimpleAlertDialog(RegistrationActivity.this, getString(R.string.error_network_disable)).show();
         }

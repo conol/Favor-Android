@@ -1,6 +1,9 @@
 package jp.co.conol.favorlib.cuona;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -36,6 +39,7 @@ import jp.co.conol.favorlib.cuona.favor_model.UsersAllOrder;
 public class Favor extends AsyncTask<Favor.Task, Void, Object> {
 
     private AsyncCallback mAsyncCallback = null;
+    private Context mContext = null;
     private String mAppToken = null;
     private String mDeviceId = null;
     private String mShopId = null;
@@ -50,7 +54,7 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
     public enum Task {
         GetAvailableDevices,        // Favorを利用可能なデバイスのデバイスID一覧取得
         ResisterUser,               // ユーザー情報登録
-        GetUser,                   // ユーザー情報取得
+        GetUser,                    // ユーザー情報取得
         EditUser,                   // ユーザー情報編集
         EnterShop,                  // 入店
         GetVisitedShopHistory,      // 入店履歴取得
@@ -73,11 +77,16 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
     }
 
     public Favor(AsyncCallback asyncCallback){
-        this.mAsyncCallback = asyncCallback;
+        mAsyncCallback = asyncCallback;
     }
 
-    public Favor setAppToken(String appToken) {
-        mAppToken = appToken;
+    public static boolean hasToken(Context context) {
+        return getString(context, "appToken") != null;
+    }
+
+    public Favor setContext(Context context) {
+        mContext =context;
+        mAppToken = getString(context, "appToken");
         return this;
     }
 
@@ -122,7 +131,7 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
     }
 
     @Override
-    protected Object doInBackground(Favor.Task... params) {
+    protected Object doInBackground(Task... params) {
 
         Gson gson = new Gson();
         String favorEndPoint = Constants.Urls.FAVOR_URL;
@@ -154,8 +163,9 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
                     responseJsonString = get(deviceManagerEndPoint + apiUrl, appToken);
                     type = new TypeToken<ArrayList<String>>(){}.getType();
 
-                    // APIレスポンスからdata部分を取得
+                    // APIレスポンスからmeta部分とdata部分を取得
                     jsonObject = new JSONObject(responseJsonString);
+                    mResponseJsonMetaString = jsonObject.getString("meta");
                     responseJsonDataString = jsonObject.getString("data");
 
                     List<String> availableDeviceIdList = new ArrayList<>();
@@ -183,6 +193,12 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
                     requestJsonString = gson.toJson(mUser);
                     responseJsonString = post(favorEndPoint + apiUrl, null, requestJsonString);
                     type = new TypeToken<User>(){}.getType();
+
+                    // ユーザーのAppToken情報を端末に保存
+                    jsonObject = new JSONObject(responseJsonString);
+                    User user = gson.fromJson(jsonObject.getString("data"), type);
+                    saveString(mContext, "appToken", user.getAppToken());
+
                     break;
 
                 // ユーザー情報取得
@@ -531,5 +547,15 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
         }
 
         return responseJsonString;
+    }
+
+    private static void saveString(Context context, String key, String string) {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        pref.edit().putString(key ,string).apply();
+    }
+
+    private static String getString(Context context, String key) {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        return pref.getString(key, null);
     }
 }

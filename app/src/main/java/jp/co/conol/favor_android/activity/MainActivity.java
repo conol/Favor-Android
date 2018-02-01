@@ -41,7 +41,6 @@ import jp.co.conol.favorlib.cuona.cuona_reader.CuonaReaderException;
 import jp.co.conol.favorlib.cuona.Favor;
 import jp.co.conol.favorlib.cuona.favor_model.Shop;
 import jp.co.conol.favorlib.cuona.favor_model.User;
-import jp.wasabeef.picasso.transformations.BlurTransformation;
 import jp.wasabeef.picasso.transformations.CropCircleTransformation;
 import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
 import jp.wasabeef.picasso.transformations.gpu.BrightnessFilterTransformation;
@@ -50,7 +49,6 @@ public class MainActivity extends AppCompatActivity {
 
     private ScanCuonaDialog mScanCuonaDialog;
     private Cuona mCuona;
-    private String mAppToken = null;
     private boolean isSuccessfulConnection = false;
     List<String> mAvailableDeviceIdList = new ArrayList<>();    // Favorのサービスに登録されているデバイスのID一覧
     @BindView(R.id.shopHistoryConstraintLayout) ConstraintLayout mShopHistoryConstraintLayout;
@@ -96,120 +94,114 @@ public class MainActivity extends AppCompatActivity {
         // nfcがオフの場合はダイアログを表示
         CuonaUtil.checkNfcSetting(this, mCuona);
 
-        // ユーザーのAppTokenを取得
-        mAppToken = MyUtil.SharedPref.getString(this, "appToken");
+        if(MyUtil.Network.isEnable(MainActivity.this)) {
 
-        if(mAppToken != null) {
-            if(MyUtil.Network.isEnable(MainActivity.this)) {
+            // 読み込みダイアログを表示
+            final ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
+            progressDialog.setMessage(getString(R.string.main_progress_message));
+            progressDialog.show();
 
-                // 読み込みダイアログを表示
-                final ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
-                progressDialog.setMessage(getString(R.string.main_progress_message));
-                progressDialog.show();
+            // ユーザー情報を取得
+            new Favor(new Favor.AsyncCallback() {
+                @Override
+                public void onSuccess(Object object) {
+                    @SuppressWarnings("unchecked")
+                    User user = (User) object;
 
-                // ユーザー情報を取得
-                new Favor(new Favor.AsyncCallback() {
-                    @Override
-                    public void onSuccess(Object object) {
-                        @SuppressWarnings("unchecked")
-                        User user = (User) object;
+                    // ユーザー情報を表示
+                    String userSettingTitle = user.getNickname() + getResources().getString(R.string.user_setting_title);
+                    mUserSettingTextView.setText(userSettingTitle);
+                    if(user.getImageUrl() != null) {
+                        Picasso.with(MainActivity.this)
+                                .load(user.getImageUrl())
+                                .transform(new CropCircleTransformation())
+                                .into(mUserImageView);
+                    } else {
+                        Picasso.with(MainActivity.this).load(R.drawable.ic_user_prof).into(mUserImageView);
+                    }
+                }
 
-                        // ユーザー情報を表示
-                        String userSettingTitle = user.getNickname() + getResources().getString(R.string.user_setting_title);
-                        mUserSettingTextView.setText(userSettingTitle);
-                        if(user.getImageUrl() != null) {
-                            Picasso.with(MainActivity.this)
-                                    .load(user.getImageUrl())
-                                    .transform(new CropCircleTransformation())
-                                    .into(mUserImageView);
-                        } else {
-                            Picasso.with(MainActivity.this).load(R.drawable.ic_user_prof).into(mUserImageView);
+                @Override
+                public void onFailure(FavorException e) {
+                    Log.e("onFailure", e.toString());
+                }
+            }).setContext(this).execute(Favor.Task.GetUser);
+
+            // 入店履歴を取得
+            new Favor(new Favor.AsyncCallback() {
+                @Override
+                public void onSuccess(Object object) {
+                    @SuppressWarnings("unchecked")
+                    List<Shop> shopList = (List<Shop>) object;
+
+                    if (shopList.size() != 0) {
+
+                        // 最後に入店した店舗のオブジェクトを取得
+                        Shop shop = shopList.get(shopList.size() - 1);
+
+                        // 最後に入店した店舗の情報を画面に反映
+                        mShopNameTextView.setText(shop.getShopName());  // 店舗名
+                        DateTimeFormatter DEF_FMT = DateTimeFormat.forPattern("yyyy/MM/dd (E) HH:mm~"); // 入店時間
+                        mShopEnterAtTextView.setText(DEF_FMT.print(DateTime.parse(shop.getEnterShopAt())));
+                        Picasso.with(MainActivity.this).load(shop.getShopImages()[0])   // 画像
+                                .fit()
+                                .transform(new RoundedCornersTransformation(12, 0))
+                                .into(mShopImageView);
+                    } else {
+                        mShopNameTextView.setText(getString(R.string.shop_history_none));
+                    }
+                }
+
+                @Override
+                public void onFailure(FavorException e) {
+                    Log.e("onFailure", e.toString());
+                }
+            }).setContext(this).execute(Favor.Task.GetVisitedShopHistory);
+
+            // Favorのサービスに登録されているデバイスID一覧を取得
+            new Favor(new Favor.AsyncCallback() {
+                @Override
+                public void onSuccess(Object object) {
+                    mAvailableDeviceIdList = (List<String>) object;
+
+                    // 読み込みダイアログを非表示
+                    progressDialog.dismiss();
+
+                    isSuccessfulConnection = true;
+                }
+
+                @Override
+                public void onFailure(FavorException e) {
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            // 読み込みダイアログを非表示
+                            progressDialog.dismiss();
+
+                            new SimpleAlertDialog(MainActivity.this, getString(R.string.error_common)).show();
                         }
-                    }
+                    });
+                }
+            }).execute(Favor.Task.GetAvailableDevices);
 
-                    @Override
-                    public void onFailure(FavorException e) {
-                        Log.e("onFailure", e.toString());
-                    }
-                }).setAppToken(mAppToken).execute(Favor.Task.GetUser);
+            // 入店履歴をタップした時の動作
+            mShopHistoryConstraintLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(MainActivity.this, ShopHistoryActivity.class);
+                    startActivity(intent);
+                }
+            });
 
-                // 入店履歴を取得
-                new Favor(new Favor.AsyncCallback() {
-                    @Override
-                    public void onSuccess(Object object) {
-                        @SuppressWarnings("unchecked")
-                        List<Shop> shopList = (List<Shop>) object;
-
-                        if (shopList.size() != 0) {
-
-                            // 最後に入店した店舗のオブジェクトを取得
-                            Shop shop = shopList.get(shopList.size() - 1);
-
-                            // 最後に入店した店舗の情報を画面に反映
-                            mShopNameTextView.setText(shop.getShopName());  // 店舗名
-                            DateTimeFormatter DEF_FMT = DateTimeFormat.forPattern("yyyy/MM/dd (E) HH:mm~"); // 入店時間
-                            mShopEnterAtTextView.setText(DEF_FMT.print(DateTime.parse(shop.getEnterShopAt())));
-                            Picasso.with(MainActivity.this).load(shop.getShopImages()[0])   // 画像
-                                    .fit()
-                                    .transform(new RoundedCornersTransformation(12, 0))
-                                    .transform(new BrightnessFilterTransformation(MainActivity.this, -0.2f))
-                                    .into(mShopImageView);
-                        } else {
-                            mShopNameTextView.setText(getString(R.string.shop_history_none));
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(FavorException e) {
-                        Log.e("onFailure", e.toString());
-                    }
-                }).setAppToken(mAppToken).execute(Favor.Task.GetVisitedShopHistory);
-
-                // Favorのサービスに登録されているデバイスID一覧を取得
-                new Favor(new Favor.AsyncCallback() {
-                    @Override
-                    public void onSuccess(Object object) {
-                        mAvailableDeviceIdList = (List<String>) object;
-
-                        // 読み込みダイアログを非表示
-                        progressDialog.dismiss();
-
-                        isSuccessfulConnection = true;
-                    }
-
-                    @Override
-                    public void onFailure(FavorException e) {
-                        runOnUiThread(new Runnable() {
-                            public void run() {
-                                // 読み込みダイアログを非表示
-                                progressDialog.dismiss();
-
-                                new SimpleAlertDialog(MainActivity.this, getString(R.string.error_common)).show();
-                            }
-                        });
-                    }
-                }).execute(Favor.Task.GetAvailableDevices);
-
-                // 入店履歴をタップした時の動作
-                mShopHistoryConstraintLayout.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent intent = new Intent(MainActivity.this, ShopHistoryActivity.class);
-                        startActivity(intent);
-                    }
-                });
-
-                // ユーザー情報をタップした時の動作
-                mUserSettingConstraintLayout.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent intent = new Intent(MainActivity.this, UserActivity.class);
-                        startActivity(intent);
-                    }
-                });
-            } else {
-                new SimpleAlertDialog(MainActivity.this, getString(R.string.error_network_disable_reboot)).show();
-            }
+            // ユーザー情報をタップした時の動作
+            mUserSettingConstraintLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(MainActivity.this, UserActivity.class);
+                    startActivity(intent);
+                }
+            });
+        } else {
+            new SimpleAlertDialog(MainActivity.this, getString(R.string.error_network_disable_reboot)).show();
         }
     }
 
@@ -286,7 +278,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                         });
                     }
-                }).setAppToken(mAppToken).setDeviceId(deviceId).execute(Favor.Task.EnterShop);
+                }).setContext(this).setDeviceId(deviceId).execute(Favor.Task.EnterShop);
 
             }
         }

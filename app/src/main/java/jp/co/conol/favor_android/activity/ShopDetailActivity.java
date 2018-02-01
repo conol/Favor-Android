@@ -76,9 +76,6 @@ public class ShopDetailActivity extends AppCompatActivity {
             // 入店履歴を取得
             if(MyUtil.Network.isEnable(this)) {
 
-                // ユーザーのAppTokenを取得
-                String appToken = MyUtil.SharedPref.getString(this, "appToken");
-
                 // ショップIDを取得
                 int ShopId = MyUtil.SharedPref.getInt(this, "shopId", 0);
 
@@ -110,7 +107,7 @@ public class ShopDetailActivity extends AppCompatActivity {
                             }
                         });
                     }
-                }).setAppToken(appToken).setShopId(ShopId).execute(Favor.Task.GetShopDetail);
+                }).setContext(this).setShopId(ShopId).execute(Favor.Task.GetShopDetail);
             } else {
                 new SimpleAlertDialog(ShopDetailActivity.this, getString(R.string.error_network_disable)).show();
             }

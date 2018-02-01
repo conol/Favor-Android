@@ -34,9 +34,6 @@ public class ShopHistoryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_shop_history);
         ButterKnife.bind(this);
 
-        // ユーザーのAppToken情報を取得
-        String appToken = MyUtil.SharedPref.getString(this, "appToken");
-
         // 入店履歴を取得
         if(MyUtil.Network.isEnable(this)) {
 
@@ -76,7 +73,7 @@ public class ShopHistoryActivity extends AppCompatActivity {
                         }
                     });
                 }
-            }).setAppToken(appToken).execute(Favor.Task.GetVisitedShopHistory);
+            }).setContext(this).execute(Favor.Task.GetVisitedShopHistory);
         } else {
             new SimpleAlertDialog(ShopHistoryActivity.this, getString(R.string.error_network_disable)).show();
         }

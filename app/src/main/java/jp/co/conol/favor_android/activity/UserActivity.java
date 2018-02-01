@@ -58,7 +58,6 @@ public class UserActivity extends AppCompatActivity {
 
     private UserFragmentStatePagerAdapter mUserFragmentStatePagerAdapter;
     private User mUser;
-    private String mAppToken;
     private boolean isBackCropUserImageActivity;  // ユーザー画像設定画面から戻ってきたか否か
     private boolean isShownAddFavorite = false;  // お気に入り追加画面を開いているか否か
     private boolean isShownEditUserSetting = false;  // ユーザー情報編集画面を開いているか否か
@@ -130,9 +129,6 @@ public class UserActivity extends AppCompatActivity {
             }
         });
 
-        // ユーザーのAppToken情報を取得
-        mAppToken = MyUtil.SharedPref.getString(this, "appToken");
-
         // 読み込みダイアログを表示
         final ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage(getString(R.string.main_progress_message));
@@ -186,7 +182,7 @@ public class UserActivity extends AppCompatActivity {
                     }
                 });
             }
-        }).setAppToken(mAppToken).execute(Favor.Task.GetUser);
+        }).setContext(this).execute(Favor.Task.GetUser);
 
         // ユーザー画像設定から戻った場合はユーザー情報編集ダイアログを表示
         isBackCropUserImageActivity = getIntent().getBooleanExtra("isBackCropUserImageActivity", false);
@@ -247,7 +243,7 @@ public class UserActivity extends AppCompatActivity {
                         public void onFailure(FavorException e) {
                             Log.e("onFailure", e.toString());
                         }
-                    }).setAppToken(mUser.getAppToken()).setFavorite(favorite).execute(Favor.Task.AddFavorite);
+                    }).setContext(UserActivity.this).setFavorite(favorite).execute(Favor.Task.AddFavorite);
                 } else {
                     Toast.makeText(UserActivity.this, getString(R.string.add_favorite_error), Toast.LENGTH_SHORT).show();
                 }
@@ -492,7 +488,7 @@ public class UserActivity extends AppCompatActivity {
                         }
                     });
                 }
-            }).setAppToken(mAppToken).setUser(editUser).execute(Favor.Task.EditUser);
+            }).setContext(UserActivity.this).setUser(editUser).execute(Favor.Task.EditUser);
         } else {
             new SimpleAlertDialog(this, getString(R.string.error_network_disable)).show();
         }

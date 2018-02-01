@@ -69,9 +69,6 @@ public class UserFavoriteFragment extends Fragment {
 
         if(MyUtil.Network.isEnable(mContext)) {
 
-            // ユーザーのAppTokenを取得
-            final String appToken = MyUtil.SharedPref.getString(mContext, "appToken");
-
             new Favor(new Favor.AsyncCallback() {
                 @Override
                 public void onSuccess(Object object) {
@@ -109,7 +106,7 @@ public class UserFavoriteFragment extends Fragment {
                                     public void onFailure(FavorException e) {
                                         Log.e("onFailure", e.toString());
                                     }
-                                }).setAppToken(appToken).setFavoriteId(mFavoriteList.get(swipedPosition).getId()).execute(Favor.Task.DeleteFavorite);
+                                }).setContext(mContext).setFavoriteId(mFavoriteList.get(swipedPosition).getId()).execute(Favor.Task.DeleteFavorite);
                             }
                         };
                         (new ItemTouchHelper(callback)).attachToRecyclerView(mUserFavoriteRecyclerView);
@@ -120,7 +117,7 @@ public class UserFavoriteFragment extends Fragment {
                 public void onFailure(FavorException e) {
                     Log.e("onFailure", e.toString());
                 }
-            }).setAppToken(appToken).execute(Favor.Task.GetFavorites);
+            }).setContext(mContext).execute(Favor.Task.GetFavorites);
         }
 
         return view;

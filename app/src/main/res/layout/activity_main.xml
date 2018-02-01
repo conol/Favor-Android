@@ -127,6 +127,17 @@
             tools:srcCompat="@mipmap/ic_launcher" />
 
         <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/style_round_box_black_back"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+        </android.support.constraint.ConstraintLayout>
+
+        <android.support.constraint.ConstraintLayout
             android:id="@+id/shopHistoryBlackBackgroundConstraintLayout"
             android:layout_width="0dp"
             android:layout_height="0dp"

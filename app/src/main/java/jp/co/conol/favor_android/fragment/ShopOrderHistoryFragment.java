@@ -86,9 +86,6 @@ public class ShopOrderHistoryFragment extends Fragment {
 
         if(MyUtil.Network.isEnable(mContext)) {
 
-            // ユーザーのAppTokenを取得
-            String appToken = MyUtil.SharedPref.getString(mContext, "appToken");
-
             if (mVisitGroupId != 0) {
                 new Favor(new Favor.AsyncCallback() {
                     @Override
@@ -110,7 +107,7 @@ public class ShopOrderHistoryFragment extends Fragment {
                     public void onFailure(FavorException e) {
                         Log.e("onFailure", e.toString());
                     }
-                }).setAppToken(appToken).setVisitGroupId(mVisitGroupId).execute(Favor.Task.GetUserGroupsOrderInShop);
+                }).setContext(mContext).setVisitGroupId(mVisitGroupId).execute(Favor.Task.GetUserGroupsOrderInShop);
             }
         }
     }

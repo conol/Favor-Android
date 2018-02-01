@@ -51,7 +51,6 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
     private Cuona mCuona;
     private final Gson mGson = new Gson();
     private Shop mShop;
-    private String mAppToken;
     private List<Order> mOrderList = new ArrayList<>(); // 注文するメニューのリスト
     private boolean isShownOrderDialog = false; // 注文ダイアログが開いているか否か
     private int mTappedPosition;    // メニューをタップした際のメニュー位置
@@ -93,9 +92,6 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
             finish();
             return;
         }
-
-        // ユーザーのAppTokenを取得
-        mAppToken = MyUtil.SharedPref.getString(this, "appToken");
 
         // 入店か履歴から表示か
         final boolean isEntering = MyUtil.SharedPref.getBoolean(this, "isEntering", false);
@@ -241,7 +237,7 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
                         }
                     });
                 }
-            }).setAppToken(mAppToken).setShopId(mShop.getShopId()).execute(Favor.Task.GetMenu);
+            }).setContext(this).setShopId(mShop.getShopId()).execute(Favor.Task.GetMenu);
         } else {
             new SimpleAlertDialog(ShopMenuActivity.this, getString(R.string.error_network_disable)).show();
         }
@@ -311,7 +307,7 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
                 public void onFailure(FavorException e) {
                     Log.e("onFailure", e.toString());
                 }
-            }).setAppToken(mAppToken).setVisitHistoryId(mShop.getVisitHistoryId()).setOrder(mOrderList).execute(Favor.Task.Order);
+            }).setContext(this).setVisitHistoryId(mShop.getVisitHistoryId()).setOrder(mOrderList).execute(Favor.Task.Order);
         }
     }
 

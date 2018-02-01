@@ -72,9 +72,6 @@ public class UserOrderHistoryFragment extends Fragment {
 
         if(MyUtil.Network.isEnable(mContext)) {
 
-            // ユーザーのAppTokenを取得
-            String appToken = MyUtil.SharedPref.getString(mContext, "appToken");
-
             new Favor(new Favor.AsyncCallback() {
                 @Override
                 public void onSuccess(Object object) {
@@ -95,7 +92,7 @@ public class UserOrderHistoryFragment extends Fragment {
                 public void onFailure(FavorException e) {
                     Log.e("onFailure", e.toString());
                 }
-            }).setAppToken(appToken).execute(Favor.Task.GetUsersAllOrder);
+            }).setContext(mContext).execute(Favor.Task.GetUsersAllOrder);
         }
 
         return view;
