@@ -85,7 +85,7 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
     }
 
     public Favor setContext(Context context) {
-        mContext =context;
+        mContext = context;
         mAppToken = getString(context, "appToken");
         return this;
     }
