@@ -58,17 +58,17 @@ public class CuonaReaderSecureTag extends CuonaReaderTag {
         return 256;
     }
 
-    private static byte[] decrypt(int customerId, byte[] deviceId, byte[] iv, byte[] encryptedcontent, int cuonaKeyCustomerId, byte[] cuonaKey)
+    private static byte[] decrypt(int keyCode, byte[] deviceId, byte[] iv, byte[] encryptedcontent, int cuonaKeyCode, byte[] cuonaKey)
             throws GeneralSecurityException {
 
         byte[] keyData;
-        if (customerId == cuonaKeyCustomerId) {
+        if (keyCode == cuonaKeyCode) {
             keyData = cuonaKey;
         } else {
             // With master Key, uncomment the following line
-            keyData = CuonaMasterKey.getKey(customerId);
+            keyData = CuonaMasterKey.getKey(keyCode);
             // Without master key, uncomment the following line
-            //return null;
+//            return null;
         }
 
         MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -88,7 +88,7 @@ public class CuonaReaderSecureTag extends CuonaReaderTag {
         return decryptor.doFinal(encryptedcontent);
     }
 
-    public static CuonaReaderSecureTag get(NdefRecord ndef, int cuonaKeyCustomerId, byte[] cuonaKey) {
+    public static CuonaReaderSecureTag get(NdefRecord ndef, int cuonaKeyCode, byte[] cuonaKey) {
         if (ndef.getTnf() != NdefRecord.TNF_EXTERNAL_TYPE) {
             return null;
         }
@@ -106,8 +106,8 @@ public class CuonaReaderSecureTag extends CuonaReaderTag {
         byte magic1 = (byte) bis.read();
         byte magic2 = (byte) bis.read();
         byte magic3 = (byte) bis.read();
-        int cidLow = (byte) bis.read();
-        int cidHigh = (byte) bis.read();
+        int kcLow = bis.read();
+        int kcHigh = bis.read();
         int deviceIdLen = bis.read();
         int ivLen = bis.read();
 
@@ -115,7 +115,7 @@ public class CuonaReaderSecureTag extends CuonaReaderTag {
             return null;
         }
 
-        int customerId = (cidHigh << 8) + cidLow;
+        int keyCode = (kcHigh << 8) + kcLow;
 
         int encryptedcontentLen = payload.length - (7 + deviceIdLen + ivLen);
         if (encryptedcontentLen < 0) {
@@ -136,7 +136,7 @@ public class CuonaReaderSecureTag extends CuonaReaderTag {
 
         byte[] content;
         try {
-            content = decrypt(customerId, deviceId, iv, encryptedcontent, cuonaKeyCustomerId, cuonaKey);
+            content = decrypt(keyCode, deviceId, iv, encryptedcontent, cuonaKeyCode, cuonaKey);
         } catch (GeneralSecurityException e) {
             return null;
         }

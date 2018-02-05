@@ -131,7 +131,8 @@ public class Cuona extends AsyncTask<String[][], Void, JSONObject> {
     // 開発用鍵が使われている否か
     // package-private
     static boolean isDevelopment() {
-        return Keys.customerId == 0;
+//        return Keys.customerId == 0;
+        return false;   // customerId == 0 だが、CONOLが出す公式アプリのため製品版とする（マスターキー使用でkeyは使わない）
     }
 
     public void enableForegroundDispatch(Activity activity) {
@@ -251,7 +252,7 @@ public class Cuona extends AsyncTask<String[][], Void, JSONObject> {
             NdefRecord[] records = msg.getRecords();
             for (NdefRecord rec: records) {
                 CuonaReaderTag cuonaReaderTag = null;
-                CuonaReaderSecureTag stag = CuonaReaderSecureTag.get(rec, Keys.customerId, Keys.cuonaKey32B);
+                CuonaReaderSecureTag stag = CuonaReaderSecureTag.get(rec, Keys.keyCode, Keys.cuonaKey32B);
                 if (stag != null) {
                     cuonaReaderTag = stag;
                 }
@@ -365,7 +366,7 @@ public class Cuona extends AsyncTask<String[][], Void, JSONObject> {
         if(msg != null) {
             NdefRecord[] records = msg.getRecords();
             for (NdefRecord rec : records) {
-                CuonaReaderSecureTag stag = CuonaReaderSecureTag.get(rec, Keys.customerId, Keys.cuonaKey32B);
+                CuonaReaderSecureTag stag = CuonaReaderSecureTag.get(rec, Keys.keyCode, Keys.cuonaKey32B);
                 if (stag != null) {
                     return stag;
                 }

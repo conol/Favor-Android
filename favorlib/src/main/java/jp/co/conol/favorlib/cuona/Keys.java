@@ -2,18 +2,20 @@
 
 package jp.co.conol.favorlib.cuona;
 
-class Keys {
+public class Keys {
 
     static final byte[] cuonaKey32B = {
-            (byte) 0x87, (byte) 0x2F, (byte) 0x79, (byte) 0x02, (byte) 0x8F,
-            (byte) 0x22, (byte) 0x1A, (byte) 0x41, (byte) 0x05, (byte) 0x76,
-            (byte) 0xE8, (byte) 0x00, (byte) 0x24, (byte) 0x5A, (byte) 0x0C,
-            (byte) 0x2C, (byte) 0x6B, (byte) 0x04, (byte) 0xCC, (byte) 0x0E,
-            (byte) 0xF1, (byte) 0x51, (byte) 0x51, (byte) 0x9F, (byte) 0x9C,
-            (byte) 0x2B, (byte) 0x65, (byte) 0x1A, (byte) 0xC7, (byte) 0x44,
-            (byte) 0x63, (byte) 0xBF,
+            (byte) 0x8A, (byte) 0x18, (byte) 0x6D, (byte) 0xE7, (byte) 0x7A,
+            (byte) 0x2C, (byte) 0xA8, (byte) 0x97, (byte) 0xD2, (byte) 0xCF,
+            (byte) 0xD3, (byte) 0x89, (byte) 0xCA, (byte) 0xF3, (byte) 0xA1,
+            (byte) 0xFE, (byte) 0x04, (byte) 0xFC, (byte) 0xF9, (byte) 0xCA,
+            (byte) 0x7E, (byte) 0xD3, (byte) 0x84, (byte) 0x5D, (byte) 0xDC,
+            (byte) 0x44, (byte) 0x0D, (byte) 0x27, (byte) 0x6E, (byte) 0x9E,
+            (byte) 0x6A, (byte) 0xE8,
     };
+    static final int keyCode = 40000;
 
-    static final int customerId = 0;
+    public static final int customerId = 0;
+
 }
 

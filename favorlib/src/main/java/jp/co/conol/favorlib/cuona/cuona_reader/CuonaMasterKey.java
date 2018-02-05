@@ -8,7 +8,7 @@ import java.util.Arrays;
  * Created by m_ito on 2018/02/04.
  */
 
-public class CuonaMasterKey {
+class CuonaMasterKey {
 
     private static final byte[] seed = {
             (byte) 0x0B, (byte) 0xF2, (byte) 0x44, (byte) 0xBC, (byte) 0x5B,
@@ -20,17 +20,17 @@ public class CuonaMasterKey {
             (byte) 0x4B, (byte) 0x32,
     };
 
-    public static byte[] getKey(int customerId) {
-        if (customerId < 0 || customerId >= 65536) {
+    public static byte[] getKey(int keyCode) {
+        if (keyCode < 0 || keyCode >= 65536) {
             throw new IllegalArgumentException("bad customerId");
         }
 
-        byte cidHigh = (byte) (customerId >> 8);
-        byte cidLow = (byte) customerId;
+        byte kcHigh = (byte) (keyCode >> 8);
+        byte kcLow = (byte) keyCode;
 
         byte[] data = Arrays.copyOf(seed, seed.length);
-        data[24] = cidHigh;
-        data[28] = cidLow;
+        data[24] = kcHigh;
+        data[28] = kcLow;
 
         MessageDigest md;
         try {
@@ -43,3 +43,4 @@ public class CuonaMasterKey {
     }
 
 }
+
