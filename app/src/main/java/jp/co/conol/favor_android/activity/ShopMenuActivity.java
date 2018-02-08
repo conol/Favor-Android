@@ -284,30 +284,50 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
         if(mScanCuonaDialog.isShowing()) {
 
             // 注文処理
-            new Favor(new Favor.AsyncCallback() {
-                @Override
-                public void onSuccess(Object object) {
+            if(MyUtil.Network.isEnable(this)) {
 
-                    // ログ送信
-                    mCuona.setReadLogMessage("注文");
-                    try {
-                        mCuona.readDeviceId(intent);
-                    } catch (CuonaReaderException e) {
-                        e.printStackTrace();
+                // 読み込みダイアログを表示
+                final ProgressDialog progressDialog = new ProgressDialog(this);
+                progressDialog.setMessage(getString(R.string.main_progress_message));
+                progressDialog.show();
+
+                new Favor(new Favor.AsyncCallback() {
+                    @Override
+                    public void onSuccess(Object object) {
+
+                        // 読み込みダイアログを非表示
+                        progressDialog.dismiss();
+
+                        // ログ送信
+                        mCuona.setReadLogMessage("注文");
+                        try {
+                            mCuona.readDeviceId(intent);
+                        } catch (CuonaReaderException e) {
+                            e.printStackTrace();
+                        }
+
+                        Intent intent = new Intent(ShopMenuActivity.this, OrderDoneActivity.class);
+                        intent.putExtra("shop", mGson.toJson(mShop));
+                        startActivity(intent);
+                        mScanCuonaDialog.dismiss();
+                        finish();
                     }
 
-                    Intent intent = new Intent(ShopMenuActivity.this, OrderDoneActivity.class);
-                    intent.putExtra("shop", mGson.toJson(mShop));
-                    startActivity(intent);
-                    mScanCuonaDialog.dismiss();
-                    finish();
-                }
+                    @Override
+                    public void onFailure(FavorException e) {
+                        // 読み込みダイアログを非表示
+                        progressDialog.dismiss();
 
-                @Override
-                public void onFailure(FavorException e) {
-                    Log.e("onFailure", e.toString());
-                }
-            }).setContext(this).setVisitHistoryId(mShop.getVisitHistoryId()).setOrder(mOrderList).execute(Favor.Task.Order);
+                        if(e.getCode() == FavorException.BAD_REQUEST) {
+                            new SimpleAlertDialog(ShopMenuActivity.this, getString(R.string.error_already_order_stopped)).show();
+                        } else {
+                            new SimpleAlertDialog(ShopMenuActivity.this, getString(R.string.error_common)).show();
+                        }
+                    }
+                }).setContext(this).setVisitHistoryId(mShop.getVisitHistoryId()).setOrder(mOrderList).execute(Favor.Task.Order);
+            } else {
+                new SimpleAlertDialog(ShopMenuActivity.this, getString(R.string.error_network_disable)).show();
+            }
         }
     }
 
