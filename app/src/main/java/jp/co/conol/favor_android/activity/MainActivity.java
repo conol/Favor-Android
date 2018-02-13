@@ -25,6 +25,7 @@ import org.joda.time.format.DateTimeFormatter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -271,8 +272,10 @@ public class MainActivity extends AppCompatActivity {
                                 // 読み込みダイアログを非表示
                                 progressDialog.dismiss();
 
-                                if(e.getCode() == FavorException.FORBIDDEN) {
+                                if(Objects.equals(e.getType(), "AlreadyEntered")) {
                                     new SimpleAlertDialog(MainActivity.this, getString(R.string.error_already_entered)).show();
+                                } else if(Objects.equals(e.getType(), "GroupNotActive")) {
+                                    new SimpleAlertDialog(MainActivity.this, getString(R.string.error_group_not_active)).show();
                                 } else {
                                     new SimpleAlertDialog(MainActivity.this, getString(R.string.error_common)).show();
                                 }
