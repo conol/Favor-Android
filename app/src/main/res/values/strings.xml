@@ -91,7 +91,7 @@
     <string name="error_read_service_failed">このNFCではFavorサービスがご利用できません。</string>
     <string name="error_not_exist_in_devise_ids">利用されたNFCは本アプリに対応していません。</string>
     <string name="error_already_entered">店舗側での退店処理が未完了です。</string>
-    <string name="error_group_not_active">このデバイスはお会計処理中です。店舗側での退店処理をお待ち下さい。</string>
+    <string name="error_group_not_active">このデバイスはお会計処理中です。店舗側での処理が完了するのをお待ち下さい。</string>
     <string name="error_already_order_stopped">すでにお会計処理が行われています。\n「お会計をする」ボタンより、退店処理を行ってください。</string>
 
     <!-- 全体 -->
