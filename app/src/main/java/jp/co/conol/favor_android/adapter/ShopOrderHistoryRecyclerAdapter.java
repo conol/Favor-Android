@@ -94,7 +94,7 @@ public class ShopOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<ShopOr
             holder.mShopOrderMenuNameTextView.setText(order.getOrderedItemName());
 
             // 値段
-            int price = order.getOrderedItemPriceCent() * order.getOrderedItemQuantity();
+            int price = order.getOrderedItemPriceCents() * order.getOrderedItemQuantity();
             holder.mShopOrderMenuPriceTextView.setText(String.valueOf(price + order.getOrderedItemPriceUnit()));
         }
     }

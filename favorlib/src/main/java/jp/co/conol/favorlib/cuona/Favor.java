@@ -30,7 +30,6 @@ import jp.co.conol.favorlib.cuona.favor_model.Menu;
 import jp.co.conol.favorlib.cuona.favor_model.Order;
 import jp.co.conol.favorlib.cuona.favor_model.Shop;
 import jp.co.conol.favorlib.cuona.favor_model.User;
-import jp.co.conol.favorlib.cuona.favor_model.UsersAllOrder;
 
 /**
  * Created by Masafumi_Ito on 2017/10/29.
@@ -272,7 +271,7 @@ public class Favor extends AsyncTask<Favor.Task, Void, Object> {
                 case GetUsersAllOrder:
                     apiUrl = "/api/users/orders.json?page=1&per=20";
                     responseJsonString = get(favorEndPoint + apiUrl, mAppToken);
-                    type = new TypeToken<ArrayList<UsersAllOrder>>(){}.getType();
+                    type = new TypeToken<ArrayList<Order>>(){}.getType();
                     break;
 
                 // オーダーストップ

@@ -145,7 +145,7 @@ public class OrderStopActivity extends AppCompatActivity {
                             int memberNum = 0;
                             List<Integer> memberIdList = new ArrayList<>();
                             for(Order order : orderList) {
-                                sumPrice += order.getOrderedItemPriceCent() * order.getOrderedItemQuantity();
+                                sumPrice += order.getOrderedItemPriceCents() * order.getOrderedItemQuantity();
                                 if(!memberIdList.contains(order.getOrderedUserId())) {
                                     memberIdList.add(order.getOrderedUserId());
                                     memberNum++;

@@ -18,7 +18,7 @@ import org.joda.time.format.DateTimeFormatter;
 import java.util.List;
 
 import jp.co.conol.favor_android.R;
-import jp.co.conol.favorlib.cuona.favor_model.UsersAllOrder;
+import jp.co.conol.favorlib.cuona.favor_model.Order;
 
 /**
  * Created by Masafumi_Ito on 2017/10/24.
@@ -27,7 +27,7 @@ import jp.co.conol.favorlib.cuona.favor_model.UsersAllOrder;
 public class UserOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<UserOrderHistoryRecyclerAdapter.ViewHolder> {
 
     private Context mContext;
-    private List<UsersAllOrder> mUsersAllOrderList;
+    private List<Order> mUsersAllOrderList;
     private final int HEADER = 0;
     private final int MENU = 1;
 
@@ -66,7 +66,7 @@ public class UserOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<UserOr
     }
 
     // コンストラクタ
-    public UserOrderHistoryRecyclerAdapter(Context context, List<UsersAllOrder> usersAllOrderList) {
+    public UserOrderHistoryRecyclerAdapter(Context context, List<Order> usersAllOrderList) {
         mContext = context;
         mUsersAllOrderList = usersAllOrderList;
     }
@@ -102,7 +102,7 @@ public class UserOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<UserOr
     public void onBindViewHolder(ViewHolder holder, int position) {
 
         // 注文内容のオブジェクトを取得
-        UsersAllOrder usersAllOrder = mUsersAllOrderList.get(position);
+        Order usersAllOrder = mUsersAllOrderList.get(position);
 
         // 内容を反映
         if(holder.mUserOrderMenuTextView != null && holder.mUserOrderMenuPriceTextView != null) {
@@ -132,7 +132,7 @@ public class UserOrderHistoryRecyclerAdapter extends RecyclerView.Adapter<UserOr
     @Override
     public int getItemViewType(int position) {
 
-        UsersAllOrder usersAllOrder = mUsersAllOrderList.get(position);
+        Order usersAllOrder = mUsersAllOrderList.get(position);
 
         int viewType = HEADER;
         if(usersAllOrder != null) {

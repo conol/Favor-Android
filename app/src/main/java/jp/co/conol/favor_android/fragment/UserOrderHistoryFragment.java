@@ -12,24 +12,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.gson.Gson;
-
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
-import jp.co.conol.favor_android.activity.ShopHistoryActivity;
 import jp.co.conol.favor_android.adapter.UserOrderHistoryRecyclerAdapter;
-import jp.co.conol.favor_android.custom.SimpleAlertDialog;
 import jp.co.conol.favorlib.cuona.Favor;
 import jp.co.conol.favorlib.cuona.FavorException;
-import jp.co.conol.favorlib.cuona.favor_model.User;
-import jp.co.conol.favorlib.cuona.favor_model.UsersAllOrder;
+import jp.co.conol.favorlib.cuona.favor_model.Order;
 
 public class UserOrderHistoryFragment extends Fragment {
 
@@ -75,7 +68,7 @@ public class UserOrderHistoryFragment extends Fragment {
             new Favor(new Favor.AsyncCallback() {
                 @Override
                 public void onSuccess(Object object) {
-                    List<UsersAllOrder> usersAllOrderList = (List<UsersAllOrder>) object;
+                    List<Order> usersAllOrderList = (List<Order>) object;
                     Collections.reverse(usersAllOrderList);
 
                     // レイアウトマネージャーのセット

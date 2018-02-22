@@ -16,10 +16,14 @@ public class Order {
     private String status = null;
     private String created_at = null;
     private String updated_at = null;
-    private UserInfo user = null;
+    private User user = null;
     private MenuItem menu_item = null;
 
-    private class UserInfo {
+    private int shop_id = 0;
+    private String shop_name = null;
+    private String enter_at = null;
+
+    private class User {
         private int id;
         private String nickname;
         private String image_url;
@@ -100,7 +104,7 @@ public class Order {
         return menu_item.getName();
     }
 
-    public int getOrderedItemPriceCent() {
+    public int getOrderedItemPriceCents() {
         return menu_item.getPriceCents();
     }
 
@@ -151,5 +155,17 @@ public class Order {
             itemImage.add(imageObj.getImage_url());
         }
         return itemImage.toArray(new String[0]);
+    }
+
+    public int getShopId() {
+        return shop_id;
+    }
+
+    public String getShopName() {
+        return shop_name;
+    }
+
+    public String getEnterAt() {
+        return enter_at;
     }
 }
