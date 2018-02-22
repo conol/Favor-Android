@@ -1,7 +1,9 @@
 package jp.co.conol.favorlib.cuona.favor_model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Masafumi_Ito on 2017/10/25.
@@ -20,10 +22,29 @@ public class Shop {
         private int zip_code;
         private String address;
         private String phone_number;
-        private ShopsExtensionField[] extension_fields;
+        private ExtensionField[] extension_fields;
         private String created_at;
         private String updated_at;
         private ShopImage[] shop_images;
+
+        private class ExtensionField {
+
+            private int id;
+            private String label;
+            private String value;
+
+            public int getId() {
+                return id;
+            }
+
+            public String getLabel() {
+                return label;
+            }
+
+            public String getValue() {
+                return value;
+            }
+        }
 
         private class ShopImage {
             private String image_url;
@@ -61,7 +82,7 @@ public class Shop {
             return phone_number;
         }
 
-        public ShopsExtensionField[] getExtension_fields() {
+        public ExtensionField[] getExtension_fields() {
             return extension_fields;
         }
 
@@ -120,19 +141,19 @@ public class Shop {
         return shop.getId();
     }
 
-    public String getShopName() {
+    public String getName() {
         return shop.getName();
     }
 
-    public String getShopIntroduction() {
+    public String getIntroduction() {
         return shop.getIntroduction();
     }
 
-    public String getShopGenre() {
+    public String getGenre() {
         return shop.getGenre();
     }
 
-    public String[] getShopImages() {
+    public String[] getImageUrls() {
         List<String> shopImage = new ArrayList<>();
         for(ShopInfo.ShopImage shopImageObj : shop.getShopImages()) {
             shopImage.add(shopImageObj.getImageUrl());
@@ -141,27 +162,34 @@ public class Shop {
         return shopImage.toArray(new String[0]);
     }
 
-    public int getShopZipCode() {
+    public int getZipCode() {
         return shop.getZip_code();
     }
 
-    public String getShopAddress() {
+    public String getAddress() {
         return shop.getAddress();
     }
 
-    public String getShopPhoneNumber() {
+    public String getPhoneNumber() {
         return shop.getPhone_number();
     }
 
-    public ShopsExtensionField[] getShopsExtensionFields() {
-        return shop.getExtension_fields();
+    public List<String[]> getExtensionFields() {
+        List<String[]> arrayList = new ArrayList<>();
+        for(ShopInfo.ExtensionField extensionField : shop.extension_fields) {
+            String[] extensionFieldArray = new String[2];
+            extensionFieldArray[0] = extensionField.getLabel();
+            extensionFieldArray[1] = extensionField.getValue();
+            arrayList.add(extensionFieldArray);
+        }
+        return arrayList;
     }
 
-    public String getShopCreatedAt() {
+    public String getCreatedAt() {
         return shop.getCreated_at();
     }
 
-    public String getShopUpdatedAt() {
+    public String getUpdatedAt() {
         return shop.getUpdated_at();
     }
 
@@ -186,7 +214,7 @@ public class Shop {
         return visit_history.getTotal_price();
     }
 
-    public String getEnterShopAt() {
+    public String getEnteredShopAt() {
         return visit_history.getCreated_at();
     }
 }

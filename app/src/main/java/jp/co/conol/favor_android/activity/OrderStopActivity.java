@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -31,9 +30,6 @@ import jp.co.conol.favorlib.cuona.Favor;
 import jp.co.conol.favorlib.cuona.FavorException;
 import jp.co.conol.favorlib.cuona.favor_model.Order;
 import jp.co.conol.favorlib.cuona.favor_model.Shop;
-import jp.co.conol.favorlib.cuona.favor_model.User;
-
-import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
 
 public class OrderStopActivity extends AppCompatActivity {
 
@@ -58,8 +54,8 @@ public class OrderStopActivity extends AppCompatActivity {
 
         // 店舗情報の表示
         if(shop != null) {
-            Picasso.with(this).load(shop.getShopImages()[0]).into(mShopImageView);
-            mShopNameTextView.setText(shop.getShopName());
+            Picasso.with(this).load(shop.getImageUrls()[0]).into(mShopImageView);
+            mShopNameTextView.setText(shop.getName());
         } else {
             Toast.makeText(this, getString(R.string.error_common), Toast.LENGTH_LONG).show();
             finish();

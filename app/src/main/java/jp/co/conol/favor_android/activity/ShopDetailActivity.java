@@ -1,7 +1,6 @@
 package jp.co.conol.favor_android.activity;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -11,13 +10,11 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
@@ -26,21 +23,16 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import java.util.Collections;
-import java.util.List;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favor_android.adapter.ShopDetailFragmentStatePagerAdapter;
-import jp.co.conol.favor_android.adapter.ShopHistoryRecyclerAdapter;
 import jp.co.conol.favor_android.custom.ProgressDialog;
 import jp.co.conol.favor_android.custom.SimpleAlertDialog;
 import jp.co.conol.favorlib.cuona.Favor;
 import jp.co.conol.favorlib.cuona.FavorException;
 import jp.co.conol.favorlib.cuona.favor_model.Shop;
-import jp.co.conol.favorlib.cuona.favor_model.User;
 
 public class ShopDetailActivity extends AppCompatActivity {
 
@@ -145,8 +137,8 @@ public class ShopDetailActivity extends AppCompatActivity {
 
             // 入店時間
             DateTimeFormatter DEF_FMT = DateTimeFormat.forPattern("yyyy/MM/dd (E) HH:mm");
-            if(shop.getEnterShopAt() != null) {
-                mShopEnterAtTextView.setText(DEF_FMT.print(DateTime.parse(shop.getEnterShopAt())) + " に来店しました");
+            if(shop.getEnteredShopAt() != null) {
+                mShopEnterAtTextView.setText(DEF_FMT.print(DateTime.parse(shop.getEnteredShopAt())) + " に来店しました");
             }
 
             // 入店していない場合は「お会計する」ボタンを非表示
@@ -160,11 +152,11 @@ public class ShopDetailActivity extends AppCompatActivity {
         }
 
         // 店舗情報をViewに反映
-        Picasso.with(this).load(shop.getShopImages()[0]).into(mShopImageView); // 画像
-        mShopNameTextView.setText(shop.getShopName());  // 店舗名
-        mShopGenreTextView.setText(shop.getShopGenre());  // ジャンル
+        Picasso.with(this).load(shop.getImageUrls()[0]).into(mShopImageView); // 画像
+        mShopNameTextView.setText(shop.getName());  // 店舗名
+        mShopGenreTextView.setText(shop.getGenre());  // ジャンル
         mShopNumVisitTextView.setText(String.valueOf(shop.getNumVisits()));  // 来店回数
-        mShopIntroductionTextView.setText(shop.getShopIntroduction());  // 店舗情報
+        mShopIntroductionTextView.setText(shop.getIntroduction());  // 店舗情報
 
         // 基本情報と注文履歴のViewPagerにアダプターをセット
         ShopDetailFragmentStatePagerAdapter shopDetailFragmentStatePagerAdapter

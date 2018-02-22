@@ -18,7 +18,6 @@ import butterknife.ButterKnife;
 import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favorlib.cuona.favor_model.Menu;
-import jp.co.conol.favorlib.cuona.favor_model.Order;
 
 /**
  * Created by Masafumi_Ito on 2017/10/25.
@@ -138,9 +137,9 @@ public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecycl
         // 要素がメニューの時
         if (holder.mMenuNameTextView != null) {
             Menu menu = mMenuList.get(position);
-            if(menu.getImages() != null && menu.getImages().length != 0) {
+            if(menu.getImageUrls() != null && menu.getImageUrls().length != 0) {
                 holder.mMenuImageView.setVisibility(View.VISIBLE);
-                Picasso.with(mContext).load(menu.getImages()[0]).into(holder.mMenuImageView);
+                Picasso.with(mContext).load(menu.getImageUrls()[0]).into(holder.mMenuImageView);
             } else {
                 holder.mMenuImageView.setVisibility(View.GONE);
             }

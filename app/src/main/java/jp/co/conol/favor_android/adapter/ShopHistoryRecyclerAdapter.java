@@ -10,7 +10,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
-import com.makeramen.roundedimageview.RoundedImageView;
 import com.squareup.picasso.Picasso;
 
 import org.joda.time.DateTime;
@@ -24,7 +23,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
-import jp.co.conol.favor_android.activity.MainActivity;
 import jp.co.conol.favor_android.activity.ShopDetailActivity;
 import jp.co.conol.favorlib.cuona.favor_model.Shop;
 import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
@@ -97,10 +95,10 @@ public class ShopHistoryRecyclerAdapter extends RecyclerView.Adapter<ShopHistory
         Shop shop = mShopList.get(position);
 
         if(shop != null) {
-            holder.mShopNameTextView.setText(shop.getShopName());
+            holder.mShopNameTextView.setText(shop.getName());
             DateTimeFormatter DEF_FMT = DateTimeFormat.forPattern("yyyy/MM/dd (E) HH:mm~"); // 入店時間
-            holder.mShopEnterAtTextView.setText(DEF_FMT.print(DateTime.parse(shop.getEnterShopAt())));
-            Picasso.with(mContext).load(shop.getShopImages()[0])
+            holder.mShopEnterAtTextView.setText(DEF_FMT.print(DateTime.parse(shop.getEnteredShopAt())));
+            Picasso.with(mContext).load(shop.getImageUrls()[0])
                     .fit()
                     .transform(new RoundedCornersTransformation(12, 0))
                     .transform(new BrightnessFilterTransformation(mContext, -0.2f))

@@ -1,11 +1,9 @@
 package jp.co.conol.favor_android.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,7 +13,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
 import com.makeramen.roundedimageview.RoundedImageView;
 import com.squareup.picasso.Picasso;
 
@@ -44,7 +41,6 @@ import jp.co.conol.favorlib.cuona.favor_model.Shop;
 import jp.co.conol.favorlib.cuona.favor_model.User;
 import jp.wasabeef.picasso.transformations.CropCircleTransformation;
 import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
-import jp.wasabeef.picasso.transformations.gpu.BrightnessFilterTransformation;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -141,10 +137,10 @@ public class MainActivity extends AppCompatActivity {
                         Shop shop = shopList.get(shopList.size() - 1);
 
                         // 最後に入店した店舗の情報を画面に反映
-                        mShopNameTextView.setText(shop.getShopName());  // 店舗名
+                        mShopNameTextView.setText(shop.getName());  // 店舗名
                         DateTimeFormatter DEF_FMT = DateTimeFormat.forPattern("yyyy/MM/dd (E) HH:mm~"); // 入店時間
-                        mShopEnterAtTextView.setText(DEF_FMT.print(DateTime.parse(shop.getEnterShopAt())));
-                        Picasso.with(MainActivity.this).load(shop.getShopImages()[0])   // 画像
+                        mShopEnterAtTextView.setText(DEF_FMT.print(DateTime.parse(shop.getEnteredShopAt())));
+                        Picasso.with(MainActivity.this).load(shop.getImageUrls()[0])   // 画像
                                 .fit()
                                 .transform(new RoundedCornersTransformation(12, 0))
                                 .into(mShopImageView);

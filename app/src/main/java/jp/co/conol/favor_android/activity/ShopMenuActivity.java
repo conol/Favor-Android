@@ -8,9 +8,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
@@ -43,7 +41,6 @@ import jp.co.conol.favorlib.cuona.Favor;
 import jp.co.conol.favorlib.cuona.favor_model.Menu;
 import jp.co.conol.favorlib.cuona.favor_model.Order;
 import jp.co.conol.favorlib.cuona.favor_model.Shop;
-import jp.co.conol.favorlib.cuona.favor_model.User;
 
 public class ShopMenuActivity extends AppCompatActivity implements NumberPickerDialog.OnPositiveButtonClickedListener {
 
@@ -109,7 +106,7 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
             progressDialog.show();
 
             // 店舗名を反映
-            mShopNameTextView.setText(mShop.getShopName());
+            mShopNameTextView.setText(mShop.getName());
             new Favor(new Favor.AsyncCallback() {
                 @Override
                 public void onSuccess(Object object) {
@@ -158,9 +155,9 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
                                 mOrderNumTextView.setText(String.valueOf(orderNum));
 
                                 // ダイアログにメニュー内容をセット
-                                if (menu.getImages() != null && menu.getImages().length != 0) {
+                                if (menu.getImageUrls() != null && menu.getImageUrls().length != 0) {
                                     mMenuImageView.setVisibility(View.VISIBLE);
-                                    Picasso.with(ShopMenuActivity.this).load(menu.getImages()[0]).into(mMenuImageView);
+                                    Picasso.with(ShopMenuActivity.this).load(menu.getImageUrls()[0]).into(mMenuImageView);
                                 }
                                 mMenuNameTextView.setText(menu.getName());
                                 mMenuPriceTextView.setText(menu.getPriceFormat());

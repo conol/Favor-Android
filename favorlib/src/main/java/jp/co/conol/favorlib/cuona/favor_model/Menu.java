@@ -46,7 +46,7 @@ public class Menu {
         return notes;
     }
 
-    public String[] getImages() {
+    public String[] getImageUrls() {
         List<String> image_urls = new ArrayList<>();
         for(Image image : images) {
             image_urls.add(image.getImageUrl());
