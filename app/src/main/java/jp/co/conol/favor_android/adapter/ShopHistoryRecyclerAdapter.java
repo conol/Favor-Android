@@ -97,7 +97,7 @@ public class ShopHistoryRecyclerAdapter extends RecyclerView.Adapter<ShopHistory
         if(shop != null) {
             holder.mShopNameTextView.setText(shop.getName());
             DateTimeFormatter DEF_FMT = DateTimeFormat.forPattern("yyyy/MM/dd (E) HH:mm~"); // 入店時間
-            holder.mShopEnterAtTextView.setText(DEF_FMT.print(DateTime.parse(shop.getEnteredShopAt())));
+            holder.mShopEnterAtTextView.setText(DEF_FMT.print(DateTime.parse(shop.getEnteredAt())));
             Picasso.with(mContext).load(shop.getImageUrls()[0])
                     .fit()
                     .transform(new RoundedCornersTransformation(12, 0))

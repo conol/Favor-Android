@@ -214,7 +214,7 @@ public class Shop {
         return visit_history.getTotal_price();
     }
 
-    public String getEnteredShopAt() {
+    public String getEnteredAt() {
         return visit_history.getCreated_at();
     }
 }

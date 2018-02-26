@@ -137,8 +137,8 @@ public class ShopDetailActivity extends AppCompatActivity {
 
             // 入店時間
             DateTimeFormatter DEF_FMT = DateTimeFormat.forPattern("yyyy/MM/dd (E) HH:mm");
-            if(shop.getEnteredShopAt() != null) {
-                mShopEnterAtTextView.setText(DEF_FMT.print(DateTime.parse(shop.getEnteredShopAt())) + " に来店しました");
+            if(shop.getEnteredAt() != null) {
+                mShopEnterAtTextView.setText(DEF_FMT.print(DateTime.parse(shop.getEnteredAt())) + " に来店しました");
             }
 
             // 入店していない場合は「お会計する」ボタンを非表示
