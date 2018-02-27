@@ -46,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
 
     private ScanCuonaDialog mScanCuonaDialog;
     private Cuona mCuona;
-    private boolean isSuccessfulConnection = false; // 全ての情報取得に失敗したか否か
     private boolean isSuccessfulConnectionUser = false;     // ユーザー情報の取得に失敗したか否か
     private boolean isSuccessfulConnectionEnterHistory = false; // 入店履歴の取得に失敗したか否か
     @BindView(R.id.shopHistoryConstraintLayout) ConstraintLayout mShopHistoryConstraintLayout;
