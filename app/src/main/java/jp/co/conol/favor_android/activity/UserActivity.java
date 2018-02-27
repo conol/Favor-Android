@@ -129,6 +129,12 @@ public class UserActivity extends AppCompatActivity {
             }
         });
 
+        // ネットワークに接続されているか確認
+        if(!MyUtil.Network.isEnable(UserActivity.this)) {
+            new SimpleAlertDialog(UserActivity.this, getString(R.string.error_network_disable)).show();
+            return;
+        }
+
         // 読み込みダイアログを表示
         final ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage(getString(R.string.main_progress_message));

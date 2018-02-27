@@ -62,56 +62,84 @@ public class OrderStopActivity extends AppCompatActivity {
             return;
         }
 
+        // ネットワークに接続されているか確認
+        if(!MyUtil.Network.isEnable(OrderStopActivity.this)) {
+            new SimpleAlertDialog(OrderStopActivity.this, getString(R.string.error_network_disable)).show();
+            return;
+        }
+
+        // 注文履歴を取得
+        if(shop.getVisitHistoryId() != 0) {
+
+            // 読み込みダイアログを表示
+            final ProgressDialog progressDialog = new ProgressDialog(OrderStopActivity.this);
+            progressDialog.setMessage(getString(R.string.main_progress_message));
+            progressDialog.show();
+
+            new Favor(new Favor.AsyncCallback() {
+                @SuppressLint("SetTextI18n")
+                @Override
+                public void onSuccess(Object object) {
+                    List<Order> orderList = (List<Order>) object;
+
+                    // 読み込みダイアログを非表示
+                    progressDialog.dismiss();
+
+                    if (orderList != null) {
+
+                        // レイアウトマネージャーのセット
+                        mOrderStopRecyclerView.setLayoutManager(new LinearLayoutManager(OrderStopActivity.this));
+
+                        // アダプターのセット
+                        mShopOrderHistoryRecyclerAdapter = new ShopOrderHistoryRecyclerAdapter(OrderStopActivity.this, orderList);
+                        mOrderStopRecyclerView.setAdapter(mShopOrderHistoryRecyclerAdapter);
+
+                        // 金額の取得
+                        int sumPrice = 0;
+                        int memberNum = 0;
+                        List<Integer> memberIdList = new ArrayList<>();
+                        for(Order order : orderList) {
+                            sumPrice += order.getOrderedItemPriceCents() * order.getOrderedItemQuantity();
+                            if(!memberIdList.contains(order.getOrderedUserId())) {
+                                memberIdList.add(order.getOrderedUserId());
+                                memberNum++;
+                            }
+                        }
+                        mSumPriceTextView.setText(String.valueOf(sumPrice) + "円");
+                        if(!Float.isNaN((float)sumPrice / memberNum)) {
+                            mMembersPriceTextView.setText(String.valueOf((float) sumPrice / memberNum) + "円");
+                        }
+
+                    } else {
+                        new SimpleAlertDialog(OrderStopActivity.this, getString(R.string.error_common)).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(FavorException e) {
+                    Log.e("onFailure", e.toString());
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            // 読み込みダイアログを非表示
+                            progressDialog.dismiss();
+
+                            new SimpleAlertDialog(OrderStopActivity.this, getString(R.string.error_common)).show();
+                        }
+                    });
+                }
+            }).setContext(OrderStopActivity.this).setVisitGroupId(shop.getVisitGroupId()).execute(Favor.Task.GetUserGroupsOrderInShop);
+        }
+
         // 会計するボタンを押した場合、サーバーに退店を通知する
         mOrderStopButtonConstraintLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(MyUtil.Network.isEnable(OrderStopActivity.this)) {
 
-                    // 読み込みダイアログを表示
-                    final ProgressDialog progressDialog = new ProgressDialog(OrderStopActivity.this);
-                    progressDialog.setMessage(getString(R.string.main_progress_message));
-                    progressDialog.show();
-
-                    new Favor(new Favor.AsyncCallback() {
-                        @Override
-                        public void onSuccess(Object object) {
-
-                            // 読み込みダイアログを非表示
-                            progressDialog.dismiss();
-
-                            if(object != null) {
-                                Intent intent = new Intent(OrderStopActivity.this, MainActivity.class);
-                                MyUtil.SharedPref.saveBoolean(OrderStopActivity.this, "isEntering", false);   // 退店
-                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                startActivity(intent);
-                            } else {
-                                new SimpleAlertDialog(OrderStopActivity.this, getString(R.string.error_common)).show();
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(FavorException e) {
-                            Log.e("onFailure", e.toString());
-                            runOnUiThread(new Runnable() {
-                                public void run() {
-                                    // 読み込みダイアログを非表示
-                                    progressDialog.dismiss();
-
-                                    new SimpleAlertDialog(OrderStopActivity.this, getString(R.string.error_common)).show();
-                                }
-                            });
-                        }
-                    }).setContext(OrderStopActivity.this).setVisitHistoryId(shop.getVisitHistoryId()).execute(Favor.Task.OrderStop);
-                } else {
+                // ネットワークに接続されているか確認
+                if(!MyUtil.Network.isEnable(OrderStopActivity.this)) {
                     new SimpleAlertDialog(OrderStopActivity.this, getString(R.string.error_network_disable)).show();
+                    return;
                 }
-            }
-        });
-
-        // 注文履歴を取得
-        if(MyUtil.Network.isEnable(OrderStopActivity.this)) {
-            if(shop.getVisitHistoryId() != 0) {
 
                 // 読み込みダイアログを表示
                 final ProgressDialog progressDialog = new ProgressDialog(OrderStopActivity.this);
@@ -119,39 +147,17 @@ public class OrderStopActivity extends AppCompatActivity {
                 progressDialog.show();
 
                 new Favor(new Favor.AsyncCallback() {
-                    @SuppressLint("SetTextI18n")
                     @Override
                     public void onSuccess(Object object) {
-                        List<Order> orderList = (List<Order>) object;
 
                         // 読み込みダイアログを非表示
                         progressDialog.dismiss();
 
-                        if (orderList != null) {
-
-                            // レイアウトマネージャーのセット
-                            mOrderStopRecyclerView.setLayoutManager(new LinearLayoutManager(OrderStopActivity.this));
-
-                            // アダプターのセット
-                            mShopOrderHistoryRecyclerAdapter = new ShopOrderHistoryRecyclerAdapter(OrderStopActivity.this, orderList);
-                            mOrderStopRecyclerView.setAdapter(mShopOrderHistoryRecyclerAdapter);
-
-                            // 金額の取得
-                            int sumPrice = 0;
-                            int memberNum = 0;
-                            List<Integer> memberIdList = new ArrayList<>();
-                            for(Order order : orderList) {
-                                sumPrice += order.getOrderedItemPriceCents() * order.getOrderedItemQuantity();
-                                if(!memberIdList.contains(order.getOrderedUserId())) {
-                                    memberIdList.add(order.getOrderedUserId());
-                                    memberNum++;
-                                }
-                            }
-                            mSumPriceTextView.setText(String.valueOf(sumPrice) + "円");
-                            if(!Float.isNaN((float)sumPrice / memberNum)) {
-                                mMembersPriceTextView.setText(String.valueOf((float) sumPrice / memberNum) + "円");
-                            }
-
+                        if(object != null) {
+                            Intent intent = new Intent(OrderStopActivity.this, MainActivity.class);
+                            MyUtil.SharedPref.saveBoolean(OrderStopActivity.this, "isEntering", false);   // 退店
+                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
                         } else {
                             new SimpleAlertDialog(OrderStopActivity.this, getString(R.string.error_common)).show();
                         }
@@ -169,10 +175,8 @@ public class OrderStopActivity extends AppCompatActivity {
                             }
                         });
                     }
-                }).setContext(OrderStopActivity.this).setVisitGroupId(shop.getVisitGroupId()).execute(Favor.Task.GetUserGroupsOrderInShop);
-            } else {
-                new SimpleAlertDialog(OrderStopActivity.this, getString(R.string.error_network_disable)).show();
+                }).setContext(OrderStopActivity.this).setVisitHistoryId(shop.getVisitHistoryId()).execute(Favor.Task.OrderStop);
             }
-        }
+        });
     }
 }

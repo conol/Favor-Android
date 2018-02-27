@@ -65,44 +65,45 @@ public class ShopDetailActivity extends AppCompatActivity {
         // 入店中した場合は店舗情報を再取得
         if(isEntering) {
 
-            // 入店履歴を取得
-            if(MyUtil.Network.isEnable(this)) {
-
-                // ショップIDを取得
-                int ShopId = MyUtil.SharedPref.getInt(this, "shopId", 0);
-
-                // 読み込みダイアログを表示
-                final ProgressDialog progressDialog = new ProgressDialog(ShopDetailActivity.this);
-                progressDialog.setMessage(getString(R.string.main_progress_message));
-                progressDialog.show();
-
-                new Favor(new Favor.AsyncCallback() {
-                    @Override
-                    public void onSuccess(Object object) {
-                        Shop shop = (Shop) object;
-
-                        setShopInfo(shop);
-
-                        // 読み込みダイアログを非表示
-                        progressDialog.dismiss();
-                    }
-
-                    @Override
-                    public void onFailure(FavorException e) {
-                        Log.e("onFailure", e.toString());
-                        runOnUiThread(new Runnable() {
-                            public void run() {
-                                // 読み込みダイアログを非表示
-                                progressDialog.dismiss();
-
-                                new SimpleAlertDialog(ShopDetailActivity.this, getString(R.string.error_common)).show();
-                            }
-                        });
-                    }
-                }).setContext(this).setShopId(ShopId).execute(Favor.Task.GetShopDetail);
-            } else {
+            // ネットワークに接続されているか確認
+            if(!MyUtil.Network.isEnable(this)) {
                 new SimpleAlertDialog(ShopDetailActivity.this, getString(R.string.error_network_disable)).show();
+                return;
             }
+
+            // ショップIDを取得
+            int ShopId = MyUtil.SharedPref.getInt(this, "shopId", 0);
+
+            // 読み込みダイアログを表示
+            final ProgressDialog progressDialog = new ProgressDialog(ShopDetailActivity.this);
+            progressDialog.setMessage(getString(R.string.main_progress_message));
+            progressDialog.show();
+
+            // 店舗情報を取得
+            new Favor(new Favor.AsyncCallback() {
+                @Override
+                public void onSuccess(Object object) {
+                    Shop shop = (Shop) object;
+
+                    setShopInfo(shop);
+
+                    // 読み込みダイアログを非表示
+                    progressDialog.dismiss();
+                }
+
+                @Override
+                public void onFailure(FavorException e) {
+                    Log.e("onFailure", e.toString());
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            // 読み込みダイアログを非表示
+                            progressDialog.dismiss();
+
+                            new SimpleAlertDialog(ShopDetailActivity.this, getString(R.string.error_common)).show();
+                        }
+                    });
+                }
+            }).setContext(this).setShopId(ShopId).execute(Favor.Task.GetShopDetail);
         } else {
             // 遷移前の情報を取得
             Shop shop = new Gson().fromJson(getIntent().getStringExtra("shop"), Shop.class);    // 店舗情報を取得

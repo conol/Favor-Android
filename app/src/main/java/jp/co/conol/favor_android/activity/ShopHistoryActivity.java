@@ -34,48 +34,49 @@ public class ShopHistoryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_shop_history);
         ButterKnife.bind(this);
 
-        // 入店履歴を取得
-        if(MyUtil.Network.isEnable(this)) {
-
-            // 読み込みダイアログを表示
-            final ProgressDialog progressDialog = new ProgressDialog(ShopHistoryActivity.this);
-            progressDialog.setMessage(getString(R.string.main_progress_message));
-            progressDialog.show();
-
-            new Favor(new Favor.AsyncCallback() {
-                @Override
-                public void onSuccess(Object object) {
-                    @SuppressWarnings("unchecked")
-                    List<Shop> shopList = (List<Shop>) object;
-                    Collections.reverse(shopList);
-
-                    // レイアウトマネージャーのセット
-                    mShopHistoryRecyclerView.setLayoutManager(new LinearLayoutManager(ShopHistoryActivity.this));
-
-                    // アダプターのセット
-                    ShopHistoryRecyclerAdapter shopHistoryRecyclerAdapter
-                            = new ShopHistoryRecyclerAdapter(ShopHistoryActivity.this, shopList);
-                    mShopHistoryRecyclerView.setAdapter(shopHistoryRecyclerAdapter);
-
-                    // 読み込みダイアログを非表示
-                    progressDialog.dismiss();
-                }
-
-                @Override
-                public void onFailure(FavorException e) {
-                    Log.e("onFailure", e.toString());
-                    runOnUiThread(new Runnable() {
-                        public void run() {
-                            // 読み込みダイアログを非表示
-                            progressDialog.dismiss();
-
-                            new SimpleAlertDialog(ShopHistoryActivity.this, getString(R.string.error_common)).show();
-                        }
-                    });
-                }
-            }).setContext(this).execute(Favor.Task.GetVisitedShopHistory);
-        } else {
+        // ネットワークに接続されているか確認
+        if(!MyUtil.Network.isEnable(this)) {
             new SimpleAlertDialog(ShopHistoryActivity.this, getString(R.string.error_network_disable)).show();
+            return;
         }
+
+        // 読み込みダイアログを表示
+        final ProgressDialog progressDialog = new ProgressDialog(ShopHistoryActivity.this);
+        progressDialog.setMessage(getString(R.string.main_progress_message));
+        progressDialog.show();
+
+        // 入店履歴を取得
+        new Favor(new Favor.AsyncCallback() {
+            @Override
+            public void onSuccess(Object object) {
+                @SuppressWarnings("unchecked")
+                List<Shop> shopList = (List<Shop>) object;
+                Collections.reverse(shopList);
+
+                // レイアウトマネージャーのセット
+                mShopHistoryRecyclerView.setLayoutManager(new LinearLayoutManager(ShopHistoryActivity.this));
+
+                // アダプターのセット
+                ShopHistoryRecyclerAdapter shopHistoryRecyclerAdapter
+                        = new ShopHistoryRecyclerAdapter(ShopHistoryActivity.this, shopList);
+                mShopHistoryRecyclerView.setAdapter(shopHistoryRecyclerAdapter);
+
+                // 読み込みダイアログを非表示
+                progressDialog.dismiss();
+            }
+
+            @Override
+            public void onFailure(FavorException e) {
+                Log.e("onFailure", e.toString());
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        // 読み込みダイアログを非表示
+                        progressDialog.dismiss();
+
+                        new SimpleAlertDialog(ShopHistoryActivity.this, getString(R.string.error_common)).show();
+                    }
+                });
+            }
+        }).setContext(this).execute(Favor.Task.GetVisitedShopHistory);
     }
 }

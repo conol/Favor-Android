@@ -223,6 +223,12 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        // ネットワークに繋がっているか確認
+        if(!MyUtil.Network.isEnable(MainActivity.this)) {
+            new SimpleAlertDialog(MainActivity.this, getString(R.string.error_network_disable)).show();
+            return;
+        }
+
         // nfc読み込み処理実行
         String deviceId;
         try {
