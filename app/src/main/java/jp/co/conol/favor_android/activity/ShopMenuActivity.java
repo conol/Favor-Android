@@ -279,57 +279,65 @@ public class ShopMenuActivity extends AppCompatActivity implements NumberPickerD
     // 注文するためにNFCにタップされた時の処理
     @Override
     protected void onNewIntent(final Intent intent) {
-        if(mScanCuonaDialog.isShowing()) {
-
-            // 注文処理
-            if(MyUtil.Network.isEnable(this)) {
-
-                // 読み込みダイアログを表示
-                final ProgressDialog progressDialog = new ProgressDialog(this);
-                progressDialog.setMessage(getString(R.string.main_progress_message));
-                progressDialog.show();
-
-                new Favor(new Favor.AsyncCallback() {
-                    @Override
-                    public void onSuccess(Object object) {
-
-                        // 読み込みダイアログを非表示
-                        progressDialog.dismiss();
-
-                        // ログ送信
-                        mCuona.setReadLogMessage("注文");
-                        try {
-                            mCuona.readDeviceId(intent);
-                        } catch (CuonaReaderException e) {
-                            e.printStackTrace();
-                        }
-
-                        Intent intent = new Intent(ShopMenuActivity.this, OrderDoneActivity.class);
-                        intent.putExtra("shop", mGson.toJson(mShop));
-                        startActivity(intent);
-                        mScanCuonaDialog.dismiss();
-                        finish();
-                    }
-
-                    @Override
-                    public void onFailure(FavorException e) {
-                        // 読み込みダイアログを非表示
-                        progressDialog.dismiss();
-
-                        if(e.getCode() == FavorException.BAD_REQUEST) {
-                            new SimpleAlertDialog(ShopMenuActivity.this, getString(R.string.error_already_order_stopped)).show();
-                        } else {
-                            new SimpleAlertDialog(ShopMenuActivity.this, getString(R.string.error_common)).show();
-                        }
-                    }
-                }).setContext(this).setVisitHistoryId(mShop.getVisitHistoryId()).setOrder(mOrderList).execute(Favor.Task.Order);
-            } else {
-                new SimpleAlertDialog(ShopMenuActivity.this, getString(R.string.error_network_disable)).show();
-            }
+        if(!mScanCuonaDialog.isShowing()) {
+            return;
         }
+
+        // ネットワークに接続されているか確認
+        if(!MyUtil.Network.isEnable(this)) {
+            new SimpleAlertDialog(ShopMenuActivity.this, getString(R.string.error_network_disable)).show();
+            return;
+        }
+
+        // 読み込みダイアログを表示
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage(getString(R.string.main_progress_message));
+        progressDialog.show();
+
+        // 注文処理
+        new Favor(new Favor.AsyncCallback() {
+            @Override
+            public void onSuccess(Object object) {
+
+                // 読み込みダイアログを非表示
+                progressDialog.dismiss();
+
+                // ログ送信
+                mCuona.setReadLogMessage("注文");
+                try {
+                    mCuona.readDeviceId(intent);
+                } catch (CuonaReaderException e) {
+                    e.printStackTrace();
+                }
+
+                Intent intent = new Intent(ShopMenuActivity.this, OrderDoneActivity.class);
+                intent.putExtra("shop", mGson.toJson(mShop));
+                startActivity(intent);
+                mScanCuonaDialog.dismiss();
+                finish();
+            }
+
+            @Override
+            public void onFailure(FavorException e) {
+                // 読み込みダイアログを非表示
+                progressDialog.dismiss();
+
+                if(Objects.equals(e.getType(), "AlreadyEntered")) {
+                    new SimpleAlertDialog(ShopMenuActivity.this, getString(R.string.error_already_entered)).show();
+                } else {
+                    new SimpleAlertDialog(ShopMenuActivity.this, getString(R.string.error_common)).show();
+                }
+            }
+        }).setContext(this).setVisitHistoryId(mShop.getVisitHistoryId()).setOrder(mOrderList).execute(Favor.Task.Order);
     }
 
     public void onStartScanButtonClicked(View view) {
+
+        // オーダー無しの場合は警告を表示
+        if(mOrderList.size() == 0) {
+            new SimpleAlertDialog(ShopMenuActivity.this, getString(R.string.order_num_zero)).show();
+            return;
+        }
 
         // nfcがオフの場合はダイアログを表示
         CuonaUtil.checkNfcSetting(this, mCuona);

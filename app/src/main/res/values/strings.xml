@@ -61,6 +61,7 @@
 
     <!-- 注文画面 -->
     <string name="order_num_text">注文数：</string>
+    <string name="order_num_zero">注文する商品を選択してください</string>
 
     <!-- 注文完了画面 -->
     <string name="order_done_message">注文が完了しました</string>
