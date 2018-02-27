@@ -83,6 +83,9 @@
 
     <!-- エラー -->
     <string name="error_common">必要なデータの取得に失敗しました。\n再度お試しください。</string>
+    <string name="error_get_user">ユーザー情報の取得に失敗しました。\nアプリを再起動してください。</string>
+    <string name="error_get_enter_history">入店履歴情報の取得に失敗しました。\nアプリを再起動してください。</string>
+    <string name="error_init_loading">初回起動時の情報取得に失敗しています。\nアプリを再起動して再度お試しください。</string>
     <string name="error_network_disable">インターネットに接続してください。</string>
     <string name="error_network_disable_reboot">インターネットに接続して、アプリを再起動してください。</string>
     <string name="error_touch_cuona">必要なデータの取得に失敗しました。\n再度タッチしてください。</string>

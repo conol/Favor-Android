@@ -46,7 +46,9 @@ public class MainActivity extends AppCompatActivity {
 
     private ScanCuonaDialog mScanCuonaDialog;
     private Cuona mCuona;
-    private boolean isSuccessfulConnection = false;
+    private boolean isSuccessfulConnection = false; // 全ての情報取得に失敗したか否か
+    private boolean isSuccessfulConnectionUser = false;     // ユーザー情報の取得に失敗したか否か
+    private boolean isSuccessfulConnectionEnterHistory = false; // 入店履歴の取得に失敗したか否か
     @BindView(R.id.shopHistoryConstraintLayout) ConstraintLayout mShopHistoryConstraintLayout;
     @BindView(R.id.userSettingConstraintLayout) ConstraintLayout mUserSettingConstraintLayout;
     @BindView(R.id.userSettingTextView) TextView mUserSettingTextView;
@@ -90,103 +92,110 @@ public class MainActivity extends AppCompatActivity {
         // nfcがオフの場合はダイアログを表示
         CuonaUtil.checkNfcSetting(this, mCuona);
 
-        if(MyUtil.Network.isEnable(MainActivity.this)) {
-
-            // 読み込みダイアログを表示
-            final ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
-            progressDialog.setMessage(getString(R.string.main_progress_message));
-            progressDialog.show();
-
-            // ユーザー情報を取得
-            new Favor(new Favor.AsyncCallback() {
-                @Override
-                public void onSuccess(Object object) {
-                    @SuppressWarnings("unchecked")
-                    User user = (User) object;
-
-                    // ユーザー情報を表示
-                    String userSettingTitle = user.getNickname() + getResources().getString(R.string.user_setting_title);
-                    mUserSettingTextView.setText(userSettingTitle);
-                    if(user.getImageUrl() != null) {
-                        Picasso.with(MainActivity.this)
-                                .load(user.getImageUrl())
-                                .transform(new CropCircleTransformation())
-                                .into(mUserImageView);
-                    } else {
-                        Picasso.with(MainActivity.this).load(R.drawable.ic_user_prof).into(mUserImageView);
-                    }
-                }
-
-                @Override
-                public void onFailure(FavorException e) {
-                    Log.e("onFailure", e.toString());
-                }
-            }).setContext(this).execute(Favor.Task.GetUser);
-
-            // 入店履歴を取得
-            new Favor(new Favor.AsyncCallback() {
-                @Override
-                public void onSuccess(Object object) {
-                    @SuppressWarnings("unchecked")
-                    List<Shop> shopList = (List<Shop>) object;
-
-                    // 読み込みダイアログを非表示
-                    progressDialog.dismiss();
-
-                    isSuccessfulConnection = true;
-
-                    if (shopList.size() != 0) {
-
-                        // 最後に入店した店舗のオブジェクトを取得
-                        Shop shop = shopList.get(shopList.size() - 1);
-
-                        // 最後に入店した店舗の情報を画面に反映
-                        mShopNameTextView.setText(shop.getName());  // 店舗名
-                        DateTimeFormatter DEF_FMT = DateTimeFormat.forPattern("yyyy/MM/dd (E) HH:mm~"); // 入店時間
-                        mShopEnterAtTextView.setText(DEF_FMT.print(DateTime.parse(shop.getEnteredAt())));
-                        Picasso.with(MainActivity.this).load(shop.getImageUrls()[0])   // 画像
-                                .fit()
-                                .transform(new RoundedCornersTransformation(12, 0))
-                                .into(mShopImageView);
-                    } else {
-                        mShopNameTextView.setText(getString(R.string.shop_history_none));
-                    }
-                }
-
-                @Override
-                public void onFailure(FavorException e) {
-                    runOnUiThread(new Runnable() {
-                        public void run() {
-                            // 読み込みダイアログを非表示
-                            progressDialog.dismiss();
-
-                            new SimpleAlertDialog(MainActivity.this, getString(R.string.error_common)).show();
-                        }
-                    });
-                }
-            }).setContext(this).execute(Favor.Task.GetVisitedShopHistory);
-
-            // 入店履歴をタップした時の動作
-            mShopHistoryConstraintLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(MainActivity.this, ShopHistoryActivity.class);
-                    startActivity(intent);
-                }
-            });
-
-            // ユーザー情報をタップした時の動作
-            mUserSettingConstraintLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(MainActivity.this, UserActivity.class);
-                    startActivity(intent);
-                    finish();
-                }
-            });
-        } else {
+        // ネットワークに繋がっているか確認
+        if(!MyUtil.Network.isEnable(MainActivity.this)) {
             new SimpleAlertDialog(MainActivity.this, getString(R.string.error_network_disable_reboot)).show();
+            return;
         }
+
+        // 読み込みダイアログを表示
+        final ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
+        progressDialog.setMessage(getString(R.string.main_progress_message));
+        progressDialog.show();
+
+        // ユーザー情報を取得
+        new Favor(new Favor.AsyncCallback() {
+            @Override
+            public void onSuccess(Object object) {
+                @SuppressWarnings("unchecked")
+                User user = (User) object;
+
+                isSuccessfulConnectionUser = true;
+
+                // ユーザー情報を表示
+                String userSettingTitle = user.getNickname() + getResources().getString(R.string.user_setting_title);
+                mUserSettingTextView.setText(userSettingTitle);
+                if(user.getImageUrl() != null) {
+                    Picasso.with(MainActivity.this)
+                            .load(user.getImageUrl())
+                            .transform(new CropCircleTransformation())
+                            .into(mUserImageView);
+                } else {
+                    Picasso.with(MainActivity.this).load(R.drawable.ic_user_prof).into(mUserImageView);
+                }
+            }
+
+            @Override
+            public void onFailure(FavorException e) {
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        new SimpleAlertDialog(MainActivity.this, getString(R.string.error_get_user)).show();
+                    }
+                });
+            }
+        }).setContext(this).execute(Favor.Task.GetUser);
+
+        // 入店履歴を取得
+        new Favor(new Favor.AsyncCallback() {
+            @Override
+            public void onSuccess(Object object) {
+                @SuppressWarnings("unchecked")
+                List<Shop> shopList = (List<Shop>) object;
+
+                // 読み込みダイアログを非表示
+                progressDialog.dismiss();
+
+                isSuccessfulConnectionEnterHistory = true;
+
+                if (shopList.size() != 0) {
+
+                    // 最後に入店した店舗のオブジェクトを取得
+                    Shop shop = shopList.get(shopList.size() - 1);
+
+                    // 最後に入店した店舗の情報を画面に反映
+                    mShopNameTextView.setText(shop.getName());  // 店舗名
+                    DateTimeFormatter DEF_FMT = DateTimeFormat.forPattern("yyyy/MM/dd (E) HH:mm~"); // 入店時間
+                    mShopEnterAtTextView.setText(DEF_FMT.print(DateTime.parse(shop.getEnteredAt())));
+                    Picasso.with(MainActivity.this).load(shop.getImageUrls()[0])   // 画像
+                            .fit()
+                            .transform(new RoundedCornersTransformation(12, 0))
+                            .into(mShopImageView);
+                } else {
+                    mShopNameTextView.setText(getString(R.string.shop_history_none));
+                }
+            }
+
+            @Override
+            public void onFailure(FavorException e) {
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        // 読み込みダイアログを非表示
+                        progressDialog.dismiss();
+
+                        new SimpleAlertDialog(MainActivity.this, getString(R.string.error_get_enter_history)).show();
+                    }
+                });
+            }
+        }).setContext(this).execute(Favor.Task.GetVisitedShopHistory);
+
+        // 入店履歴をタップした時の動作
+        mShopHistoryConstraintLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, ShopHistoryActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        // ユーザー情報をタップした時の動作
+        mUserSettingConstraintLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, UserActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
     }
 
     @Override
@@ -203,62 +212,71 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onNewIntent(final Intent intent) {
-        if(mScanCuonaDialog.isShowing() && isSuccessfulConnection) {
 
-            // nfc読み込み処理実行
-            String deviceId;
-            try {
-                mCuona.setReadLogMessage("入店");
-                deviceId = mCuona.readDeviceId(intent);
-            } catch (CuonaReaderException e) {
-                Log.d("CuonaReader", e.toString());
-                new SimpleAlertDialog(MainActivity.this, getString(R.string.error_not_exist_in_devise_ids)).show();
-                return;
+        // CUONA読み込みダイアログが開いているか確認
+        if(!mScanCuonaDialog.isShowing()) {
+            return;
+        }
+
+        // 初回読み込みに成功しているか確認
+        if(!isSuccessfulConnectionUser || !isSuccessfulConnectionEnterHistory) {
+            new SimpleAlertDialog(MainActivity.this, getString(R.string.error_init_loading)).show();
+            return;
+        }
+
+        // nfc読み込み処理実行
+        String deviceId;
+        try {
+            mCuona.setReadLogMessage("入店");
+            deviceId = mCuona.readDeviceId(intent);
+        } catch (CuonaReaderException e) {
+            Log.d("CuonaReader", e.toString());
+            new SimpleAlertDialog(MainActivity.this, getString(R.string.error_not_exist_in_devise_ids)).show();
+            return;
+        }
+
+        // 読み込みダイアログを表示
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage(getString(R.string.main_progress_message));
+        progressDialog.show();
+
+        // 店舗情報を取得
+        new Favor(new Favor.AsyncCallback() {
+            @Override
+            public void onSuccess(Object object) {
+                Shop shop = (Shop) object;
+
+                // 読み込みダイアログを非表示
+                progressDialog.dismiss();
+
+                // 店舗詳細ページへ移動
+                Intent shopDetailIntent = new Intent(MainActivity.this, ShopDetailActivity.class);
+                MyUtil.SharedPref.saveBoolean(MainActivity.this, "isEntering", true);
+                MyUtil.SharedPref.saveInt(MainActivity.this, "shopId", shop.getShopId());
+                shopDetailIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(shopDetailIntent);
+                mScanCuonaDialog.dismiss();
             }
 
-            // 読み込みダイアログを表示
-            final ProgressDialog progressDialog = new ProgressDialog(this);
-            progressDialog.setMessage(getString(R.string.main_progress_message));
-            progressDialog.show();
+            @Override
+            public void onFailure(final FavorException e) {
+                Log.d("onFailure", e.toString());
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        // 読み込みダイアログを非表示
+                        progressDialog.dismiss();
 
-            // 店舗情報を取得
-            new Favor(new Favor.AsyncCallback() {
-                @Override
-                public void onSuccess(Object object) {
-                    Shop shop = (Shop) object;
-
-                    // 読み込みダイアログを非表示
-                    progressDialog.dismiss();
-
-                    // 店舗詳細ページへ移動
-                    Intent shopDetailIntent = new Intent(MainActivity.this, ShopDetailActivity.class);
-                    MyUtil.SharedPref.saveBoolean(MainActivity.this, "isEntering", true);
-                    MyUtil.SharedPref.saveInt(MainActivity.this, "shopId", shop.getShopId());
-                    shopDetailIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(shopDetailIntent);
-                    mScanCuonaDialog.dismiss();
-                }
-
-                @Override
-                public void onFailure(final FavorException e) {
-                    Log.d("onFailure", e.toString());
-                    runOnUiThread(new Runnable() {
-                        public void run() {
-                            // 読み込みダイアログを非表示
-                            progressDialog.dismiss();
-
-                            if(Objects.equals(e.getType(), "AlreadyEntered")) {
-                                new SimpleAlertDialog(MainActivity.this, getString(R.string.error_already_entered)).show();
-                            } else if(Objects.equals(e.getType(), "GroupNotActive")) {
-                                new SimpleAlertDialog(MainActivity.this, getString(R.string.error_group_not_active)).show();
-                            } else {
-                                new SimpleAlertDialog(MainActivity.this, getString(R.string.error_common)).show();
-                            }
+                        if(Objects.equals(e.getType(), "AlreadyEntered")) {
+                            new SimpleAlertDialog(MainActivity.this, getString(R.string.error_already_entered)).show();
+                        } else if(Objects.equals(e.getType(), "GroupNotActive")) {
+                            new SimpleAlertDialog(MainActivity.this, getString(R.string.error_group_not_active)).show();
+                        } else {
+                            new SimpleAlertDialog(MainActivity.this, getString(R.string.error_common)).show();
                         }
-                    });
-                }
-            }).setContext(this).setDeviceId(deviceId).execute(Favor.Task.EnterShop);
-        }
+                    }
+                });
+            }
+        }).setContext(this).setDeviceId(deviceId).execute(Favor.Task.EnterShop);
     }
 
     public void onStartScanButtonClicked(View view) {
