@@ -10,7 +10,9 @@ import java.util.List;
 public class Menu {
 
     private int id;
+    private int menu_group_id;
     private String name;
+    private String option;
     private int price_cents;
     private String price_format;
     private String notes;
@@ -30,8 +32,16 @@ public class Menu {
         return id;
     }
 
+    public int getMenuGroupId() {
+        return menu_group_id;
+    }
+
     public String getName() {
         return name;
+    }
+
+    public String getOption() {
+        return option;
     }
 
     public int getPriceCents() {
