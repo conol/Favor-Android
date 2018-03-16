@@ -143,8 +143,16 @@ public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecycl
             } else {
                 holder.mMenuImageView.setVisibility(View.GONE);
             }
-            holder.mMenuNameTextView.setText(menu.getName());    // メニュー名の設定
-            holder.mMenuPriceTextView.setText(menu.getPriceFormat());    // メニュー値段の設定
+
+            // メニュー名の設定
+            String menuName = menu.getName();
+            if(menu.getOption() != null) {
+                menuName += " (" + menu.getOption() + ")";
+            }
+            holder.mMenuNameTextView.setText(menuName);
+
+            // メニュー値段の設定
+            holder.mMenuPriceTextView.setText(menu.getPriceFormat());
 
             // 注文数が指定された場合、注文数を表示
             Integer orderNum = mOrderNumList.get(position);
