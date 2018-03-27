@@ -40,5 +40,5 @@ dependencies {
     compile 'jp.wasabeef:picasso-transformations:2.1.2'
     compile 'jp.co.cyberagent.android.gpuimage:gpuimage-library:1.4.1'
     compile 'joda-time:joda-time:2.9.9'
-    implementation project(':favorlib')
+    implementation project(':favorlib-debug')
 }
