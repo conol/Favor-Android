@@ -6,6 +6,9 @@ package jp.co.conol.favorlib.cuona;
 
 // package-private
 class Constants {
+
+    private final boolean isDevelopment = true; // 開発晩夏GitHubにあげるやつ
+
     static class Urls {
 
         // サービス
@@ -13,12 +16,12 @@ class Constants {
         static final String SERVICE_KEY = "UXbfYJ6SXm8G";   // サービスキー
 
         // デバイスマネージャーサーバー
-        static final String CDMS_URL = "http://manage-dev.cuona.io";   // デバイスマネージャーURL（開発）
-//        static final String CDMS_URL = "https://manage.cuona.io";   // デバイスマネージャーURL（本番）
+//        static final String CDMS_URL = "http://manage-dev.cuona.io";   // デバイスマネージャーURL（開発）
+        static final String CDMS_URL = "https://manage.cuona.io";   // デバイスマネージャーURL（本番）
 
         // サービスサーバー
-        static final String FAVOR_URL = "http://favor-dev.cuona.io";   // FavorURL（開発）
-//        static final String FAVOR_URL = "https://favor.cuona.io";   // FavorURL（本番）
+        static final String FAVOR_URL = "http://favor-dev.cuona.io";   // FavorURL（開発版）
+//        static final String FAVOR_URL = "https://favor.cuona.io";   // FavorURL（製品版）
 
         // ログ
 //        static final String LOG_URL = ""; // ログを送らない
