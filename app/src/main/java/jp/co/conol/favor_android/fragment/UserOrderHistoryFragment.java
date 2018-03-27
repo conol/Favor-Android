@@ -12,11 +12,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.gson.Gson;
-
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -24,12 +21,11 @@ import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favor_android.adapter.UserOrderHistoryRecyclerAdapter;
 import jp.co.conol.favorlib.cuona.Favor;
-import jp.co.conol.favorlib.cuona.favor_model.User;
-import jp.co.conol.favorlib.cuona.favor_model.UsersAllOrder;
+import jp.co.conol.favorlib.cuona.FavorException;
+import jp.co.conol.favorlib.cuona.favor_model.Order;
 
 public class UserOrderHistoryFragment extends Fragment {
 
-    private final Gson mGson = new Gson();
     private Context mContext;
     private UserOrderHistoryRecyclerAdapter mUserOrderHistoryRecyclerAdapter;
     @BindView(R.id.userOrderHistoryRecyclerView) RecyclerView mUserOrderHistoryRecyclerView;
@@ -67,43 +63,30 @@ public class UserOrderHistoryFragment extends Fragment {
         final View view = inflater.inflate(R.layout.fragment_user_order_history, container, false);
         ButterKnife.bind(this, view);
 
-        // ユーザー情報の取得
-        User user = mGson.fromJson(MyUtil.SharedPref.getString(mContext, "userSetting"), User.class);
+        if(MyUtil.Network.isEnable(mContext)) {
 
-        new Favor(new Favor.AsyncCallback() {
-            @Override
-            public void onSuccess(Object object) {
-                List<UsersAllOrder> usersAllOrderList = (List<UsersAllOrder>) object;
-                List<Integer> insertHeaderPosition = new ArrayList<>();
-
-                if(usersAllOrderList != null) {
-
-                    // 入店日時・店舗名を表示するためのヘッダー部分の要素を追加
-                    for(int i = 0; i < usersAllOrderList.size() - 1; i++) {
-                        if(!Objects.equals(usersAllOrderList.get(i).getEnterAt(), usersAllOrderList.get(i + 1).getEnterAt())) {
-                            insertHeaderPosition.add(i + 1);
-                        }
-                    }
-                    for(int i = 0; i < insertHeaderPosition.size(); i++) {
-                        usersAllOrderList.add(insertHeaderPosition.get(insertHeaderPosition.size() - 1 - i), null); // 先頭
-                    }
-                    if(1 <= usersAllOrderList.size()) usersAllOrderList.add(0, new UsersAllOrder()); // 先頭にヘッダー用要素を追加
+            new Favor(new Favor.AsyncCallback() {
+                @Override
+                public void onSuccess(Object object) {
+                    List<Order> usersAllOrderList = (List<Order>) object;
+                    Collections.reverse(usersAllOrderList);
 
                     // レイアウトマネージャーのセット
                     mUserOrderHistoryRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
 
                     // アダプターのセット
-                    mUserOrderHistoryRecyclerAdapter = new UserOrderHistoryRecyclerAdapter(mContext, usersAllOrderList);
+                    mUserOrderHistoryRecyclerAdapter
+                            = new UserOrderHistoryRecyclerAdapter(mContext, MyUtil.Transform.addHeader(usersAllOrderList, "getEnterAt"));
                     mUserOrderHistoryRecyclerView.setAdapter(mUserOrderHistoryRecyclerAdapter);
+
                 }
 
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                Log.e("onFailure", e.toString());
-            }
-        }).setAppToken(user.getAppToken()).execute(Favor.Task.GetUsersAllOrder);
+                @Override
+                public void onFailure(FavorException e) {
+                    Log.e("onFailure", e.toString());
+                }
+            }).setContext(mContext).execute(Favor.Task.GetUsersAllOrder);
+        }
 
         return view;
     }

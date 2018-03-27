@@ -64,7 +64,7 @@
         android:onClick="onStartScanButtonClicked"
         android:layout_width="0dp"
         android:layout_height="50dp"
-        android:background="@android:color/darker_gray"
+        android:background="@color/blue"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -74,6 +74,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/shop_menu_order_button"
+            android:textColor="@android:color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -93,6 +94,17 @@
 
     <include
         layout="@layout/layout_scan_cuona_dialog"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        tools:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- 読み込みダイアログ -->
+    <include
+        layout="@layout/layout_progress_dialog"
         android:layout_width="0dp"
         android:layout_height="0dp"
         tools:visibility="gone"

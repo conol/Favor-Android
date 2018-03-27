@@ -6,8 +6,8 @@
     android:layout_height="match_parent"
     tools:context="jp.co.conol.favor_android.activity.RegistrationActivity">
 
-    <TextView
-        android:id="@+id/appNameTextView"
+    <ImageView
+        android:id="@+id/appNameImageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/app_name"
@@ -17,7 +17,8 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/appNameSubTextView"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="8dp"
+        android:src="@drawable/ic_favor_logo"/>
 
     <TextView
         android:id="@+id/appNameSubTextView"
@@ -27,7 +28,7 @@
         android:text="@string/app_name_sub"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appNameTextView"
+        app:layout_constraintTop_toBottomOf="@+id/appNameImageView"
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toTopOf="@+id/userNameEditText" />
 
@@ -96,5 +97,16 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
+
+    <!-- 読み込みダイアログ -->
+    <include
+        layout="@layout/layout_progress_dialog"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        tools:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

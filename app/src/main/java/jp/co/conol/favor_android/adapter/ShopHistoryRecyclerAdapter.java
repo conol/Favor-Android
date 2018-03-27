@@ -6,16 +6,27 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.google.gson.Gson;
+import com.squareup.picasso.Picasso;
+
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favor_android.activity.ShopDetailActivity;
 import jp.co.conol.favorlib.cuona.favor_model.Shop;
+import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
+import jp.wasabeef.picasso.transformations.gpu.BrightnessFilterTransformation;
 
 /**
  * Created by Masafumi_Ito on 2017/09/04.
@@ -30,6 +41,8 @@ public class ShopHistoryRecyclerAdapter extends RecyclerView.Adapter<ShopHistory
     class ViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.shopNameTextView) TextView mShopNameTextView;
+        @BindView(R.id.shopEnterAtTextView) TextView mShopEnterAtTextView;
+        @BindView(R.id.shopImageView) ImageView mShopImageView;
 
         // ViewHolderのコンストラクタ
         private ViewHolder(View v) {
@@ -65,8 +78,8 @@ public class ShopHistoryRecyclerAdapter extends RecyclerView.Adapter<ShopHistory
 
                 // 店舗詳細ページへ移動
                 Intent intent = new Intent(mContext, ShopDetailActivity.class);
-                intent.putExtra("shopId", shop.getShopId());
-                intent.putExtra("visitGroupId", shop.getVisitGroupId());
+                MyUtil.SharedPref.saveBoolean(mContext, "isEntering", false);
+                intent.putExtra("shop", new Gson().toJson(shop));
                 mContext.startActivity(intent);
             }
         });
@@ -77,7 +90,20 @@ public class ShopHistoryRecyclerAdapter extends RecyclerView.Adapter<ShopHistory
     // 画面に表示する内容をセット
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.mShopNameTextView.setText(mShopList.get(position).getShopName());
+
+        // 店舗情報を取得
+        Shop shop = mShopList.get(position);
+
+        if(shop != null) {
+            holder.mShopNameTextView.setText(shop.getName());
+            DateTimeFormatter DEF_FMT = DateTimeFormat.forPattern("yyyy/MM/dd (E) HH:mm~"); // 入店時間
+            holder.mShopEnterAtTextView.setText(DEF_FMT.print(DateTime.parse(shop.getEnteredAt())));
+            Picasso.with(mContext).load(shop.getImageUrls()[0])
+                    .fit()
+                    .transform(new RoundedCornersTransformation(12, 0))
+                    .transform(new BrightnessFilterTransformation(mContext, -0.2f))
+                    .into(holder.mShopImageView);
+        }
     }
 
     @Override

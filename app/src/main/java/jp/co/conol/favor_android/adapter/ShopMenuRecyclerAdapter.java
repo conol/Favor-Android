@@ -6,7 +6,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,16 +28,20 @@ public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecycl
     private Context mContext;
     private List<Menu> mMenuList = new ArrayList<>();
     private List<Integer> mOrderNumList = new ArrayList<>();
+    private boolean isEntering = false;
     protected void showOrderDialog(int position, int orderNum) {}
+    private final int HEADER = 0;
+    private final int MENU = 1;
 
     // ViewHolder
     class ViewHolder extends RecyclerView.ViewHolder {
 
         private TextView mMenuCategoryTextView; // ヘッダーのメニューカテゴリ名
-        private TextView mMenuNameTextView;    // メニュー名
-        private TextView mMenuPriceTextView;  // メニューの値段
+        private ImageView mMenuImageView;       // メニューの画像
+        private TextView mMenuNameTextView;     // メニュー名
+        private TextView mMenuPriceTextView;    // メニューの値段
         private ConstraintLayout mSelectedOrderNumConstraintLayout; // 注文数を表示するエリア
-        private TextView mSelectedOrderNumTextView; // 注文数
+        private TextView mOrderNumTextView; // 注文数
 
         // ViewHolderのコンストラクタ
         private ViewHolder(View v, int viewType) {
@@ -42,16 +49,17 @@ public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecycl
             switch (viewType) {
 
                 // 要素がヘッダーの場合
-                case 0:
+                case HEADER:
                     mMenuCategoryTextView = (TextView) v.findViewById(R.id.menuCategoryTextView);
                     break;
 
                 // 要素がメニューの場合
-                case 1:
+                case MENU:
                     mMenuNameTextView = (TextView) v.findViewById(R.id.menuNameTextView);
+                    mMenuImageView = (ImageView) v.findViewById(R.id.menuImageView);
                     mMenuPriceTextView = (TextView) v.findViewById(R.id.menuPriceTextView);
                     mSelectedOrderNumConstraintLayout = (ConstraintLayout) v.findViewById(R.id.selectedOrderNumConstraintLayout);
-                    mSelectedOrderNumTextView = (TextView) v.findViewById(R.id.selectedOrderNumTextView);
+                    mOrderNumTextView = (TextView) v.findViewById(R.id.orderNumTextView);
                     break;
 
                 default:
@@ -67,6 +75,9 @@ public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecycl
         mContext = context;
         mMenuList = menuList;
         mOrderNumList = orderNumList;
+
+        // 入店か履歴から表示か
+        isEntering = MyUtil.SharedPref.getBoolean(context, "isEntering", false);
     }
 
     // ViewHolder作成
@@ -78,35 +89,37 @@ public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecycl
         switch (viewType) {
 
             // 要素がヘッダーの場合
-            case 0:
+            case HEADER:
                 view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_shop_menu_header, parent, false);
                 holder = new ViewHolder(view, viewType);
                 break;
 
             // 要素がメニューの場合
-            case 1:
+            case MENU:
                 view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_shop_menu, parent, false);
                 holder = new ViewHolder(view, viewType);
 
-                // クリック時の処理
-                final ViewHolder finalHolder = holder;
-                view.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
+                // クリック時の処理（入店時のみ）
+                if(isEntering) {
+                    final ViewHolder finalHolder = holder;
+                    view.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
 
-                        // positionを取得
-                        final int position = finalHolder.getAdapterPosition();
+                            // positionを取得
+                            final int position = finalHolder.getAdapterPosition();
 
-                        // 注文ダイアログを表示
-                        int orderNum;
-                        if(mOrderNumList.get(position) != null && mOrderNumList.get(position) != 0) {
-                            orderNum = Integer.parseInt(mOrderNumList.get(position).toString());
-                        } else {
-                            orderNum = 1; // 注文数の初期値
+                            // 注文ダイアログを表示
+                            int orderNum;
+                            if (mOrderNumList.get(position) != null && mOrderNumList.get(position) != 0) {
+                                orderNum = Integer.parseInt(mOrderNumList.get(position).toString());
+                            } else {
+                                orderNum = 1; // 注文数の初期値
+                            }
+                            showOrderDialog(position, orderNum);
                         }
-                        showOrderDialog(position, orderNum);
-                    }
-                });
+                    });
+                }
 
                 break;
 
@@ -123,13 +136,31 @@ public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecycl
 
         // 要素がメニューの時
         if (holder.mMenuNameTextView != null) {
-            holder.mMenuNameTextView.setText(mMenuList.get(position).getName());    // メニュー名の設定
-            holder.mMenuPriceTextView.setText(mMenuList.get(position).getPriceFormat());    // メニュー値段の設定
+            Menu menu = mMenuList.get(position);
+            if(menu.getImageUrls() != null && menu.getImageUrls().length != 0) {
+                holder.mMenuImageView.setVisibility(View.VISIBLE);
+                Picasso.with(mContext).load(menu.getImageUrls()[0]).into(holder.mMenuImageView);
+            } else {
+                holder.mMenuImageView.setVisibility(View.GONE);
+            }
+
+            // メニュー名の設定
+            String menuName = menu.getName();
+            if(menu.getOption() != null) {
+                menuName += " (" + menu.getOption() + ")";
+            }
+            holder.mMenuNameTextView.setText(menuName);
+
+            // メニュー値段の設定
+            holder.mMenuPriceTextView.setText(menu.getPriceFormat());
 
             // 注文数が指定された場合、注文数を表示
-            if (mOrderNumList.get(position) != null && mOrderNumList.get(position) != 0) {
+            Integer orderNum = mOrderNumList.get(position);
+            if (orderNum != null && orderNum != 0) {
                 holder.mSelectedOrderNumConstraintLayout.setVisibility(View.VISIBLE);
-                holder.mSelectedOrderNumTextView.setText(String.valueOf(mOrderNumList.get(position)));
+                holder.mOrderNumTextView.setText(String.valueOf(orderNum));
+            } else {
+                holder.mSelectedOrderNumConstraintLayout.setVisibility(View.GONE);
             }
         }
         // 要素がヘッダーの時
@@ -150,9 +181,9 @@ public class ShopMenuRecyclerAdapter extends RecyclerView.Adapter<ShopMenuRecycl
 
         Menu menu = mMenuList.get(position);
 
-        int viewType = 0;
+        int viewType = HEADER;
         if(menu != null) {
-            viewType = 1;
+            viewType = MENU;
         }
 
         // ヘッダーの場合は0、それ以外の場合は1を返す

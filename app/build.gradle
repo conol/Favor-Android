@@ -8,7 +8,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 27
         versionCode 1
-        versionName "1.0.0"
+        versionName "1.0.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -34,5 +34,11 @@ dependencies {
     compile 'com.android.support:support-v13:27.0.2'
     compile 'com.jakewharton:butterknife:8.8.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+    compile 'com.makeramen:roundedimageview:2.3.0'
+    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.isseiaoki:simplecropview:1.1.7'
+    compile 'jp.wasabeef:picasso-transformations:2.1.2'
+    compile 'jp.co.cyberagent.android.gpuimage:gpuimage-library:1.4.1'
+    compile 'joda-time:joda-time:2.9.9'
     implementation project(':favorlib-debug')
 }

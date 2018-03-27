@@ -1,6 +1,7 @@
 package jp.co.conol.favor_android.fragment;
 
 import android.app.Activity;
+
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import android.view.ViewGroup;
 
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -22,13 +24,13 @@ import jp.co.conol.favor_android.MyUtil;
 import jp.co.conol.favor_android.R;
 import jp.co.conol.favor_android.adapter.ShopOrderHistoryRecyclerAdapter;
 import jp.co.conol.favorlib.cuona.Favor;
+import jp.co.conol.favorlib.cuona.FavorException;
 import jp.co.conol.favorlib.cuona.favor_model.Order;
 import jp.co.conol.favorlib.cuona.favor_model.User;
 
 public class ShopOrderHistoryFragment extends Fragment {
 
     private Context mContext;
-    private final Gson mGson = new Gson();
     private int mVisitGroupId;
     private ShopOrderHistoryRecyclerAdapter mShopOrderHistoryRecyclerAdapter;
     @BindView(R.id.shopOrderHistoryRecyclerView) RecyclerView mShopOrderHistoryRecyclerView;
@@ -82,31 +84,31 @@ public class ShopOrderHistoryFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        // ユーザー情報の取得
-        User user = mGson.fromJson(MyUtil.SharedPref.getString(mContext, "userSetting"), User.class);
+        if(MyUtil.Network.isEnable(mContext)) {
 
-        if(mVisitGroupId != 0) {
-            new Favor(new Favor.AsyncCallback() {
-                @Override
-                public void onSuccess(Object object) {
-                    List<Order> orderList = (List<Order>) object;
+            if (mVisitGroupId != 0) {
+                new Favor(new Favor.AsyncCallback() {
+                    @Override
+                    public void onSuccess(Object object) {
+                        List<Order> orderList = (List<Order>) object;
 
-                    if (orderList != null) {
+                        if (orderList != null) {
 
-                        // レイアウトマネージャーのセット
-                        mShopOrderHistoryRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+                            // レイアウトマネージャーのセット
+                            mShopOrderHistoryRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
 
-                        // アダプターのセット
-                        mShopOrderHistoryRecyclerAdapter = new ShopOrderHistoryRecyclerAdapter(mContext, orderList);
-                        mShopOrderHistoryRecyclerView.setAdapter(mShopOrderHistoryRecyclerAdapter);
+                            // アダプターのセット
+                            mShopOrderHistoryRecyclerAdapter = new ShopOrderHistoryRecyclerAdapter(mContext, orderList);
+                            mShopOrderHistoryRecyclerView.setAdapter(mShopOrderHistoryRecyclerAdapter);
+                        }
                     }
-                }
 
-                @Override
-                public void onFailure(Exception e) {
-                    Log.e("onFailure", e.toString());
-                }
-            }).setAppToken(user.getAppToken()).setVisitGroupId(mVisitGroupId).execute(Favor.Task.GetUserGroupsOrderInShop);
+                    @Override
+                    public void onFailure(FavorException e) {
+                        Log.e("onFailure", e.toString());
+                    }
+                }).setContext(mContext).setVisitGroupId(mVisitGroupId).execute(Favor.Task.GetUserGroupsOrderInShop);
+            }
         }
     }
 }
